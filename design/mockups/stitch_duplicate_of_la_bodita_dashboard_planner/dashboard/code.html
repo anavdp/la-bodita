@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard - La Bodita</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;family=Quicksand:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "secondary-fixed-dim": "#ffb4ab",
+                  "surface": "#f5fafa",
+                  "tertiary-fixed": "#ffdbcc",
+                  "surface-container-low": "#eff5f4",
+                  "surface-container": "#e9efef",
+                  "secondary-container": "#fd574b",
+                  "surface-bright": "#f5fafa",
+                  "error-container": "#ffdad6",
+                  "secondary": "#b6231f",
+                  "tertiary-fixed-dim": "#ffb693",
+                  "inverse-on-surface": "#ecf2f1",
+                  "on-primary-fixed": "#002020",
+                  "primary-container": "#2faead",
+                  "on-primary": "#ffffff",
+                  "primary-fixed-dim": "#64d8d7",
+                  "on-background": "#171d1d",
+                  "on-error": "#ffffff",
+                  "surface-tint": "#006a69",
+                  "surface-dim": "#d5dbdb",
+                  "surface-container-lowest": "#ffffff",
+                  "outline-variant": "#bcc9c8",
+                  "on-tertiary-fixed-variant": "#77320a",
+                  "inverse-surface": "#2c3132",
+                  "on-secondary": "#ffffff",
+                  "secondary-fixed": "#ffdad6",
+                  "on-tertiary-container": "#5e2300",
+                  "on-primary-fixed-variant": "#00504f",
+                  "primary": "#006a69",
+                  "on-primary-container": "#003c3b",
+                  "on-secondary-fixed": "#410002",
+                  "inverse-primary": "#64d8d7",
+                  "on-secondary-fixed-variant": "#93000a",
+                  "surface-container-high": "#e4e9e9",
+                  "tertiary": "#954920",
+                  "on-surface-variant": "#3d4949",
+                  "background": "#f5fafa",
+                  "on-error-container": "#93000a",
+                  "outline": "#6d7a79",
+                  "on-tertiary": "#ffffff",
+                  "error": "#ba1a1a",
+                  "surface-container-highest": "#dee4e3",
+                  "surface-variant": "#dee4e3",
+                  "on-tertiary-fixed": "#351000",
+                  "on-surface": "#171d1d",
+                  "on-secondary-container": "#5c0004",
+                  "primary-fixed": "#82f5f3",
+                  "tertiary-container": "#e28658"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "base": "8px",
+                  "gutter": "24px",
+                  "sidebar_width": "260px",
+                  "topbar_height": "80px",
+                  "margin-mobile": "16px",
+                  "margin-desktop": "40px"
+          },
+          "fontFamily": {
+                  "body-lg": [
+                          "Be Vietnam Pro"
+                  ],
+                  "headline-lg-mobile": [
+                          "Quicksand"
+                  ],
+                  "body-sm": [
+                          "Be Vietnam Pro"
+                  ],
+                  "display-lg": [
+                          "Quicksand"
+                  ],
+                  "headline-md": [
+                          "Quicksand"
+                  ],
+                  "headline-lg": [
+                          "Quicksand"
+                  ],
+                  "title-lg": [
+                          "Be Vietnam Pro"
+                  ],
+                  "label-md": [
+                          "Be Vietnam Pro"
+                  ]
+          },
+          "fontSize": {
+                  "body-lg": [
+                          "16px",
+                          {
+                                  "lineHeight": "24px",
+                                  "fontWeight": "400"
+                          }
+                  ],
+                  "headline-lg-mobile": [
+                          "28px",
+                          {
+                                  "lineHeight": "36px",
+                                  "fontWeight": "700"
+                          }
+                  ],
+                  "body-sm": [
+                          "14px",
+                          {
+                                  "lineHeight": "20px",
+                                  "fontWeight": "400"
+                          }
+                  ],
+                  "display-lg": [
+                          "48px",
+                          {
+                                  "lineHeight": "56px",
+                                  "letterSpacing": "-0.02em",
+                                  "fontWeight": "700"
+                          }
+                  ],
+                  "headline-md": [
+                          "24px",
+                          {
+                                  "lineHeight": "32px",
+                                  "fontWeight": "700"
+                          }
+                  ],
+                  "headline-lg": [
+                          "32px",
+                          {
+                                  "lineHeight": "40px",
+                                  "fontWeight": "700"
+                          }
+                  ],
+                  "title-lg": [
+                          "18px",
+                          {
+                                  "lineHeight": "24px",
+                                  "fontWeight": "600"
+                          }
+                  ],
+                  "label-md": [
+                          "12px",
+                          {
+                                  "lineHeight": "16px",
+                                  "letterSpacing": "0.05em",
+                                  "fontWeight": "600"
+                          }
+                  ]
+          }
+  },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #F4F8F7;
+      background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background font-body-lg antialiased flex">
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-[260px] rounded-r-3xl border-r border-outline-variant dark:border-none shadow-sm bg-surface-container-low dark:bg-surface-dim flex flex-col py-gutter z-20 hidden md:flex">
+<div class="px-6 mb-8">
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim">La Bodita</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">65 Days to Go</p>
+</div>
+<nav class="flex-1 overflow-y-auto px-2">
+<a class="bg-primary text-on-primary rounded-xl flex items-center px-4 py-3 m-2 scale-95 transition-transform duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">inventory_2</span>
+<span class="font-label-md text-label-md">Items</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">checklist</span>
+<span class="font-label-md text-label-md">Checklist</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">payments</span>
+<span class="font-label-md text-label-md">Budget</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">group</span>
+<span class="font-label-md text-label-md">Guest List</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">description</span>
+<span class="font-label-md text-label-md">Documents</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">category</span>
+<span class="font-label-md text-label-md">Category Manager</span>
+</a>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full border border-secondary text-secondary rounded-full py-2 mb-4 font-label-md text-label-md flex justify-center items-center">
+        Language: EN
+      </button>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-primary-fixed-dim mr-3"></div>
+<span class="font-label-md text-label-md text-primary">User Name</span>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 md:ml-[260px] min-h-screen pb-12">
+<!-- Top Bar -->
+<header class="fixed top-0 right-0 h-20 left-[260px] z-10 bg-transparent flex justify-between items-center px-margin-desktop w-[calc(100%-260px)]">
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-lowest border border-surface-variant rounded-full py-3 pl-12 pr-4 font-body-lg text-body-lg text-primary dark:text-inverse-primary focus:outline-none focus:border-primary" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-secondary-container text-on-secondary rounded-full px-6 py-3 font-label-md text-label-md flex items-center hover:opacity-90 transition-opacity shadow-sm">
+<span class="material-symbols-outlined mr-2">add</span>
+          Add Task
+        </button>
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest border border-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors shadow-sm">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest border border-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors shadow-sm">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="pt-24 px-margin-desktop max-w-[1440px] mx-auto">
+<!-- Welcome Header -->
+<div class="bg-surface-container-lowest rounded-3xl p-8 mb-8 shadow-[0px_4px_20px_rgba(0,0,0,0.02)] inline-block min-w-[500px]">
+<h2 class="font-display-lg text-display-lg text-primary-container mb-2">Dashboard</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Welcome back! Let's plan a beautiful day. 🌴</p>
+</div>
+<!-- Stat Cards Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Tasks Card -->
+<div class="bg-primary text-on-primary p-6 rounded-[32px] rounded-bl-xl shadow-md relative overflow-hidden flex flex-col justify-between h-48 group hover:-translate-y-1 transition-transform">
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]">check_circle</span>
+</div>
+<div class="flex justify-between items-start z-10">
+<div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<span class="font-label-md text-label-md uppercase tracking-wider">Tasks</span>
+</div>
+<div class="z-10">
+<div class="font-headline-lg text-headline-lg mb-1">45/60</div>
+<div class="font-body-sm text-body-sm opacity-90 mb-4">Completed</div>
+<div class="w-full bg-black/20 h-2 rounded-full overflow-hidden">
+<div class="bg-white/80 h-full rounded-full w-[75%]"></div>
+</div>
+</div>
+</div>
+<!-- Budget Card -->
+<div class="bg-[#F55146] text-white p-6 rounded-[32px] rounded-tr-xl shadow-md relative overflow-hidden flex flex-col justify-between h-48 group hover:-translate-y-1 transition-transform">
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]">account_balance_wallet</span>
+</div>
+<div class="flex justify-between items-start z-10">
+<div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<span class="font-label-md text-label-md uppercase tracking-wider">Budget</span>
+</div>
+<div class="z-10">
+<div class="font-headline-lg text-headline-lg mb-1">70%</div>
+<div class="font-body-sm text-body-sm opacity-90 mb-4">Spent</div>
+<div class="w-full bg-black/20 h-2 rounded-full overflow-hidden">
+<div class="bg-white/80 h-full rounded-full w-[70%]"></div>
+</div>
+</div>
+</div>
+<!-- Guests Card -->
+<div class="bg-tertiary-container text-white p-6 rounded-[32px] rounded-br-xl shadow-md relative overflow-hidden flex flex-col justify-between h-48 group hover:-translate-y-1 transition-transform">
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]">groups</span>
+</div>
+<div class="flex justify-between items-start z-10">
+<div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<span class="font-label-md text-label-md uppercase tracking-wider">Guests</span>
+</div>
+<div class="z-10">
+<div class="font-headline-lg text-headline-lg mb-1">85</div>
+<div class="font-body-sm text-body-sm opacity-90 mb-4">Confirmed</div>
+<div class="w-full bg-black/20 h-2 rounded-full overflow-hidden">
+<div class="bg-white/80 h-full rounded-full w-[85%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Layout Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Left Column: Upcoming Deadlines -->
+<div class="lg:col-span-2">
+<div class="bg-surface-container-lowest rounded-[40px] rounded-tl-xl p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.02)] h-full">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-md text-headline-md text-primary-container">Upcoming Deadlines</h3>
+<button class="bg-surface-container-low text-on-surface-variant px-4 py-2 rounded-full font-label-md text-label-md hover:bg-surface-container transition-colors">View All</button>
+</div>
+<div class="space-y-4">
+<!-- Task 1 -->
+<div class="flex items-center p-4 border border-surface-variant rounded-2xl hover:border-primary-container transition-colors cursor-pointer group">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-primary-container transition-colors"></div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span>💐</span>
+<h4 class="font-title-lg text-title-lg text-on-surface">Finalize Florist Deposit</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant ml-8">Due in 3 days</p>
+</div>
+<span class="bg-[#F55146] text-white px-3 py-1 rounded-full font-label-md text-[10px] uppercase tracking-wide">URGENT</span>
+</div>
+<!-- Task 2 -->
+<div class="flex items-center p-4 border border-surface-variant rounded-2xl hover:border-primary-container transition-colors cursor-pointer group">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-primary-container transition-colors"></div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span>🍽️</span>
+<h4 class="font-title-lg text-title-lg text-on-surface">Catering Tasting Appointment</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant ml-8">Oct 12 at 2:00 PM</p>
+</div>
+<span class="bg-surface-variant text-on-surface-variant px-3 py-1 rounded-full font-label-md text-[10px] uppercase tracking-wide">SCHEDULED</span>
+</div>
+<!-- Task 3 -->
+<div class="flex items-center p-4 border border-surface-variant rounded-2xl hover:border-primary-container transition-colors cursor-pointer group">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-primary-container transition-colors"></div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span>🎵</span>
+<h4 class="font-title-lg text-title-lg text-on-surface">DJ Playlist Submission</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant ml-8">Due next week</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Countdown & Reminders -->
+<div class="space-y-8">
+<!-- Countdown Blob -->
+<div class="bg-primary-fixed-dim/30 rounded-[60px] rounded-br-[100px] rounded-tl-[100px] p-8 text-center shadow-sm relative overflow-hidden h-72 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-tertiary-container text-4xl mb-2" style="font-variation-settings: 'wght' 200;">favorite</span>
+<div class="font-display-lg text-[80px] leading-none text-primary-container mb-2">65</div>
+<div class="font-headline-md text-headline-md text-primary-container uppercase tracking-wider mb-1">DAYS TO GO</div>
+<p class="font-body-sm text-body-sm text-on-primary-fixed-variant">Until the big day</p>
+</div>
+<!-- Reminders Card -->
+<div class="bg-surface-container-lowest rounded-[32px] p-8 text-center shadow-[0px_4px_20px_rgba(0,0,0,0.02)] border-t-[6px] border-tertiary-container">
+<div class="w-16 h-16 bg-surface-variant rounded-full flex items-center justify-center mx-auto mb-4">
+<span class="material-symbols-outlined text-tertiary-container text-2xl">mail</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary-container mb-2">Send Reminders</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">You have 15 pending RSVPs.</p>
+<button class="w-full bg-tertiary-container text-white py-4 rounded-full font-label-md text-label-md hover:bg-opacity-90 transition-opacity shadow-sm">
+              Draft Email
+            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

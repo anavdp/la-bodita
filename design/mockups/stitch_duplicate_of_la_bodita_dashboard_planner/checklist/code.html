@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>La Bodita - Checklist</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&amp;family=Quicksand:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#410002",
+                        "on-tertiary-fixed-variant": "#77320a",
+                        "inverse-surface": "#2c3132",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#eff5f4",
+                        "error": "#ba1a1a",
+                        "on-background": "#171d1d",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#bcc9c8",
+                        "surface-dim": "#d5dbdb",
+                        "surface-bright": "#f5fafa",
+                        "surface": "#f5fafa",
+                        "on-secondary-fixed-variant": "#93000a",
+                        "surface-variant": "#dee4e3",
+                        "on-secondary-container": "#5c0004",
+                        "on-tertiary-fixed": "#351000",
+                        "secondary-fixed-dim": "#ffb4ab",
+                        "on-surface": "#171d1d",
+                        "secondary-container": "#fd574b",
+                        "surface-tint": "#006a69",
+                        "on-surface-variant": "#3d4949",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#ecf2f1",
+                        "secondary-fixed": "#ffdad6",
+                        "surface-container-highest": "#dee4e3",
+                        "surface-container-high": "#e4e9e9",
+                        "on-primary-fixed": "#002020",
+                        "primary": "#006a69",
+                        "tertiary-container": "#e28658",
+                        "primary-fixed": "#82f5f3",
+                        "primary-container": "#2faead",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb693",
+                        "tertiary": "#954920",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-container": "#e9efef",
+                        "on-tertiary-container": "#5e2300",
+                        "on-primary-container": "#003c3b",
+                        "on-primary-fixed-variant": "#00504f",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#f5fafa",
+                        "secondary": "#b6231f",
+                        "inverse-primary": "#64d8d7",
+                        "primary-fixed-dim": "#64d8d7",
+                        "outline": "#6d7a79",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "base": "8px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "sidebar_width": "260px",
+                        "topbar_height": "80px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Be Vietnam Pro"],
+                        "headline-lg": ["Quicksand"],
+                        "title-lg": ["Be Vietnam Pro"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "headline-md": ["Quicksand"],
+                        "body-sm": ["Be Vietnam Pro"],
+                        "display-lg": ["Quicksand"],
+                        "headline-lg-mobile": ["Quicksand"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .dot-grid {
+            background-image: radial-gradient(circle, #bcc9c8 1px, transparent 1px);
+            background-size: 8px 8px;
+        }
+        .asymmetric-radius {
+            border-radius: 24px 8px 24px 32px;
+        }
+        .task-card-icon {
+            opacity: 0.03;
+            font-size: 80px;
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-background dot-grid text-on-background font-body-sm min-h-screen flex">
+<!-- NavigationDrawer (JSON Component) -->
+<aside class="fixed left-0 top-0 h-full w-[260px] rounded-r-3xl border-r border-outline-variant shadow-sm bg-surface-container-low flex flex-col py-gutter z-20">
+<!-- Header -->
+<div class="px-gutter mb-8 flex flex-col">
+<h2 class="text-headline-md font-headline-md font-bold text-primary">La Bodita</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">65 Days to Go</p>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 overflow-y-auto px-2 space-y-1">
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-md text-label-md">Items</span>
+</a>
+<!-- Active Page -->
+<a class="bg-primary text-on-primary rounded-xl flex items-center px-4 py-3 m-2 scale-95 transition-transform duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="checklist">checklist</span>
+<span class="font-label-md text-label-md">Checklist</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="payments">payments</span>
+<span class="font-label-md text-label-md">Budget</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Guest List</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="description">description</span>
+<span class="font-label-md text-label-md">Documents</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="category">category</span>
+<span class="font-label-md text-label-md">Category Manager</span>
+</a>
+</nav>
+<!-- Footer -->
+<div class="px-4 mt-auto space-y-4">
+<button class="w-full py-2 border border-secondary-container text-secondary-container rounded-full font-label-md text-label-md flex justify-center items-center hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined mr-2 text-sm" data-icon="language">language</span> Language: EN
+            </button>
+<div class="flex items-center space-x-3 px-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden shrink-0 border-2 border-primary-container">
+<img alt="User avatar with wedding ring icon" class="w-full h-full object-cover" data-alt="A brightly lit close up portrait of a young person smiling softly, warm natural lighting, professional headshot style, clean minimalist background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdj7QMQ8ZGzD1h1U83VXdFNwj3x7BzVGVrN30dozUXMZbf-NlK9jUmobEQipauN_yVxNk1e03p_oHoCw7T9-jp-0Ie4OHypIQ_qzWG6TcRuVDq7KtohPl5rkkds4x6_nEIe6ZcidkV2T6TBjLv49uuRRvNM4_lbxhk9MPbFPuFj3yZWfwSydIrdcZd6XLmeSVlxVSjOhYJjOrT_M7EXi3NpARbjZ50kEqRzbXg6u7xeysz3m4aCQiQSA"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">User Name</span>
+<span class="font-label-md text-xs text-on-surface-variant">Profile Settings</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[260px] flex-1 flex flex-col min-h-screen relative">
+<!-- TopAppBar (JSON Component) -->
+<header class="fixed top-0 right-0 h-20 left-[260px] z-10 bg-transparent flex justify-between items-center px-margin-desktop w-full pointer-events-none">
+<!-- Left: Search -->
+<div class="pointer-events-auto">
+<div class="relative bg-surface-container-lowest rounded-full shadow-sm flex items-center px-4 py-2 border border-outline-variant hover:bg-surface-container-highest transition-colors opacity-90 backdrop-blur-sm">
+<span class="material-symbols-outlined text-outline mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none outline-none font-body-lg text-body-lg text-on-surface-variant placeholder:text-outline w-64 focus:ring-0 p-0" placeholder="Search..." type="text"/>
+</div>
+</div>
+<!-- Right: Actions -->
+<div class="flex items-center space-x-4 pointer-events-auto">
+<button class="bg-secondary-container text-on-primary font-label-md text-label-md py-3 px-6 rounded-full flex items-center hover:opacity-90 transition-opacity shadow-sm">
+<span class="material-symbols-outlined mr-2" data-icon="add">add</span>
+                    Add Task
+                </button>
+<button class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors shadow-sm">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors shadow-sm">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- Page Content -->
+<div class="px-margin-desktop pt-[104px] pb-margin-desktop max-w-[1440px] w-full mx-auto space-y-8 flex-1">
+<!-- Page Header -->
+<section class="bg-surface-container-lowest asymmetric-radius p-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] relative overflow-hidden border border-white/50">
+<span class="material-symbols-outlined task-card-icon text-primary/10 rotate-[-15deg] right-4 bottom-[-20px]" data-icon="checklist">checklist</span>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2 relative z-10">Checklist</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant relative z-10">Stay on top of every detail for your big day. 📝</p>
+</section>
+<!-- Filter Bar -->
+<section class="flex flex-wrap gap-4 items-center">
+<div class="flex space-x-2 mr-4 bg-surface-container p-1 rounded-full border border-outline-variant/30">
+<button class="px-5 py-2 rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm">All</button>
+<button class="px-5 py-2 rounded-full font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors">Venue</button>
+<button class="px-5 py-2 rounded-full font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors">Attire</button>
+<button class="px-5 py-2 rounded-full font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors">Travel</button>
+</div>
+<div class="w-[1px] h-6 bg-outline-variant/50 hidden md:block"></div>
+<div class="flex space-x-2 flex-1 md:ml-4">
+<button class="px-4 py-1.5 rounded-full border border-outline-variant font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high flex items-center transition-colors">
+                        To Do <span class="ml-2 bg-surface-variant px-2 py-0.5 rounded-full text-xs">12</span>
+</button>
+<button class="px-4 py-1.5 rounded-full border border-outline-variant font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high flex items-center transition-colors">
+                        In Progress <span class="ml-2 bg-surface-variant px-2 py-0.5 rounded-full text-xs">4</span>
+</button>
+<button class="px-4 py-1.5 rounded-full border border-outline-variant font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high flex items-center transition-colors">
+                        Done <span class="ml-2 bg-surface-variant px-2 py-0.5 rounded-full text-xs">8</span>
+</button>
+</div>
+</section>
+<!-- Task List Grid (Bento/Card Style) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+<!-- Task Card 1 (Urgent) -->
+<article class="bg-surface-container-lowest asymmetric-radius p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-white/50 relative overflow-hidden flex flex-col group hover:-translate-y-1 transition-transform duration-300">
+<span class="material-symbols-outlined task-card-icon text-error-container" data-icon="local_florist">local_florist</span>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<button class="w-6 h-6 rounded-full border-2 border-outline-variant hover:border-primary transition-colors flex items-center justify-center shrink-0 mt-1">
+<!-- Empty circle for uncompleted -->
+</button>
+<span class="px-2 py-1 bg-error-container text-on-error-container font-label-md text-[10px] rounded uppercase tracking-wider">Urgent</span>
+</div>
+<div class="mb-4 relative z-10 flex-1">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-2 leading-tight">🏛️ Confirm floral arrangements</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Finalize centerpiece counts and bouquet ribbon colors with the vendor.</p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex justify-between items-center relative z-10">
+<div class="flex items-center text-error font-label-md text-xs">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="event">event</span> Due Tomorrow
+                        </div>
+<span class="text-on-surface-variant font-label-md text-xs">Venue</span>
+</div>
+</article>
+<!-- Task Card 2 (In Progress) -->
+<article class="bg-surface-container-lowest asymmetric-radius p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-white/50 relative overflow-hidden flex flex-col group hover:-translate-y-1 transition-transform duration-300">
+<span class="material-symbols-outlined task-card-icon text-tertiary-container/30" data-icon="checkroom">checkroom</span>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<button class="w-6 h-6 rounded-full border-2 border-tertiary-container flex items-center justify-center shrink-0 mt-1">
+<div class="w-3 h-3 bg-tertiary-container rounded-full"></div>
+</button>
+<span class="px-2 py-1 bg-tertiary-container/20 text-tertiary font-label-md text-[10px] rounded uppercase tracking-wider">In Progress</span>
+</div>
+<div class="mb-4 relative z-10 flex-1">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-2 leading-tight">👗 Second gown fitting</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Bring shoes and undergarments to ensure exact hemline measurement.</p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex justify-between items-center relative z-10">
+<div class="flex items-center text-on-surface-variant font-label-md text-xs">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="event">event</span> Oct 12
+                        </div>
+<span class="text-on-surface-variant font-label-md text-xs">Attire</span>
+</div>
+</article>
+<!-- Task Card 3 (Done) -->
+<article class="bg-surface-container-lowest asymmetric-radius p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-white/50 relative overflow-hidden flex flex-col opacity-75">
+<span class="material-symbols-outlined task-card-icon text-primary/20" data-icon="mail">mail</span>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<button class="w-6 h-6 rounded-full bg-primary border-2 border-primary flex items-center justify-center shrink-0 mt-1">
+<span class="material-symbols-outlined text-on-primary text-[14px]" data-icon="check">check</span>
+</button>
+<span class="px-2 py-1 bg-primary/10 text-primary font-label-md text-[10px] rounded uppercase tracking-wider">Done</span>
+</div>
+<div class="mb-4 relative z-10 flex-1">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-2 leading-tight line-through decoration-outline-variant">✉️ Send Save the Dates</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Mail out to all confirmed addresses on the A-List.</p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex justify-between items-center relative z-10">
+<div class="flex items-center text-outline font-label-md text-xs">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="done_all">done_all</span> Completed Oct 1
+                        </div>
+<span class="text-on-surface-variant font-label-md text-xs">Guest List</span>
+</div>
+</article>
+<!-- Task Card 4 (Scheduled) -->
+<article class="bg-surface-container-lowest asymmetric-radius p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-white/50 relative overflow-hidden flex flex-col group hover:-translate-y-1 transition-transform duration-300">
+<span class="material-symbols-outlined task-card-icon text-outline/20" data-icon="flight">flight</span>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<button class="w-6 h-6 rounded-full border-2 border-outline-variant hover:border-primary transition-colors flex items-center justify-center shrink-0 mt-1">
+</button>
+<span class="px-2 py-1 bg-surface-variant text-on-surface-variant font-label-md text-[10px] rounded uppercase tracking-wider">Scheduled</span>
+</div>
+<div class="mb-4 relative z-10 flex-1">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-2 leading-tight">✈️ Book Honeymoon Flights</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Set fare alerts for Bali departures in early November.</p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex justify-between items-center relative z-10">
+<div class="flex items-center text-on-surface-variant font-label-md text-xs">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="event">event</span> Nov 5
+                        </div>
+<span class="text-on-surface-variant font-label-md text-xs">Travel</span>
+</div>
+</article>
+</section>
+</div>
+</main>
+</body></html>

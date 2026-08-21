@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>La Bodita - Calendar</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;family=Quicksand:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#e28658",
+                        "tertiary-fixed-dim": "#ffb693",
+                        "outline-variant": "#bcc9c8",
+                        "on-primary-container": "#003c3b",
+                        "tertiary": "#954920",
+                        "secondary-fixed-dim": "#ffb4ab",
+                        "secondary-container": "#fd574b",
+                        "surface-container-low": "#eff5f4",
+                        "primary-fixed": "#82f5f3",
+                        "background": "#f5fafa",
+                        "on-surface-variant": "#3d4949",
+                        "inverse-on-surface": "#ecf2f1",
+                        "surface-container": "#e9efef",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#2c3132",
+                        "primary": "#006a69",
+                        "primary-container": "#2faead",
+                        "surface-container-highest": "#dee4e3",
+                        "on-error": "#ffffff",
+                        "outline": "#6d7a79",
+                        "surface-tint": "#006a69",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#002020",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#64d8d7",
+                        "on-secondary-container": "#5c0004",
+                        "secondary": "#b6231f",
+                        "surface-variant": "#dee4e3",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface": "#f5fafa",
+                        "surface-container-high": "#e4e9e9",
+                        "on-surface": "#171d1d",
+                        "on-background": "#171d1d",
+                        "on-tertiary-fixed-variant": "#77320a",
+                        "on-secondary-fixed": "#410002",
+                        "on-tertiary-container": "#5e2300",
+                        "secondary-fixed": "#ffdad6",
+                        "surface-dim": "#d5dbdb",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#64d8d7",
+                        "on-primary-fixed-variant": "#00504f",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-bright": "#f5fafa"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "sidebar_width": "260px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "base": "8px",
+                        "topbar_height": "80px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Quicksand"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "headline-md": ["Quicksand"],
+                        "headline-lg-mobile": ["Quicksand"],
+                        "title-lg": ["Be Vietnam Pro"],
+                        "body-sm": ["Be Vietnam Pro"],
+                        "headline-lg": ["Quicksand"],
+                        "body-lg": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .dot-pattern {
+            background-image: radial-gradient(circle at 1px 1px, #d5dbdb 1px, transparent 0);
+            background-size: 8px 8px;
+        }
+        
+        .blob-1 { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+        .blob-2 { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        .blob-3 { border-radius: 50% 50% 20% 80% / 25% 80% 20% 75%; }
+        .blob-4 { border-radius: 80% 20% 50% 50% / 50% 50% 50% 50%; }
+
+        .post-it-edge {
+            border-radius: 2px 8px 4px 6px / 6px 3px 7px 4px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-sm min-h-screen dot-pattern flex font-sans overflow-x-hidden">
+<!-- Sidebar Navigation Drawer -->
+<aside class="fixed left-0 top-0 h-full w-[260px] rounded-r-3xl bg-surface-container-low border-r border-outline-variant shadow-sm flex flex-col py-gutter z-20 hidden md:flex">
+<!-- Header -->
+<div class="px-6 mb-8 flex flex-col items-start">
+<h1 class="text-headline-md font-headline-md font-bold text-primary mb-1">La Bodita</h1>
+<span class="text-body-sm font-body-sm text-primary-container">65 Days to Go</span>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 px-4 space-y-1">
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-3">inventory_2</span>
+<span class="font-label-md text-label-md">Items</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-3">checklist</span>
+<span class="font-label-md text-label-md">Checklist</span>
+</a>
+<a class="bg-primary text-on-primary rounded-xl flex items-center px-4 py-3 m-2 scale-95 transition-transform duration-150 ease-in-out shadow-sm" href="#">
+<span class="material-symbols-outlined mr-3">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-3">payments</span>
+<span class="font-label-md text-label-md">Budget</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-3">group</span>
+<span class="font-label-md text-label-md">Guest List</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-3">description</span>
+<span class="font-label-md text-label-md">Documents</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-3">category</span>
+<span class="font-label-md text-label-md">Category Manager</span>
+</a>
+</nav>
+<!-- Footer Profile -->
+<div class="mt-auto px-6 border-t border-surface-dim pt-6">
+<button class="w-full flex items-center justify-center py-2 px-4 border border-secondary-container text-secondary-container rounded-full font-label-md text-label-md hover:bg-secondary-fixed transition-colors mb-4">
+                Language: EN
+            </button>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container mr-3 font-bold">
+                    UN
+                </div>
+<span class="font-label-md text-label-md text-primary">User Name</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[260px] min-h-screen relative">
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 h-20 left-0 md:left-[260px] z-10 bg-transparent flex justify-between items-center px-margin-mobile md:px-margin-desktop w-full">
+<div class="flex-1 max-w-md bg-surface-container-lowest rounded-full flex items-center px-4 py-2 shadow-sm">
+<span class="material-symbols-outlined text-on-surface-variant mr-2">search</span>
+<input class="bg-transparent border-none outline-none font-body-lg text-body-lg text-on-surface w-full focus:ring-0 placeholder:text-on-surface-variant/50" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center space-x-4">
+<button class="bg-secondary-container text-on-secondary hover:bg-secondary transition-colors rounded-full px-6 py-3 font-label-md text-label-md flex items-center shadow-sm">
+<span class="material-symbols-outlined mr-2 text-sm">add</span>
+                    Add Event
+                </button>
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors shadow-sm">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors shadow-sm">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<div class="pt-24 px-margin-mobile md:px-margin-desktop pb-12 max-w-[1440px] mx-auto">
+<!-- Page Header -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm mb-8 flex justify-between items-center blob-1">
+<h2 class="text-headline-lg font-headline-lg text-primary font-bold">Calendar</h2>
+<div class="bg-surface-container-low rounded-full p-1 flex shadow-inner">
+<button class="px-6 py-2 rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md shadow-sm">Month</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-highest transition-colors">List</button>
+</div>
+</div>
+<!-- 7-Column Grid View -->
+<div class="w-full bg-surface-container-lowest/80 backdrop-blur-sm rounded-3xl shadow-sm border border-outline-variant overflow-hidden">
+<!-- Days of Week Header -->
+<div class="grid grid-cols-7 border-b border-outline-variant bg-surface-container-low">
+<div class="py-3 px-4 text-center text-label-md font-label-md text-on-surface-variant">SUN</div>
+<div class="py-3 px-4 text-center text-label-md font-label-md text-on-surface-variant">MON</div>
+<div class="py-3 px-4 text-center text-label-md font-label-md text-on-surface-variant">TUE</div>
+<div class="py-3 px-4 text-center text-label-md font-label-md text-on-surface-variant">WED</div>
+<div class="py-3 px-4 text-center text-label-md font-label-md text-on-surface-variant">THU</div>
+<div class="py-3 px-4 text-center text-label-md font-label-md text-on-surface-variant">FRI</div>
+<div class="py-3 px-4 text-center text-label-md font-label-md text-on-surface-variant">SAT</div>
+</div>
+<!-- Calendar Grid -->
+<div class="grid grid-cols-7 auto-rows-[140px] bg-outline-variant gap-px">
+<!-- Week 1 -->
+<div class="bg-surface-container-lowest p-2 flex flex-col relative opacity-50">
+<span class="text-body-sm font-bold text-on-surface-variant/50 self-end">28</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative opacity-50">
+<span class="text-body-sm font-bold text-on-surface-variant/50 self-end">29</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative opacity-50">
+<span class="text-body-sm font-bold text-on-surface-variant/50 self-end">30</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">1</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">2</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">3</span>
+<div class="bg-primary-container text-on-primary-container text-xs font-label-md px-2 py-1.5 shadow-sm transform -rotate-1 relative z-10 w-full truncate post-it-edge">
+                💍 Engagement
+            </div>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">4</span>
+</div>
+<!-- Week 2 -->
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">5</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">6</span>
+<div class="bg-tertiary-container text-on-tertiary-container text-xs font-label-md px-2 py-1.5 shadow-sm transform rotate-1 relative z-10 w-[calc(200%+1px)] truncate post-it-edge">
+                🍰 Cake Tasting (2 Days)
+            </div>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">7</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative bg-primary-fixed/10 border-2 border-primary border-dashed">
+<span class="text-body-sm font-bold text-primary self-end mb-2">8</span>
+<span class="absolute top-2 left-2 text-[10px] font-bold text-primary">TODAY</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">9</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">10</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">11</span>
+<div class="bg-secondary-container text-on-secondary-container text-xs font-label-md px-2 py-1.5 shadow-sm transform -rotate-2 relative z-10 w-full truncate post-it-edge">
+                🎶 Music
+            </div>
+</div>
+<!-- Week 3 -->
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">12</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">13</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">14</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">15</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">16</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">17</span>
+</div>
+<div class="bg-surface-container-lowest p-2 flex flex-col relative">
+<span class="text-body-sm font-bold text-on-surface self-end mb-2">18</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

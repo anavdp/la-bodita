@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>La Bodita - Calendar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&amp;family=Be+Vietnam+Pro:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#006a69",
+                        "secondary-container": "#fd574b",
+                        "on-secondary-fixed-variant": "#93000a",
+                        "secondary-fixed": "#ffdad6",
+                        "primary-fixed-dim": "#64d8d7",
+                        "outline-variant": "#bcc9c8",
+                        "inverse-surface": "#2c3132",
+                        "on-tertiary-fixed-variant": "#77320a",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#5e2300",
+                        "secondary-fixed-dim": "#ffb4ab",
+                        "surface-variant": "#dee4e3",
+                        "primary-container": "#2faead",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb693",
+                        "surface-bright": "#f5fafa",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff5f4",
+                        "on-tertiary-fixed": "#351000",
+                        "inverse-primary": "#64d8d7",
+                        "on-primary-container": "#003c3b",
+                        "on-background": "#171d1d",
+                        "tertiary-container": "#e28658",
+                        "inverse-on-surface": "#ecf2f1",
+                        "background": "#f5fafa",
+                        "surface": "#f5fafa",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-tint": "#006a69",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#e9efef",
+                        "surface-dim": "#d5dbdb",
+                        "on-surface": "#171d1d",
+                        "on-primary-fixed": "#002020",
+                        "secondary": "#b6231f",
+                        "on-primary-fixed-variant": "#00504f",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#82f5f3",
+                        "on-surface-variant": "#3d4949",
+                        "surface-container-highest": "#dee4e3",
+                        "on-secondary-fixed": "#410002",
+                        "tertiary": "#954920",
+                        "outline": "#6d7a79",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e4e9e9",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#5c0004",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sidebar_width": "260px",
+                        "margin-mobile": "16px",
+                        "topbar_height": "80px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Quicksand"],
+                        "display-lg": ["Quicksand"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "headline-lg": ["Quicksand"],
+                        "title-lg": ["Be Vietnam Pro"],
+                        "body-sm": ["Be Vietnam Pro"],
+                        "headline-md": ["Quicksand"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    },
+                    "backgroundImage": {
+                        "dot-pattern": "radial-gradient(circle, #d5dbdb 1px, transparent 1px)"
+                    },
+                    "backgroundSize": {
+                        "dots": "16px 16px"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f5fafa;
+            background-image: radial-gradient(circle, #dee4e3 1px, transparent 1px);
+            background-size: 16px 16px;
+            background-position: 0 0, 8px 8px;
+        }
+        .organic-blob {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+        .organic-blob-2 {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        }
+        .organic-blob-3 {
+            border-radius: 50% 50% 30% 70% / 50% 60% 40% 50%;
+        }
+    </style>
+</head>
+<body class="text-on-background font-body-lg min-h-screen">
+<!-- Navigation Drawer -->
+<aside class="fixed left-0 top-0 h-full w-[260px] rounded-r-3xl border-r border-outline-variant dark:border-none shadow-sm bg-surface-container-low dark:bg-surface-dim flex flex-col h-screen py-gutter z-20">
+<div class="px-6 pb-8">
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim">La Bodita</h1>
+<p class="text-body-sm font-body-sm text-primary-container mt-1">65 Days to Go</p>
+</div>
+<nav class="flex-1 overflow-y-auto px-2 space-y-1">
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">inventory_2</span>
+<span class="font-label-md text-label-md">Items</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">checklist</span>
+<span class="font-label-md text-label-md">Checklist</span>
+</a>
+<a class="bg-primary text-on-primary rounded-xl flex items-center px-4 py-3 m-2 scale-95 transition-transform duration-150 ease-in-out shadow-sm" href="#">
+<span class="material-symbols-outlined mr-3">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">payments</span>
+<span class="font-label-md text-label-md">Budget</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">group</span>
+<span class="font-label-md text-label-md">Guest List</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">description</span>
+<span class="font-label-md text-label-md">Documents</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">category</span>
+<span class="font-label-md text-label-md">Category Manager</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<button class="w-full rounded-full border border-secondary-container text-secondary-container py-2 mb-4 font-label-md text-label-md hover:bg-secondary-container hover:text-white transition-colors">
+                Language: EN
+            </button>
+<div class="flex items-center space-x-3 p-2 rounded-xl hover:bg-surface-container-high cursor-pointer transition-colors">
+<div class="w-10 h-10 rounded-full bg-primary-fixed-dim flex items-center justify-center overflow-hidden">
+<img alt="User avatar with wedding ring icon" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrlGfXyYw-wiClL2_eL3bwB_9M0HjbvhdMqYLycQeyoNrSQRLZRxrf6MmYsZQddXxZR6gA1RKgeu_nnV1865199mGr9rhiR2ZlZ7RKovDq3XsYSODAoVcQRf49eRPfY5Xl9qufMPj43m7ZbZ1tDdk2hJgMkFuT8iwRwtCKSf4lo2SEJ3VlbtIYzL6FCb97eN9wXOD5dRQaSx7rWyfZCqccZinKlnuHRrLVEpLGoMCTsloCrGEODgNO0w"/>
+</div>
+<span class="font-label-md text-label-md text-primary font-bold">User Name</span>
+</div>
+</div>
+</aside>
+<!-- Top App Bar -->
+<header class="fixed top-0 right-0 h-20 left-[260px] z-10 bg-transparent flex justify-between items-center px-margin-desktop w-[calc(100%-260px)] pt-6">
+<div class="relative w-[400px]">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-12 pr-4 py-3 rounded-full bg-surface-container-lowest border border-surface-variant focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm font-body-lg text-body-lg text-on-surface" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center space-x-4">
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest shadow-sm">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest shadow-sm">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="bg-secondary-container text-white px-6 py-3 rounded-full font-label-md text-label-md shadow-sm hover:opacity-90 transition-opacity flex items-center space-x-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+<span>Add Event</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[260px] pt-24 px-margin-desktop pb-20">
+<div class="max-w-[900px] mx-auto">
+<!-- Header & Toggle -->
+<div class="flex justify-between items-end mb-12">
+<div>
+<h2 class="text-display-lg font-display-lg text-primary mb-2">Calendar</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Here's your upcoming schedule.</p>
+</div>
+<div class="bg-surface-container-lowest rounded-full p-1 shadow-sm flex items-center border border-surface-variant">
+<button class="px-6 py-2 rounded-full bg-primary-container text-white font-label-md text-label-md shadow-sm">Agenda</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-highest transition-colors">Month</button>
+</div>
+</div>
+<!-- Agenda View -->
+<div class="relative pl-8 border-l-2 border-primary/20 space-y-16">
+<!-- Day Group -->
+<div class="relative">
+<div class="absolute -left-14 top-0 w-12 h-12 bg-surface-container-lowest rounded-full border-4 border-background flex items-center justify-center z-10 text-primary font-bold text-title-lg organic-blob shadow-sm">
+                        12
+                    </div>
+<h3 class="text-title-lg font-title-lg text-primary mb-6 pt-2">October</h3>
+<div class="space-y-4">
+<!-- Event Row -->
+<div class="bg-surface-container-lowest rounded-2xl p-5 flex items-center justify-between shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-surface-variant/50 hover:-translate-y-1 transition-transform">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
+                                    🍽️
+                                </div>
+<div>
+<h4 class="font-title-lg text-title-lg text-on-surface">Catering Tasting Appointment</h4>
+<p class="text-body-sm text-on-surface-variant mt-1">2:00 PM - 4:00 PM • The Grand Hall</p>
+</div>
+</div>
+<span class="px-4 py-1.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-md text-label-md uppercase tracking-wider text-[10px]">Scheduled</span>
+</div>
+</div>
+</div>
+<!-- Day Group -->
+<div class="relative">
+<div class="absolute -left-14 top-0 w-12 h-12 bg-surface-container-lowest rounded-full border-4 border-background flex items-center justify-center z-10 text-secondary-container font-bold text-title-lg organic-blob-2 shadow-sm">
+                        15
+                    </div>
+<h3 class="text-title-lg font-title-lg text-secondary-container mb-6 pt-2">October</h3>
+<div class="space-y-4">
+<!-- Event Row -->
+<div class="bg-surface-container-lowest rounded-2xl p-5 flex items-center justify-between shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-surface-variant/50 hover:-translate-y-1 transition-transform border-l-4 border-l-secondary-container">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container/10 flex items-center justify-center text-2xl">
+                                    💐
+                                </div>
+<div>
+<h4 class="font-title-lg text-title-lg text-on-surface">Finalize Florist Deposit</h4>
+<p class="text-body-sm text-on-surface-variant mt-1">10:00 AM • Online</p>
+</div>
+</div>
+<span class="px-4 py-1.5 rounded-full bg-secondary-container text-white font-label-md text-label-md uppercase tracking-wider text-[10px]">Urgent</span>
+</div>
+</div>
+</div>
+<!-- Day Group -->
+<div class="relative">
+<div class="absolute -left-14 top-0 w-12 h-12 bg-surface-container-lowest rounded-full border-4 border-background flex items-center justify-center z-10 text-tertiary-container font-bold text-title-lg organic-blob-3 shadow-sm">
+                        22
+                    </div>
+<h3 class="text-title-lg font-title-lg text-tertiary-container mb-6 pt-2">October</h3>
+<div class="space-y-4">
+<!-- Event Row -->
+<div class="bg-surface-container-lowest rounded-2xl p-5 flex items-center justify-between shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-surface-variant/50 hover:-translate-y-1 transition-transform">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/10 flex items-center justify-center text-2xl">
+                                    🎵
+                                </div>
+<div>
+<h4 class="font-title-lg text-title-lg text-on-surface">DJ Playlist Submission</h4>
+<p class="text-body-sm text-on-surface-variant mt-1">End of Day</p>
+</div>
+</div>
+<span class="px-4 py-1.5 rounded-full bg-tertiary-container/20 text-tertiary font-label-md text-label-md uppercase tracking-wider text-[10px]">Pending</span>
+</div>
+<!-- Event Row -->
+<div class="bg-surface-container-lowest rounded-2xl p-5 flex items-center justify-between shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-surface-variant/50 hover:-translate-y-1 transition-transform">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
+                                    👗
+                                </div>
+<div>
+<h4 class="font-title-lg text-title-lg text-on-surface">Dress Fitting</h4>
+<p class="text-body-sm text-on-surface-variant mt-1">3:30 PM • Bridal Boutique</p>
+</div>
+</div>
+<span class="px-4 py-1.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-md text-label-md uppercase tracking-wider text-[10px]">Scheduled</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

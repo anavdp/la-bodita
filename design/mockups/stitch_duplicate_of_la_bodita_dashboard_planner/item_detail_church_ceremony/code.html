@@ -1,0 +1,360 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Item Detail - Church Ceremony</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&amp;family=Quicksand:wght@700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "inverse-surface": "#2c3132",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#64d8d7",
+                    "secondary-fixed": "#ffdad6",
+                    "inverse-on-surface": "#ecf2f1",
+                    "primary": "#006a69",
+                    "tertiary-fixed": "#ffdbcc",
+                    "on-background": "#171d1d",
+                    "surface-container-low": "#eff5f4",
+                    "surface-container-highest": "#dee4e3",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#d5dbdb",
+                    "tertiary-fixed-dim": "#ffb693",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#fd574b",
+                    "on-primary-fixed": "#002020",
+                    "primary-fixed": "#82f5f3",
+                    "primary-container": "#2faead",
+                    "secondary-fixed-dim": "#ffb4ab",
+                    "on-tertiary-fixed-variant": "#77320a",
+                    "on-secondary-container": "#5c0004",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface": "#171d1d",
+                    "on-secondary-fixed": "#410002",
+                    "primary-fixed-dim": "#64d8d7",
+                    "on-primary-container": "#003c3b",
+                    "surface-tint": "#006a69",
+                    "on-tertiary-container": "#5e2300",
+                    "surface-bright": "#f5fafa",
+                    "surface": "#f5fafa",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#dee4e3",
+                    "outline": "#6d7a79",
+                    "on-error-container": "#93000a",
+                    "tertiary": "#954920",
+                    "on-secondary-fixed-variant": "#93000a",
+                    "surface-container": "#e9efef",
+                    "tertiary-container": "#e28658",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#00504f",
+                    "outline-variant": "#bcc9c8",
+                    "surface-container-high": "#e4e9e9",
+                    "secondary": "#b6231f",
+                    "background": "#f5fafa",
+                    "on-surface-variant": "#3d4949",
+                    "on-tertiary-fixed": "#351000"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "40px",
+                    "margin-mobile": "16px",
+                    "base": "8px",
+                    "sidebar_width": "260px",
+                    "gutter": "24px",
+                    "topbar_height": "80px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Be Vietnam Pro"],
+                    "label-md": ["Be Vietnam Pro"],
+                    "title-lg": ["Be Vietnam Pro"],
+                    "headline-lg-mobile": ["Quicksand"],
+                    "headline-md": ["Quicksand"],
+                    "headline-lg": ["Quicksand"],
+                    "display-lg": ["Quicksand"],
+                    "body-lg": ["Be Vietnam Pro"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "title-lg": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .dotted-bg {
+            background-image: radial-gradient(circle at 1px 1px, #dee4e3 1px, transparent 0);
+            background-size: 8px 8px;
+        }
+        /* Asymmetric border radii classes */
+        .rounded-asym-header { border-radius: 24px 8px 24px 32px; }
+        .rounded-asym-card-1 { border-radius: 16px 32px 16px 8px; }
+        .rounded-asym-card-2 { border-radius: 8px 16px 32px 24px; }
+        .rounded-asym-card-3 { border-radius: 32px 16px 8px 24px; }
+        
+        /* Custom Checkbox */
+        .custom-checkbox {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #6d7a79;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        .custom-checkbox:checked {
+            background-color: #006a69;
+            border-color: #006a69;
+        }
+        .custom-checkbox:checked::after {
+            content: "";
+            position: absolute;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-sm min-h-screen dotted-bg flex flex-col md:flex-row overflow-x-hidden" style="background-color: rgb(244, 248, 247);">
+<!-- NavigationDrawer (Sidebar) -->
+<nav class="hidden md:flex bg-surface-container-low border-r border-outline-variant shadow-sm fixed left-0 top-0 h-full w-[260px] rounded-r-3xl flex-col py-gutter z-20">
+<!-- Profile Header -->
+<div class="px-6 pb-6 border-b border-outline-variant/30 flex items-center gap-4">
+
+<div>
+<h2 class="font-headline-md text-headline-md font-bold text-primary">La Bodita</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">65 Days to Go</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 overflow-y-auto mt-4 px-2">
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors duration-150 ease-in-out hover:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-primary">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="bg-primary text-on-primary rounded-xl flex items-center px-4 py-3 m-2 transition-transform duration-150 ease-in-out scale-95 shadow-md" href="#">
+<span class="material-symbols-outlined mr-3" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-label-md text-label-md">Items</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors duration-150 ease-in-out hover:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-primary">checklist</span>
+<span class="font-label-md text-label-md">Checklist</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors duration-150 ease-in-out hover:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-primary">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors duration-150 ease-in-out hover:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-primary">payments</span>
+<span class="font-label-md text-label-md">Budget</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors duration-150 ease-in-out hover:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-primary">group</span>
+<span class="font-label-md text-label-md">Guest List</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors duration-150 ease-in-out hover:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-primary">description</span>
+<span class="font-label-md text-label-md">Documents</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors duration-150 ease-in-out hover:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-primary">category</span>
+<span class="font-label-md text-label-md">Category Manager</span>
+</a>
+</div>
+<div class="px-6 pt-4 border-t border-outline-variant/30">
+<p class="font-label-md text-label-md text-outline">User Name</p>
+</div>
+</nav>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 h-20 md:left-[260px] left-0 z-10 bg-transparent flex justify-between items-center px-margin-mobile md:px-margin-desktop w-full md:w-[calc(100%-260px)]">
+<!-- Search Input -->
+<div class="relative w-full max-w-xs md:max-w-md hidden md:block">
+<span class="material-symbols-outlined absolute left-4 top-1/2 transform -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-full py-3 pl-12 pr-4 font-body-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:bg-surface-bright transition-colors" placeholder="Search..." type="text">
+</div>
+<div class="md:hidden flex items-center">
+<button class="p-2 text-primary hover:bg-surface-container-highest rounded-full transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<button class="hidden md:flex bg-tertiary-container hover:bg-secondary-container text-on-tertiary rounded-full px-8 py-4 font-label-md text-label-md items-center shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5" style="background-color: rgb(245, 81, 70); color: white; font-weight: bold;">
+<span class="material-symbols-outlined mr-2">add</span>
+                Add Task
+            </button>
+<button class="md:hidden bg-tertiary-container text-on-tertiary rounded-full p-3 shadow-sm flex items-center justify-center" style="background-color: rgb(245, 81, 70); color: white;">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="w-12 h-12 bg-surface-container-lowest rounded-full flex items-center justify-center text-primary shadow-sm hover:bg-surface-container-highest transition-colors relative">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="absolute top-3 right-3 w-2.5 h-2.5 bg-secondary rounded-full border-2 border-surface-container-lowest"></span>
+</button>
+<button class="w-12 h-12 bg-surface-container-lowest rounded-full flex items-center justify-center text-outline shadow-sm hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 mt-20 md:ml-[260px] p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto w-full relative z-0">
+<!-- PAGE HEADER -->
+<div class="bg-surface-container-lowest rounded-asym-header p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] mb-8 flex justify-between items-start md:items-center relative overflow-hidden group">
+<!-- Decorative soft gradient bg element -->
+<div class="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700 pointer-events-none"></div>
+<div class="flex items-center gap-4 z-10">
+<div class="text-4xl md:text-5xl">⛪</div>
+<div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-primary tracking-tight mb-2">Church Ceremony</h1>
+<span class="inline-block bg-tertiary-fixed text-on-tertiary-fixed-variant px-3 py-1 rounded-full font-label-md text-label-md">Venue</span>
+</div>
+</div>
+<button class="border-2 border-outline-variant text-outline hover:text-primary hover:border-primary rounded-full w-12 h-12 flex items-center justify-center transition-colors shadow-sm bg-surface-container-lowest z-10">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<!-- CONTENT LAYOUT -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Left Column (Tasks & Docs) -->
+<div class="col-span-1 md:col-span-8 flex flex-col gap-6">
+<!-- Tasks Card -->
+<div class="bg-surface-container-lowest rounded-asym-card-1 p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,106,105,0.08)] transition-shadow duration-300">
+<h3 class="font-title-lg text-primary mb-6 flex items-center">
+<span class="material-symbols-outlined mr-2">checklist</span>
+                        Tasks
+                    </h3>
+<ul class="space-y-4">
+<li class="flex items-center gap-4 p-3 hover:bg-surface-container rounded-xl transition-colors">
+<input class="custom-checkbox" id="task1" type="checkbox">
+<label class="font-body-lg text-on-surface flex-1 cursor-pointer select-none" for="task1">Confirm floral arrangements</label>
+<span class="bg-error-container text-on-error-container px-2 py-1 rounded-full font-label-md text-label-md text-[10px]">URGENT</span>
+</li>
+<li class="flex items-center gap-4 p-3 hover:bg-surface-container rounded-xl transition-colors">
+<input checked="" class="custom-checkbox" id="task2" type="checkbox">
+<label class="font-body-lg text-on-surface flex-1 cursor-pointer select-none line-through text-outline" for="task2">Finalize music selection</label>
+<span class="material-symbols-outlined text-outline hover:text-secondary cursor-pointer">delete</span>
+</li>
+<li class="flex items-center gap-4 p-3 hover:bg-surface-container rounded-xl transition-colors">
+<input class="custom-checkbox" id="task3" type="checkbox">
+<label class="font-body-lg text-on-surface flex-1 cursor-pointer select-none" for="task3">Rehearsal walkthrough</label>
+<span class="bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full font-label-md text-label-md text-[10px]">SCHEDULED</span>
+</li>
+</ul>
+<button class="mt-4 text-primary font-label-md text-label-md hover:underline flex items-center p-2">
+<span class="material-symbols-outlined text-sm mr-1">add</span> Add Task
+                    </button>
+</div>
+<!-- Documents & Photos Card -->
+<div class="bg-surface-container-lowest rounded-asym-card-2 p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,106,105,0.08)] transition-shadow duration-300">
+<h3 class="font-title-lg text-primary mb-6 flex items-center">
+<span class="material-symbols-outlined mr-2">description</span>
+                        Documents &amp; Photos
+                    </h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="flex items-center gap-3 p-4 border border-outline-variant/40 rounded-2xl hover:border-primary/50 hover:bg-surface-container-low transition-all cursor-pointer group">
+<div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="font-body-sm font-semibold text-on-surface truncate">Ceremony_Script.pdf</p>
+<p class="font-label-md text-[10px] text-outline">2.4 MB</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-4 border border-outline-variant/40 rounded-2xl hover:border-primary/50 hover:bg-surface-container-low transition-all cursor-pointer group">
+<div class="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
+<span class="material-symbols-outlined">image</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="font-body-sm font-semibold text-on-surface truncate">Venue_Layout.jpg</p>
+<p class="font-label-md text-[10px] text-outline">4.1 MB</p>
+</div>
+</div>
+<!-- Add New Doc Dropzone placeholder -->
+<div class="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-outline-variant/50 rounded-2xl hover:border-primary hover:bg-surface-container-low transition-all cursor-pointer text-outline hover:text-primary">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-label-md">Upload File</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (Dates & Cost) -->
+<div class="col-span-1 md:col-span-4 flex flex-col gap-6">
+<!-- Scheduled Dates Card -->
+<div class="bg-surface-container-lowest rounded-asym-card-3 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-tertiary/10 rounded-full blur-2xl"></div>
+<h3 class="font-label-md text-label-md text-outline uppercase tracking-widest mb-4">Scheduled Date</h3>
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined">calendar_month</span>
+</div>
+<div>
+<p class="font-title-lg text-primary">October 15, 2024</p>
+<p class="font-body-lg text-on-surface-variant flex items-center mt-1">
+<span class="material-symbols-outlined text-sm mr-1">schedule</span> 2:00 PM
+                            </p>
+</div>
+</div>
+</div>
+<!-- Cost Card (Dashboard stat card style) -->
+<div class="bg-secondary-container rounded-[24px_32px_16px_24px] p-6 shadow-md text-on-secondary-container relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+<!-- Decorative inner translucent circles for vibrancy depth -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4 group-hover:scale-110 transition-transform duration-500"></div>
+<div class="flex justify-between items-start mb-6 relative z-10">
+<div>
+<p class="font-label-md text-label-md text-on-secondary-container/80 uppercase tracking-wider mb-1">TOTAL COST</p>
+<h4 class="font-headline-md text-headline-md text-on-secondary-container">$1,200</h4>
+</div>
+<div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+<span class="material-symbols-outlined text-on-secondary-container">payments</span>
+</div>
+</div>
+<div class="relative z-10">
+<div class="flex justify-between font-label-md text-[10px] mb-2 opacity-80">
+<span class="">Paid: $800</span>
+<span class="">Remaining: $400</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-2 bg-on-secondary-container/20 rounded-full overflow-hidden">
+<div class="h-full bg-on-secondary-container rounded-full w-[66%] relative overflow-hidden">
+<div class="absolute inset-0 bg-white/20 w-full h-full animate-[pulse_2s_ease-in-out_infinite]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions or Notes (Generated Extra) -->
+<div class="bg-primary/5 border border-primary/20 rounded-2xl p-5 mt-auto">
+<h4 class="font-label-md text-label-md text-primary mb-2 flex items-center">
+<span class="material-symbols-outlined text-[16px] mr-1">sticky_note_2</span> Notes
+                    </h4>
+<p class="font-body-sm text-on-surface-variant italic leading-relaxed">
+                        "Speak with Father Thomas about adjusting the lighting near the altar during the vows."
+                    </p>
+</div>
+</div>
+</div>
+</main>
+
+
+</body></html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guest List - La Bodita</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&amp;family=Quicksand:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#954920",
+                        "on-secondary-fixed": "#410002",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed-variant": "#00504f",
+                        "secondary-fixed": "#ffdad6",
+                        "inverse-surface": "#2c3132",
+                        "on-tertiary-fixed-variant": "#77320a",
+                        "surface-dim": "#d5dbdb",
+                        "outline-variant": "#bcc9c8",
+                        "on-secondary-fixed-variant": "#93000a",
+                        "surface-container-low": "#eff5f4",
+                        "on-surface-variant": "#3d4949",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#ffb4ab",
+                        "background": "#f5fafa",
+                        "primary": "#006a69",
+                        "inverse-primary": "#64d8d7",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#351000",
+                        "primary-container": "#2faead",
+                        "on-surface": "#171d1d",
+                        "tertiary-container": "#e28658",
+                        "outline": "#6d7a79",
+                        "surface-bright": "#f5fafa",
+                        "on-tertiary-container": "#5e2300",
+                        "primary-fixed": "#82f5f3",
+                        "primary-fixed-dim": "#64d8d7",
+                        "surface-container": "#e9efef",
+                        "on-secondary-container": "#5c0004",
+                        "surface-container-high": "#e4e9e9",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb693",
+                        "on-primary-fixed": "#002020",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#006a69",
+                        "surface-variant": "#dee4e3",
+                        "secondary": "#b6231f",
+                        "secondary-container": "#fd574b",
+                        "inverse-on-surface": "#ecf2f1",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#dee4e3",
+                        "on-background": "#171d1d",
+                        "surface": "#f5fafa",
+                        "on-primary-container": "#003c3b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "sidebar_width": "260px",
+                        "margin-desktop": "40px",
+                        "topbar_height": "80px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "headline-lg": ["Quicksand"],
+                        "headline-md": ["Quicksand"],
+                        "headline-lg-mobile": ["Quicksand"],
+                        "body-sm": ["Be Vietnam Pro"],
+                        "title-lg": ["Be Vietnam Pro"],
+                        "display-lg": ["Quicksand"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .dotted-grid {
+            background-image: radial-gradient(circle at center, #dee4e3 1px, transparent 1px);
+            background-size: 8px 8px;
+        }
+        .organic-shape-1 { border-radius: 40px 10px 40px 10px; }
+        .organic-shape-2 { border-radius: 10px 30px 10px 40px; }
+        .organic-shape-3 { border-radius: 20px 40px 20px 10px; }
+        .table-row-hover:hover { background-color: rgba(0, 106, 105, 0.05); }
+    </style>
+</head>
+<body class="bg-background text-on-background dotted-grid min-h-screen font-body-sm overflow-x-hidden">
+<!-- Navigation Drawer -->
+<nav class="hidden md:flex flex-col h-screen py-gutter bg-surface-container-low fixed left-0 top-0 w-[260px] rounded-r-[40px] border-r border-outline-variant shadow-sm z-20">
+<div class="px-gutter mb-8 flex items-center gap-4">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A stylized, playful avatar illustration of a user with a subtle wedding ring icon floating nearby, rendered in a bright, modern color palette featuring teal and coral accents. The art style is flat but vibrant, perfect for a modern wedding planning app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAOqTN4VuPXeAdXlkpi28y2vE3iVtifA2_P_qX_exghjevHuJ30EDdb3W5GlfRRA5VG1kRGojWGf19zE8V99t-Etnd9asUm7rmwD2LHEHIjPXxVn2lXCRzvkSZT4qHnL6CXajHK1UZOXOKcBRNvKDhqfpj6kXGIJtRt-pMrXD0DUYxFcCcNEsuXoTtD5OqjqK1wUxXNOT3_TFXWRBoQMnFopDrBAeWHtc1MZiGlLbIy6VKbB2RXWsLAQ"/>
+<div>
+<h2 class="text-primary font-headline-md text-headline-md font-bold">La Bodita</h2>
+<p class="text-on-surface-variant font-body-sm text-body-sm">65 Days to Go</p>
+<p class="text-outline font-label-md text-label-md mt-1">User Name</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-2 space-y-2">
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-4">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-4">inventory_2</span>
+<span class="font-label-md text-label-md">Items</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-4">checklist</span>
+<span class="font-label-md text-label-md">Checklist</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-4">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-4">payments</span>
+<span class="font-label-md text-label-md">Budget</span>
+</a>
+<a class="bg-primary text-on-primary rounded-xl flex items-center px-4 py-3 m-2 scale-95 transition-transform duration-150 ease-in-out shadow-md" href="#">
+<span class="material-symbols-outlined mr-4">group</span>
+<span class="font-label-md text-label-md">Guest List</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-4">description</span>
+<span class="font-label-md text-label-md">Documents</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-4">category</span>
+<span class="font-label-md text-label-md">Category Manager</span>
+</a>
+</div>
+</nav>
+<!-- Top App Bar -->
+<header class="flex justify-between items-center px-margin-desktop w-full fixed top-0 right-0 h-20 md:pl-[300px] z-10 bg-transparent">
+<div class="flex-1 max-w-md bg-surface-container-lowest rounded-full shadow-[0px_4px_20px_rgba(0,0,0,0.04)] px-4 py-2 flex items-center">
+<span class="material-symbols-outlined text-outline mr-3">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-primary font-body-lg text-body-lg placeholder:text-outline-variant" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="bg-tertiary-container text-on-tertiary font-label-md text-label-md px-8 py-4 rounded-full shadow-md hover:opacity-90 transition-opacity">
+                + Add Task
+            </button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="md:ml-[260px] pt-[100px] p-margin-desktop max-w-[1440px] mx-auto">
+<!-- Page Header -->
+<div class="bg-surface-container-lowest p-8 organic-shape-1 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] mb-8">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">Guest List</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Manage your wedding guests and RSVPs</p>
+</div>
+<!-- Stat Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Confirmed -->
+<div class="bg-primary p-6 organic-shape-2 text-on-primary relative overflow-hidden shadow-md">
+<span class="material-symbols-outlined text-6xl absolute -bottom-4 -right-4 opacity-10">check_circle</span>
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined">check</span>
+</div>
+<div>
+<p class="font-headline-md text-headline-md">85</p>
+<p class="font-label-md text-label-md uppercase tracking-wider opacity-80">Confirmed</p>
+</div>
+</div>
+<div class="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+<div class="bg-on-primary h-full w-[70%]"></div>
+</div>
+</div>
+<!-- Pending -->
+<div class="bg-tertiary-container p-6 organic-shape-3 text-on-tertiary relative overflow-hidden shadow-md">
+<span class="material-symbols-outlined text-6xl absolute -bottom-4 -right-4 opacity-10">hourglass_empty</span>
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<div>
+<p class="font-headline-md text-headline-md">24</p>
+<p class="font-label-md text-label-md uppercase tracking-wider opacity-80">Pending</p>
+</div>
+</div>
+<div class="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+<div class="bg-on-tertiary h-full w-[20%]"></div>
+</div>
+</div>
+<!-- Declined -->
+<div class="bg-secondary-container p-6 organic-shape-1 text-on-secondary relative overflow-hidden shadow-md">
+<span class="material-symbols-outlined text-6xl absolute -bottom-4 -right-4 opacity-10">cancel</span>
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined">close</span>
+</div>
+<div>
+<p class="font-headline-md text-headline-md">12</p>
+<p class="font-label-md text-label-md uppercase tracking-wider opacity-80">Declined</p>
+</div>
+</div>
+<div class="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+<div class="bg-on-secondary h-full w-[10%]"></div>
+</div>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="bg-surface-container-lowest p-8 rounded-[30px_10px_40px_20px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surface-variant text-on-surface-variant font-label-md text-label-md uppercase">
+<th class="py-4 px-4 font-semibold">Name</th>
+<th class="py-4 px-4 font-semibold">Type</th>
+<th class="py-4 px-4 font-semibold">RSVP Status</th>
+<th class="py-4 px-4 font-semibold">Relationship</th>
+<th class="py-4 px-4 font-semibold">Side</th>
+<th class="py-4 px-4 font-semibold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm">
+<tr class="border-b border-surface-container table-row-hover transition-colors">
+<td class="py-4 px-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant"></div>
+<span class="font-title-lg text-title-lg text-on-surface">Maria Rossi</span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant">Adult</td>
+<td class="py-4 px-4">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-label-md text-label-md inline-block">Confirmed</span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant">Family</td>
+<td class="py-4 px-4">
+<span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#008C45]"></span> Italy</span>
+</td>
+<td class="py-4 px-4 text-right">
+<button class="text-outline hover:text-primary"><span class="material-symbols-outlined">more_horiz</span></button>
+</td>
+</tr>
+<tr class="border-b border-surface-container table-row-hover transition-colors">
+<td class="py-4 px-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant"></div>
+<span class="font-title-lg text-title-lg text-on-surface">Carlos Mendoza</span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant">Adult</td>
+<td class="py-4 px-4">
+<span class="bg-tertiary-container/10 text-tertiary px-3 py-1 rounded-full font-label-md text-label-md inline-block">Pending</span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant">Friend</td>
+<td class="py-4 px-4">
+<span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#FCE300]"></span> Venezuela</span>
+</td>
+<td class="py-4 px-4 text-right">
+<button class="text-outline hover:text-primary"><span class="material-symbols-outlined">more_horiz</span></button>
+</td>
+</tr>
+<tr class="border-b border-surface-container table-row-hover transition-colors">
+<td class="py-4 px-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant"></div>
+<span class="font-title-lg text-title-lg text-on-surface">Lucia Mendoza</span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant">Child</td>
+<td class="py-4 px-4">
+<span class="bg-secondary-container/10 text-secondary px-3 py-1 rounded-full font-label-md text-label-md inline-block">Declined</span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant">Friend</td>
+<td class="py-4 px-4">
+<span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#FCE300]"></span> Venezuela</span>
+</td>
+<td class="py-4 px-4 text-right">
+<button class="text-outline hover:text-primary"><span class="material-symbols-outlined">more_horiz</span></button>
+</td>
+</tr>
+<tr class="border-b border-surface-container table-row-hover transition-colors">
+<td class="py-4 px-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant"></div>
+<span class="font-title-lg text-title-lg text-on-surface">Alejandro Garcia</span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant">Adult</td>
+<td class="py-4 px-4">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-label-md text-label-md inline-block">Confirmed</span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant">Co-worker</td>
+<td class="py-4 px-4">
+<span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#AA151B]"></span> Spain</span>
+</td>
+<td class="py-4 px-4 text-right">
+<button class="text-outline hover:text-primary"><span class="material-symbols-outlined">more_horiz</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</body></html>

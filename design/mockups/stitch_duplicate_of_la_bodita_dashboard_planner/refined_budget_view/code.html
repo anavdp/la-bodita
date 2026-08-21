@@ -1,0 +1,255 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Budget - La Bodita</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-container": "#e28658",
+                        "tertiary": "#954920",
+                        "secondary-fixed-dim": "#ffb4ab",
+                        "surface-variant": "#dee4e3",
+                        "primary-container": "#2faead",
+                        "primary-fixed-dim": "#64d8d7",
+                        "on-secondary-fixed-variant": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#ecf2f1",
+                        "inverse-surface": "#2c3132",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6d7a79",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#eff5f4",
+                        "surface": "#f5fafa",
+                        "tertiary-fixed": "#ffdbcc",
+                        "primary-fixed": "#82f5f3",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#006a69",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-container-highest": "#dee4e3",
+                        "outline-variant": "#bcc9c8",
+                        "on-tertiary-fixed-variant": "#77320a",
+                        "secondary-container": "#fd574b",
+                        "surface-container": "#e9efef",
+                        "on-background": "#171d1d",
+                        "secondary": "#b6231f",
+                        "on-secondary-fixed": "#410002",
+                        "surface-dim": "#d5dbdb",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#5e2300",
+                        "on-primary-container": "#003c3b",
+                        "background": "#f5fafa",
+                        "primary": "#006a69",
+                        "secondary-fixed": "#ffdad6",
+                        "surface-bright": "#f5fafa",
+                        "on-secondary-container": "#5c0004",
+                        "on-surface": "#171d1d",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#e4e9e9",
+                        "on-surface-variant": "#3d4949",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#00504f",
+                        "on-primary-fixed": "#002020",
+                        "tertiary-fixed-dim": "#ffb693",
+                        "inverse-primary": "#64d8d7",
+                        "error": "#ba1a1a"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "margin-mobile": "16px",
+                        "topbar_height": "80px",
+                        "base": "8px",
+                        "sidebar_width": "260px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px"
+                    },
+                    fontFamily: {
+                        "headline-lg": ["Quicksand"],
+                        "headline-lg-mobile": ["Quicksand"],
+                        "display-lg": ["Quicksand"],
+                        "title-lg": ["Be Vietnam Pro"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "headline-md": ["Quicksand"],
+                        "body-sm": ["Be Vietnam Pro"]
+                    },
+                    fontSize: {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f5fafa;
+            background-image: radial-gradient(#d5dbdb 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .organic-shape-1 { border-radius: 20px 40px 10px 30px; }
+        .organic-shape-2 { border-radius: 30px 10px 40px 20px; }
+        .organic-shape-3 { border-radius: 40px 20px 20px 40px; }
+        .organic-card { border-radius: 16px 24px 12px 20px; }
+        .organic-input { border-radius: 20px 12px 24px 16px; }
+        
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #006a69;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #006a69;
+        }
+    </style>
+</head>
+<body class="font-body-lg text-on-surface antialiased overflow-x-hidden min-h-screen">
+<!-- Navigation Drawer -->
+<nav class="hidden md:flex flex-col h-screen py-gutter bg-surface-container-lowest fixed left-0 top-0 h-full w-[260px] rounded-r-3xl border-r border-outline-variant shadow-sm z-20">
+<div class="px-6 mb-8 flex flex-col">
+<h1 class="text-headline-md font-headline-md font-bold text-primary">La Bodita</h1>
+<p class="font-body-sm text-body-sm text-primary-container">65 Days to Go</p>
+</div>
+<div class="flex-1 overflow-y-auto px-2">
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">inventory_2</span>
+<span class="font-label-md text-label-md">Items</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">checklist</span>
+<span class="font-label-md text-label-md">Checklist</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<!-- Active Tab -->
+<a class="bg-primary text-on-primary rounded-xl flex items-center px-4 py-3 m-2" href="#">
+<span class="material-symbols-outlined mr-3" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="font-label-md text-label-md">Budget</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">group</span>
+<span class="font-label-md text-label-md">Guest List</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">description</span>
+<span class="font-label-md text-label-md">Documents</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center px-4 py-3 m-2 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">category</span>
+<span class="font-label-md text-label-md">Category Manager</span>
+</a>
+</div>
+<div class="px-6 mt-auto flex flex-col gap-4">
+<button class="border border-outline text-secondary font-label-md text-label-md rounded-full py-2 px-4 w-full flex justify-center items-center hover:bg-surface-container-high transition-colors">
+                Language: EN
+            </button>
+<div class="flex items-center gap-3 bg-surface-container-low p-2 rounded-xl">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">person</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">User Name</span>
+</div>
+</div>
+</nav>
+<!-- Top App Bar -->
+<header class="hidden md:flex justify-between items-center px-margin-desktop w-full bg-transparent fixed top-0 right-0 h-20 left-[260px] z-10 transition-all">
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant py-3 pl-12 pr-4 organic-input font-body-lg text-body-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Search..." type="text">
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-secondary-container text-on-secondary hover:bg-secondary transition-colors px-6 py-3 rounded-full font-label-md text-label-md flex items-center gap-2">
+<span class="material-symbols-outlined">add</span>
+                Add Task
+            </button>
+<button class="w-12 h-12 bg-surface-container-lowest rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors shadow-sm">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-12 h-12 bg-surface-container-lowest rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors shadow-sm">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="md:ml-[260px] pt-[100px] px-margin-mobile md:px-margin-desktop pb-20 max-w-[1440px] mx-auto">
+<!-- Page Header -->
+<div class="bg-surface-container-lowest px-8 py-6 organic-shape-1 shadow-sm inline-block mb-10 border border-white/50 backdrop-blur-sm flex items-center">
+<h1 class="font-display-lg text-display-lg text-primary">Budget</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-1"><br></p>
+<div class="flex items-center gap-4 ml-8"><div class="flex items-center gap-2"><div class="w-10 h-10 organic-shape-2 bg-secondary-container flex items-center justify-center shadow-sm"><div class="w-3 h-3 rounded-full bg-white"></div></div><div class="flex flex-col"><span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Total Spent</span><span class="font-bold text-body-sm text-secondary">$15,400</span></div></div><div class="flex items-center gap-2"><div class="w-10 h-10 organic-shape-3 bg-tertiary-container flex items-center justify-center shadow-sm"><div class="w-3 h-3 rounded-full bg-white"></div></div><div class="flex flex-col"><span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Remaining</span><span class="font-bold text-body-sm text-tertiary">$9,600</span></div></div></div></div>
+<!-- Stat Cards Grid -->
+<div class="flex items-center gap-4 mb-8">
+    <div class="relative">
+        <button class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant hover:bg-surface-container-high px-6 py-2 organic-input font-label-md text-label-md transition-colors flex items-center gap-2 shadow-sm">
+            <span class="">Category</span>
+            <span class="material-symbols-outlined text-primary">expand_more</span>
+        </button>
+    </div>
+    <div class="relative">
+        <button class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant hover:bg-surface-container-high px-6 py-2 organic-input font-label-md text-label-md transition-colors flex items-center gap-2 shadow-sm">
+            <span class="">Subcategory</span>
+            <span class="material-symbols-outlined text-primary">expand_more</span>
+        </button>
+    </div>
+</div>
+<!-- Controls Area -->
+<!-- Budget Kanban Board -->
+<div class="flex flex-col gap-12">
+<!-- Top Section: Selected Options -->
+<section>
+<div class="flex justify-between items-end border-b border-outline-variant/50 pb-2 mb-6">
+<h2 class="font-headline-md text-headline-md text-[#2FAEAD]">Selected Options</h2>
+<span class="font-title-lg text-title-lg text-on-surface">$16,500</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Item 1 -->
+<div class="bg-surface-container-lowest p-5 organic-card shadow-sm border border-outline-variant/20 flex flex-col gap-4 hover:shadow-md transition-all cursor-grab group"><div class="flex justify-between items-start"><h4 class="font-title-lg text-title-lg text-on-surface">Botanical Garden Rental</h4><div class="w-3 h-3 rounded-full bg-primary mt-2"></div></div><div class="flex justify-between items-end"><p class="font-body-sm text-body-sm text-on-surface-variant">Decoration</p><span class="font-headline-md text-headline-md text-on-surface">$5,000</span></div></div>
+<!-- Item 2 -->
+<div class="bg-surface-container-lowest p-5 organic-shape-2 shadow-sm border border-outline-variant/20 flex flex-col gap-4 hover:shadow-md transition-all cursor-grab group"><div class="flex justify-between items-start"><h4 class="font-title-lg text-title-lg text-on-surface">Plated Dinner &amp; Bar</h4><div class="w-3 h-3 rounded-full bg-primary-container mt-2"></div></div><div class="flex justify-between items-end"><p class="font-body-sm text-body-sm text-on-surface-variant">Food &amp; Drink</p><span class="font-headline-md text-headline-md text-on-surface">$7,500</span></div></div>
+<!-- Item 3 -->
+<div class="bg-surface-container-lowest p-5 organic-shape-3 shadow-sm border border-outline-variant/20 flex flex-col gap-4 hover:shadow-md transition-all cursor-grab group"><div class="flex justify-between items-start"><h4 class="font-title-lg text-title-lg text-on-surface">Wedding Dress</h4><div class="w-3 h-3 rounded-full bg-secondary mt-2"></div></div><div class="flex justify-between items-end"><p class="font-body-sm text-body-sm text-on-surface-variant">Bridal</p><span class="font-headline-md text-headline-md text-on-surface">$2,500</span></div></div>
+<!-- Item 4 -->
+<div class="bg-surface-container-lowest p-5 organic-shape-1 shadow-sm border border-outline-variant/20 flex flex-col gap-4 hover:shadow-md transition-all cursor-grab group"><div class="flex justify-between items-start"><h4 class="font-title-lg text-title-lg text-on-surface">8-Hour Package</h4><div class="w-3 h-3 rounded-full bg-tertiary-container mt-2"></div></div><div class="flex justify-between items-end"><p class="font-body-sm text-body-sm text-on-surface-variant">Service</p><span class="font-headline-md text-headline-md text-on-surface">$4,000</span></div></div>
+</div>
+</section>
+<!-- Bottom Section: Considering Options -->
+<section>
+<div class="flex justify-between items-end border-b border-outline-variant/50 pb-2 mb-6">
+<h2 class="font-headline-md text-headline-md text-[#2FAEAD]">Considering Options</h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant italic">Drag to commit</span>
+</div>
+<div class="space-y-3">
+<!-- Compact Item 1 -->
+<div class="bg-surface-container-lowest p-3 organic-card shadow-sm border border-outline-variant/20 flex items-center justify-between hover:shadow-md transition-all cursor-grab group"><div class="flex items-center gap-4"><span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">drag_indicator</span><div><h4 class="font-title-lg text-title-lg text-on-surface">Groom Suit Rental</h4><p class="font-body-sm text-body-sm text-on-surface-variant">Groom</p></div></div><div class="flex items-center gap-6"><div class="w-3 h-3 rounded-full bg-outline-variant"></div><span class="font-headline-md text-headline-md text-on-surface">$700</span></div></div>
+<!-- Compact Item 2 -->
+<div class="bg-surface-container-lowest p-3 organic-card shadow-sm border border-outline-variant/20 flex items-center justify-between hover:shadow-md transition-all cursor-grab group"><div class="flex items-center gap-4"><span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">drag_indicator</span><div><h4 class="font-title-lg text-title-lg text-on-surface">Custom Wedding Cake</h4><p class="font-body-sm text-body-sm text-on-surface-variant">Dessert</p></div></div><div class="flex items-center gap-6"><div class="w-3 h-3 rounded-full bg-outline-variant"></div><span class="font-headline-md text-headline-md text-on-surface">$1,200</span></div></div>
+</div>
+</section>
+</div>
+</main>
+
+
+
+
+</body></html>
