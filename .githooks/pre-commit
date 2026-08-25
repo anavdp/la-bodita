@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#
+# Blocks the commit when tests fail or coverage drops below 85% (see CLAUDE.md).
+# Enable with: git config core.hooksPath .githooks
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+if [ -d backend/app ]; then
+  if [ -x backend/.venv/bin/python ]; then
+    backend_python="$repo_root/backend/.venv/bin/python"
+  elif command -v python3 >/dev/null 2>&1; then
+    backend_python="$(command -v python3)"
+  else
+    echo "pre-commit: no python interpreter found for the backend test run" >&2
+    exit 1
+  fi
+
+  echo "pre-commit: running backend tests"
+  (cd backend && "$backend_python" -m pytest -q)
+fi
+
+if [ -f frontend/package.json ]; then
+  echo "pre-commit: running frontend tests"
+  (cd frontend && npm run test:coverage --silent)
+fi

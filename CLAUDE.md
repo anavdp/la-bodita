@@ -9,10 +9,25 @@ users (bride/groom) — a personal productivity tool for a complex project
 (registro civil paperwork, Italian documentation, a venue/church in
 Venezuela, guest list, budget, calendar), not a wedding-invitation site.
 
-**No application code has been written yet.** The repo currently contains
-only the monorepo scaffold, approved UI mockups, and the GitHub issue
-backlog. Update this file's Commands section once `backend/` and
-`frontend/` are actually scaffolded (issue #13).
+The backend is scaffolded (FastAPI app skeleton, session management, Alembic)
+but has no schema or endpoints yet. The frontend is still an empty directory —
+it gets scaffolded with issue #1, and this file's Commands section needs a
+frontend entry once it is.
+
+## Commands
+
+All backend commands run from `backend/` against its own virtualenv:
+
+```bash
+.venv/bin/pip install -e ".[dev]"   # install (first time)
+.venv/bin/python -m pytest          # tests + 85% coverage gate
+.venv/bin/uvicorn app.main:app --reload
+.venv/bin/alembic upgrade head
+.venv/bin/alembic revision --autogenerate -m "describe the change"
+```
+
+The commit gate lives in `.githooks/pre-commit` and is tracked in the repo.
+Each clone must opt in once with `git config core.hooksPath .githooks`.
 
 ## Stack
 
@@ -39,9 +54,9 @@ a preceding failing test.
 **Commit gate:** commits must be blocked if any test is failing or if
 coverage falls below **85%**, enforced by a pre-commit hook — backend via
 `pytest --cov --cov-fail-under=85`, frontend via Vitest coverage thresholds
-set to 85 in `vitest.config`. Setting up this hook is part of issue #13
-(backend project setup); until it exists, treat the 85% floor as a manual
-requirement before every commit. 85% is a floor, not a target — don't pad it
+set to 85 in `vitest.config`. The hook exists at `.githooks/pre-commit` and
+runs the backend suite always, the frontend suite once
+`frontend/package.json` exists. 85% is a floor, not a target — don't pad it
 with low-value tests just to clear the number.
 
 **Naming conventions:**
