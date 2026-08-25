@@ -35,6 +35,15 @@ Run the tests (coverage gate at 85% is built into `addopts`):
 cd backend && .venv/bin/python -m pytest
 ```
 
+Run one file or one test while iterating — `--no-cov` is needed because a
+partial run otherwise trips the 85% gate:
+
+```bash
+cd backend && .venv/bin/python -m pytest tests/test_health.py --no-cov
+```
+
+See the [root README](../README.md) for the commit gate and coverage reports.
+
 Apply migrations:
 
 ```bash
