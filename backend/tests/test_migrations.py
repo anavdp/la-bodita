@@ -93,3 +93,68 @@ def test_given_migrations_at_head_when_compared_to_the_models_then_nothing_has_d
         differences = compare_metadata(context, Base.metadata)
 
     assert differences == []
+
+
+def test_given_an_empty_database_when_migrations_run_then_the_guest_table_exists(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'guest_schema_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    inspector = inspect(create_engine(database_url))
+    assert "guest" in inspector.get_table_names()
+    columns = {column["name"] for column in inspector.get_columns("guest")}
+    assert columns == {
+        "id",
+        "wedding_id",
+        "first_name",
+        "last_name",
+        "is_child",
+        "gender",
+        "relationship_type",
+        "side",
+        "rsvp_status",
+        "phone",
+        "email",
+        "created_at",
+        "updated_at",
+    }
+
+
+def test_given_the_guest_migration_when_it_runs_then_the_wedding_foreign_key_is_named_and_indexed(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'guest_constraint_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    inspector = inspect(create_engine(database_url))
+    foreign_keys = inspector.get_foreign_keys("guest")
+    assert len(foreign_keys) == 1
+    assert foreign_keys[0]["name"] == "fk_guest_wedding_id_wedding"
+    assert foreign_keys[0]["referred_table"] == "wedding"
+    indexed_columns = [index["column_names"] for index in inspector.get_indexes("guest")]
+    assert ["wedding_id"] in indexed_columns
+
+
+def test_given_the_guest_migration_when_the_enum_columns_land_then_they_are_plain_text(tmp_path):
+    """No CHECK constraint: adding a side later must stay a code change, not a table rebuild."""
+    database_url = f"sqlite:///{tmp_path / 'guest_enum_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    with create_engine(database_url).connect() as connection:
+        create_statement = connection.exec_driver_sql(
+            "select sql from sqlite_master where name = 'guest'"
+        ).scalar_one()
+    assert "CHECK" not in create_statement.upper()
+    assert "rsvp_status VARCHAR(20)" in create_statement
+
+
+def test_given_the_guest_migration_when_it_is_downgraded_then_only_the_guest_table_is_dropped(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'guest_downgrade_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "head")
+
+    command.downgrade(config, "-1")
+
+    tables = inspect(create_engine(database_url)).get_table_names()
+    assert "guest" not in tables
+    assert "wedding" in tables
