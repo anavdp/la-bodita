@@ -73,6 +73,14 @@ always and the frontend suite once `frontend/package.json` exists. To commit
 despite the gate — for a work-in-progress branch, not for `main` — use
 `git commit --no-verify`.
 
+### CI
+
+Because the hook is opt-in per clone, [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+is the unconditional gate: it runs the same suites on every push and pull
+request, plus `alembic upgrade head` and `alembic check` to catch a model
+change that was never given a migration. The frontend job no-ops until
+`frontend/package.json` exists.
+
 ## Design system
 
 See [`design/mockups/stitch_duplicate_of_la_bodita_dashboard_planner/organic_celebration/DESIGN.md`](design/mockups/stitch_duplicate_of_la_bodita_dashboard_planner/organic_celebration/DESIGN.md)
