@@ -71,9 +71,13 @@ Work is tracked as GitHub issues on the `MVP` milestone, labeled by area
 (`area:backend`, `area:frontend`, `area:design`, `area:infra`), with a
 Projects board at github.com/users/anavdp/projects/1. Workflow: one branch +
 one PR per issue, PR body includes `Closes #N` to auto-close on merge.
-Issue #25 defines the full initial schema in one migration — it must land
-before the per-entity endpoint issues (#14–#19), which only add endpoints on
-top of it.
+Schema lands one vertical slice at a time, not in a single migration: issue
+#25 sets up the `Base`/mixin conventions and the `WEDDING` tenant root, then
+each entity gets its own table+migration issue, endpoint issue, and screen so
+it can be built end to end. Slice order is in #25 — each slice creates its
+tables complete and only FKs *up* at tables that already exist, so no slice
+back-patches an earlier one. Keep the Alembic history linear by merging one
+slice branch at a time.
 
 ## Architecture: data model
 
