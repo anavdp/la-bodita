@@ -6,6 +6,10 @@ from sqlalchemy import engine_from_config, pool
 from app.config import settings
 from app.database import Base
 
+# Imported for the side effect of registering every model on Base.metadata,
+# which is what autogenerate compares the database against.
+from app import models  # noqa: F401
+
 config = context.config
 
 if config.config_file_name is not None:
