@@ -75,11 +75,10 @@ export function GuestTable({ guests, onEdit, onDelete, onChangeRsvp }: GuestTabl
                 key={guest.id}
                 className="table-row-hover border-b border-surface-container transition-colors"
               >
-                <td className="flex items-center gap-3 px-4 py-4">
-                  <div
-                    className="h-8 w-8 rounded-full border-2 border-outline-variant"
-                    aria-hidden="true"
-                  />
+                <td className="px-4 py-4">
+                  {/* The mockup starts each row with the design system's circular
+                      checkbox, but with nothing selectable behind it. It comes back
+                      with batch confirmation (issue #37). */}
                   <span className="font-title-lg text-title-lg text-on-surface">{name}</span>
                 </td>
                 <td className="px-4 py-4 text-on-surface-variant">
