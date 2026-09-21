@@ -156,11 +156,11 @@ describe("GuestListPage", () => {
     expect(await screen.findByText("We could not remove this guest.")).toBeInTheDocument();
   });
 
-  it("given a guest row, when the table is rendered, then the side is shown with its colour dot", async () => {
+  it("given a guest row, when the table is rendered, then the side is shown as its flag", async () => {
     renderWithProviders(<GuestListPage />);
 
     const row = await screen.findByRole("row", { name: /Carlos Mendoza/ });
-    expect(within(row).getByText("Venezuela")).toBeInTheDocument();
+    expect(within(row).getByRole("img", { name: "Venezuela" })).toHaveTextContent("🇻🇪");
   });
 });
 

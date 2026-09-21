@@ -10,7 +10,7 @@ import {
   rsvpLabelKey,
   rsvpStatuses,
   rsvpToneClass,
-  sideDotColor,
+  sideFlag,
   sideLabelKey,
 } from "./vocabulary";
 
@@ -88,13 +88,15 @@ export function GuestTable({ guests, onEdit, onDelete, onChangeRsvp }: GuestTabl
                   {t(relationshipLabelKey(guest.relationshipType))}
                 </td>
                 <td className="px-4 py-4">
-                  <span className="flex items-center gap-2">
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: sideDotColor[guest.side] }}
-                      aria-hidden="true"
-                    />
-                    {t(sideLabelKey(guest.side))}
+                  {/* The flag is the label: the country's name is what it is announced
+                      as, and what it says on hover. */}
+                  <span
+                    role="img"
+                    aria-label={t(sideLabelKey(guest.side))}
+                    title={t(sideLabelKey(guest.side))}
+                    className="text-2xl leading-none"
+                  >
+                    {sideFlag[guest.side]}
                   </span>
                 </td>
 

@@ -55,7 +55,25 @@ describe("GuestTable", () => {
     expect(within(row).getByText("Maria Rossi")).toBeInTheDocument();
     expect(within(row).getByText("Adult")).toBeInTheDocument();
     expect(within(row).getByText("Family")).toBeInTheDocument();
-    expect(within(row).getByText("Italy")).toBeInTheDocument();
+    expect(within(row).getByRole("img", { name: "Italy" })).toHaveTextContent("🇮🇹");
+  });
+
+  it("given each side, when the column is rendered, then it is that country's flag, not its name", () => {
+    renderTable([
+      aGuest({ firstName: "Ana", lastName: "Uno", side: "venezuela" }),
+      aGuest({ firstName: "Ana", lastName: "Dos", side: "spain" }),
+      aGuest({ firstName: "Ana", lastName: "Tres", side: "other" }),
+    ]);
+
+    expect(screen.getByRole("img", { name: "Venezuela" })).toHaveTextContent("🇻🇪");
+    expect(screen.getByRole("img", { name: "Spain" })).toHaveTextContent("🇪🇸");
+    expect(screen.queryByText("Venezuela")).not.toBeInTheDocument();
+  });
+
+  it("given a side with no flag of its own, when the column is rendered, then it still reads as a side", () => {
+    renderTable([aGuest({ firstName: "Ana", lastName: "Tres", side: "other" })]);
+
+    expect(screen.getByRole("img", { name: "Other" })).toHaveTextContent("🌍");
   });
 
   it("given a child guest, when the row is rendered, then the type column says so", () => {
