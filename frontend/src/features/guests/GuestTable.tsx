@@ -5,7 +5,6 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import { fullName } from "./filtering";
 import {
   relationshipLabelKey,
-  rsvpChipClass,
   rsvpIcon,
   rsvpLabelKey,
   rsvpStatuses,
@@ -61,7 +60,7 @@ export function GuestTable({ guests, onEdit, onDelete, onChangeRsvp }: GuestTabl
             <th className="px-4 py-4 font-semibold">{t("guests.column.type")}</th>
             <th className="px-4 py-4 font-semibold">{t("guests.column.relationship")}</th>
             <th className="px-4 py-4 font-semibold">{t("guests.column.side")}</th>
-            <th className="px-4 py-4 font-semibold">{t("guests.column.rsvp")}</th>
+            <th className="px-4 py-4 text-right font-semibold">{t("guests.column.rsvp")}</th>
             <th className="px-4 py-4 text-right font-semibold">{t("guests.column.actions")}</th>
           </tr>
         </thead>
@@ -100,8 +99,9 @@ export function GuestTable({ guests, onEdit, onDelete, onChangeRsvp }: GuestTabl
                   </span>
                 </td>
 
-                {/* The status is the icon itself, and the icon is how you change it. */}
-                <td className="px-4 py-4">
+                {/* The status is the icon itself, and the icon is how you change it.
+                    Right-aligned so it sits beside the actions rather than adrift. */}
+                <td className="px-4 py-4 text-right">
                   <div className="relative inline-block">
                     <button
                       type="button"
@@ -110,16 +110,16 @@ export function GuestTable({ guests, onEdit, onDelete, onChangeRsvp }: GuestTabl
                       aria-expanded={isOpen(guest, "rsvp")}
                       onClick={() => toggleMenu(guest, "rsvp")}
                       className={`flex h-10 w-10 items-center justify-center rounded-full transition-opacity hover:opacity-70 ${
-                        rsvpChipClass[guest.rsvpStatus]
-                      } ${rsvpToneClass[guest.rsvpStatus]}`}
+                        rsvpToneClass[guest.rsvpStatus]
+                      }`}
                     >
-                      <span className="material-symbols-outlined" aria-hidden="true">
+                      <span className="material-symbols-outlined icon-filled" aria-hidden="true">
                         {rsvpIcon[guest.rsvpStatus]}
                       </span>
                     </button>
 
                     {isOpen(guest, "rsvp") && (
-                      <div className={`${menuPanel} left-0`}>
+                      <div className={`${menuPanel} right-0`}>
                         {rsvpStatuses
                           .filter((status) => status !== guest.rsvpStatus)
                           .map((status) => (
@@ -133,7 +133,7 @@ export function GuestTable({ guests, onEdit, onDelete, onChangeRsvp }: GuestTabl
                               className={menuItem}
                             >
                               <span
-                                className={`material-symbols-outlined ${rsvpToneClass[status]}`}
+                                className={`material-symbols-outlined icon-filled ${rsvpToneClass[status]}`}
                                 aria-hidden="true"
                               >
                                 {rsvpIcon[status]}

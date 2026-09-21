@@ -29,6 +29,10 @@
     border-radius: 20px 40px 20px 10px;
   }
 
+  .icon-filled {
+    font-variation-settings: "FILL" 1;
+  }
+
   .table-row-hover:hover {
     background-color: rgba(0, 106, 105, 0.05);
   }

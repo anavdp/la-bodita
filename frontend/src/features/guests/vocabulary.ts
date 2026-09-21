@@ -37,9 +37,3 @@ export const rsvpToneClass: Record<RsvpStatus, string> = {
   pending: "text-tertiary",
   declined: "text-secondary",
 };
-
-export const rsvpChipClass: Record<RsvpStatus, string> = {
-  confirmed: "bg-primary/10",
-  pending: "bg-tertiary-container/10",
-  declined: "bg-secondary-container/10",
-};
