@@ -16,17 +16,7 @@ interface StatCardProps {
 
 function StatCard({ label, count, share, icon, shapeClass, toneClass, barClass }: StatCardProps) {
   return (
-    <div
-      role="group"
-      aria-label={label}
-      className={`relative overflow-hidden p-6 shadow-md ${shapeClass} ${toneClass}`}
-    >
-      <span
-        className="material-symbols-outlined absolute -bottom-4 -right-4 text-6xl opacity-10"
-        aria-hidden="true"
-      >
-        {icon}
-      </span>
+    <div role="group" aria-label={label} className={`p-6 shadow-md ${shapeClass} ${toneClass}`}>
       <div className="mb-4 flex items-center gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
           <span className="material-symbols-outlined" aria-hidden="true">
