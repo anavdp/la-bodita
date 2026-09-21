@@ -20,8 +20,21 @@ export const sideDotColor: Record<GuestSide, string> = {
   other: "#6d7a79",
 };
 
-export const rsvpPillClass: Record<RsvpStatus, string> = {
-  confirmed: "bg-primary/10 text-primary",
-  pending: "bg-tertiary-container/10 text-tertiary",
-  declined: "bg-secondary-container/10 text-secondary",
+/** One icon per status, shared by the summary cards and the table's RSVP column. */
+export const rsvpIcon: Record<RsvpStatus, string> = {
+  confirmed: "check_circle",
+  pending: "hourglass_empty",
+  declined: "cancel",
+};
+
+export const rsvpToneClass: Record<RsvpStatus, string> = {
+  confirmed: "text-primary",
+  pending: "text-tertiary",
+  declined: "text-secondary",
+};
+
+export const rsvpChipClass: Record<RsvpStatus, string> = {
+  confirmed: "bg-primary/10",
+  pending: "bg-tertiary-container/10",
+  declined: "bg-secondary-container/10",
 };

@@ -1,6 +1,7 @@
 import type { Guest } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { summariseRsvps } from "./guestSummary";
+import { rsvpIcon } from "./vocabulary";
 
 interface StatCardProps {
   label: string;
@@ -61,7 +62,7 @@ export function GuestStats({ guests }: { guests: Guest[] }) {
         label={t("guests.confirmed")}
         count={summary.confirmed}
         share={summary.shareConfirmed}
-        icon="check_circle"
+        icon={rsvpIcon.confirmed}
         shapeClass="organic-shape-2"
         toneClass="bg-primary text-on-primary"
         barClass="bg-on-primary"
@@ -70,7 +71,7 @@ export function GuestStats({ guests }: { guests: Guest[] }) {
         label={t("guests.pending")}
         count={summary.pending}
         share={summary.sharePending}
-        icon="hourglass_empty"
+        icon={rsvpIcon.pending}
         shapeClass="organic-shape-3"
         toneClass="bg-tertiary-container text-on-tertiary"
         barClass="bg-on-tertiary"
@@ -79,7 +80,7 @@ export function GuestStats({ guests }: { guests: Guest[] }) {
         label={t("guests.declined")}
         count={summary.declined}
         share={summary.shareDeclined}
-        icon="cancel"
+        icon={rsvpIcon.declined}
         shapeClass="organic-shape-1"
         toneClass="bg-secondary-container text-on-secondary"
         barClass="bg-on-secondary"

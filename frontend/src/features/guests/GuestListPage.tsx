@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 
-import type { Guest, GuestDraft } from "../../api/types";
+import type { Guest, GuestDraft, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
+import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { filterGuestsByName } from "./filtering";
@@ -23,7 +24,8 @@ export function GuestListPage() {
     useGuests(weddingId);
 
   const [dialogTarget, setDialogTarget] = useState<DialogTarget>(null);
-  const [deleteFailed, setDeleteFailed] = useState(false);
+  /** Which row action failed, if any: the dialog reports its own failures. */
+  const [actionError, setActionError] = useState<TranslationKey | null>(null);
 
   const visibleGuests = useMemo(() => filterGuestsByName(guests, term), [guests, term]);
 
@@ -37,11 +39,20 @@ export function GuestListPage() {
   };
 
   const handleDelete = async (guest: Guest) => {
-    setDeleteFailed(false);
+    setActionError(null);
     try {
       await removeGuest(guest.id);
     } catch {
-      setDeleteFailed(true);
+      setActionError("guests.deleteFailed");
+    }
+  };
+
+  const handleChangeRsvp = async (guest: Guest, rsvpStatus: RsvpStatus) => {
+    setActionError(null);
+    try {
+      await editGuest(guest.id, { rsvpStatus });
+    } catch {
+      setActionError("guests.rsvpFailed");
     }
   };
 
@@ -73,7 +84,14 @@ export function GuestListPage() {
         </p>
       );
     }
-    return <GuestTable guests={visibleGuests} onEdit={(guest) => setDialogTarget({ guest })} onDelete={handleDelete} />;
+    return (
+      <GuestTable
+        guests={visibleGuests}
+        onEdit={(guest) => setDialogTarget({ guest })}
+        onDelete={handleDelete}
+        onChangeRsvp={handleChangeRsvp}
+      />
+    );
   };
 
   return (
@@ -95,9 +113,9 @@ export function GuestListPage() {
       <GuestStats guests={guests} />
 
       <div className="rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
-        {deleteFailed && (
+        {actionError !== null && (
           <p role="alert" className="mb-4 font-body-sm text-body-sm text-error">
-            {t("guests.deleteFailed")}
+            {t(actionError)}
           </p>
         )}
         {tableArea()}

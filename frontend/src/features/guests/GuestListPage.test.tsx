@@ -163,3 +163,35 @@ describe("GuestListPage", () => {
     expect(within(row).getByText("Venezuela")).toBeInTheDocument();
   });
 });
+
+describe("changing an RSVP from the table", () => {
+  beforeEach(() => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria]);
+  });
+
+  it("given a pending guest, when a new status is chosen, then only the RSVP is patched", async () => {
+    vi.mocked(guestsApi.updateGuest).mockResolvedValue({ ...carlos, rsvpStatus: "confirmed" });
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Carlos Mendoza");
+
+    await userEvent.click(screen.getByRole("button", { name: /Carlos Mendoza — Pending/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark as Confirmed" }));
+
+    await waitFor(() =>
+      expect(guestsApi.updateGuest).toHaveBeenCalledWith(1, carlos.id, {
+        rsvpStatus: "confirmed",
+      }),
+    );
+  });
+
+  it("given the API rejects it, when the RSVP is changed, then the failure is reported", async () => {
+    vi.mocked(guestsApi.updateGuest).mockRejectedValue(new Error("Guest not found"));
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Carlos Mendoza");
+
+    await userEvent.click(screen.getByRole("button", { name: /Carlos Mendoza — Pending/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark as Declined" }));
+
+    expect(await screen.findByText("We could not update this RSVP.")).toBeInTheDocument();
+  });
+});
