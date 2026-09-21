@@ -9,10 +9,10 @@ users (bride/groom) — a personal productivity tool for a complex project
 (registro civil paperwork, Italian documentation, a venue/church in
 Venezuela, guest list, budget, calendar), not a wedding-invitation site.
 
-The backend is scaffolded (FastAPI app skeleton, session management, Alembic)
-but has no schema or endpoints yet. The frontend is still an empty directory —
-it gets scaffolded with issue #1, and this file's Commands section needs a
-frontend entry once it is.
+The first vertical slice is in place end to end: `WEDDING` + `GUEST` tables,
+wedding-scoped guest endpoints, and the Guest List screen inside the shared
+sidebar/top-bar shell. Every other screen routes to a placeholder until its own
+issue lands.
 
 ## Commands
 
@@ -24,6 +24,25 @@ All backend commands run from `backend/` against its own virtualenv:
 .venv/bin/uvicorn app.main:app --reload
 .venv/bin/alembic upgrade head
 .venv/bin/alembic revision --autogenerate -m "describe the change"
+```
+
+Frontend commands run from `frontend/`:
+
+```bash
+npm install            # install (first time)
+npm run dev            # Vite dev server on :5173
+npm test               # Vitest
+npm run test:coverage  # tests + 85% coverage gate
+npm run typecheck
+```
+
+Running the app locally needs both halves, plus a wedding row to plan against:
+
+```bash
+cd backend && .venv/bin/alembic upgrade head
+.venv/bin/python -m app.seed --name "La Bodita" --date 2026-10-29
+.venv/bin/uvicorn app.main:app --reload    # :8000
+cd ../frontend && npm run dev              # :5173
 ```
 
 The commit gate lives in `.githooks/pre-commit` and is tracked in the repo.

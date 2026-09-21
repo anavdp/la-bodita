@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-on-background font-body-sm;
+  }
+}
+
+@layer components {
+  /* The "planner notebook" background: an 8px dot grid, the same base unit
+     every component aligns its margins to. */
+  .dotted-grid {
+    background-image: radial-gradient(circle at center, #dee4e3 1px, transparent 1px);
+    background-size: 8px 8px;
+  }
+
+  /* The design system's asymmetric squircles, from the mockups. */
+  .organic-shape-1 {
+    border-radius: 40px 10px 40px 10px;
+  }
+
+  .organic-shape-2 {
+    border-radius: 10px 30px 10px 40px;
+  }
+
+  .organic-shape-3 {
+    border-radius: 20px 40px 20px 10px;
+  }
+
+  .table-row-hover:hover {
+    background-color: rgba(0, 106, 105, 0.05);
+  }
+}
