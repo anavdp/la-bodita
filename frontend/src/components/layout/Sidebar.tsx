@@ -6,7 +6,7 @@ import { daysUntil } from "./countdown";
 import { navigationItems } from "./navigationItems";
 
 const activeItem = "bg-primary text-on-primary scale-95 shadow-sm";
-const restingItem = "text-on-surface-variant hover:bg-surface-container-high";
+const restingItem = "text-on-primary-container hover:bg-white/40";
 
 export function Sidebar() {
   const { t, language, toggleLanguage } = useTranslation();
@@ -21,12 +21,12 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-20 hidden h-full w-[260px] flex-col rounded-r-3xl border-r border-outline-variant bg-surface-container-low py-gutter shadow-sm md:flex">
+    <aside className="fixed left-0 top-0 z-20 hidden h-full w-[260px] flex-col rounded-r-3xl border-r border-outline-variant bg-primary-container py-gutter shadow-sm md:flex">
       <div className="px-6 mb-8">
-        <h1 className="font-headline-md text-headline-md font-bold text-primary">
+        <h1 className="font-headline-md text-headline-md font-bold text-on-primary-container">
           {wedding?.name ?? "La Bodita"}
         </h1>
-        <p className="font-body-sm text-body-sm text-on-surface-variant">{countdown()}</p>
+        <p className="font-body-sm text-body-sm text-on-primary-container">{countdown()}</p>
       </div>
 
       <nav aria-label={t("layout.mainNavigation")} className="flex-1 overflow-y-auto px-2">
@@ -52,13 +52,13 @@ export function Sidebar() {
         <button
           type="button"
           onClick={toggleLanguage}
-          className="mb-4 flex w-full items-center justify-center rounded-full border border-secondary py-2 font-label-md text-label-md text-secondary transition-colors hover:bg-secondary/5"
+          className="mb-4 flex w-full items-center justify-center rounded-full border border-secondary bg-surface-container-lowest py-2 font-label-md text-label-md text-secondary transition-colors hover:bg-secondary/5"
         >
           {t("layout.language", { code: language.toUpperCase() })}
         </button>
         <div className="flex items-center">
-          <div className="mr-3 h-8 w-8 rounded-full bg-primary-fixed-dim" aria-hidden="true" />
-          <span className="font-label-md text-label-md text-primary">{t("layout.user")}</span>
+          <div className="mr-3 h-8 w-8 rounded-full bg-primary" aria-hidden="true" />
+          <span className="font-label-md text-label-md text-on-primary-container">{t("layout.user")}</span>
         </div>
       </div>
     </aside>

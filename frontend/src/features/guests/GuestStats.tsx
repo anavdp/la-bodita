@@ -63,8 +63,8 @@ export function GuestStats({ guests }: { guests: Guest[] }) {
         share={summary.sharePending}
         icon={rsvpIcon.pending}
         shapeClass="organic-shape-3"
-        toneClass="bg-tertiary-container text-on-tertiary"
-        barClass="bg-on-tertiary"
+        toneClass="bg-tertiary-container text-on-tertiary-container"
+        barClass="bg-on-tertiary-container"
       />
       <StatCard
         label={t("guests.declined")}

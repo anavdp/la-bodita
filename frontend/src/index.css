@@ -10,9 +10,10 @@
 
 @layer components {
   /* The "planner notebook" background: an 8px dot grid, the same base unit
-     every component aligns its margins to. */
+     every component aligns its margins to. Sky at full strength turns the page
+     into a cyan wash at this density, so the dots are held back to 45%. */
   .dotted-grid {
-    background-image: radial-gradient(circle at center, #dee4e3 1px, transparent 1px);
+    background-image: radial-gradient(circle at center, rgba(115, 210, 222, 0.45) 1px, transparent 1px);
     background-size: 8px 8px;
   }
 

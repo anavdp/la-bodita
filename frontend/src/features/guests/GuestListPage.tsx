@@ -104,7 +104,7 @@ export function GuestListPage() {
         <button
           type="button"
           onClick={() => setDialogTarget({ guest: null })}
-          className="rounded-full bg-tertiary-container px-8 py-4 font-label-md text-label-md text-on-tertiary shadow-md transition-opacity hover:opacity-90"
+          className="rounded-full bg-secondary px-8 py-4 font-label-md text-label-md text-on-secondary shadow-md transition-opacity hover:opacity-90"
         >
           {t("guests.add")}
         </button>

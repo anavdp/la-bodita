@@ -34,7 +34,7 @@ export function TopBar() {
           type="button"
           disabled
           title={t("layout.addTaskUnavailable")}
-          className="flex items-center rounded-full bg-secondary-container px-4 py-3 sm:px-6 font-label-md text-label-md text-on-secondary shadow-sm transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center rounded-full bg-secondary px-4 py-3 sm:px-6 font-label-md text-label-md text-on-secondary shadow-sm transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="material-symbols-outlined sm:mr-2" aria-hidden="true">
             add
