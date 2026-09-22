@@ -54,8 +54,8 @@ export function GuestStats({ guests }: { guests: Guest[] }) {
         share={summary.shareConfirmed}
         icon={rsvpIcon.confirmed}
         shapeClass="organic-shape-2"
-        toneClass="bg-primary text-on-primary"
-        barClass="bg-on-primary"
+        toneClass="bg-secondary text-on-secondary"
+        barClass="bg-on-secondary"
       />
       <StatCard
         label={t("guests.pending")}
@@ -63,8 +63,8 @@ export function GuestStats({ guests }: { guests: Guest[] }) {
         share={summary.sharePending}
         icon={rsvpIcon.pending}
         shapeClass="organic-shape-3"
-        toneClass="bg-tertiary-container text-on-tertiary-container"
-        barClass="bg-on-tertiary-container"
+        toneClass="bg-tertiary text-on-tertiary"
+        barClass="bg-on-tertiary"
       />
       <StatCard
         label={t("guests.declined")}

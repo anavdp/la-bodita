@@ -32,13 +32,9 @@ export const rsvpIcon: Record<RsvpStatus, string> = {
   declined: "cancel",
 };
 
-/**
- * Each icon matches the colour of its summary card. "Pending" is the exception:
- * the card's amber is far too light to read as an icon on white, so it uses the
- * dark amber of the same family.
- */
+/** Each icon is the same token as its summary card, so the two match exactly. */
 export const rsvpToneClass: Record<RsvpStatus, string> = {
-  confirmed: "text-primary",
+  confirmed: "text-secondary",
   pending: "text-tertiary",
   declined: "text-secondary-container",
 };

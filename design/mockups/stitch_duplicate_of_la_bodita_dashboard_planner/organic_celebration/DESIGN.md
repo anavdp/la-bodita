@@ -1,53 +1,53 @@
 ---
 name: Organic Celebration
 colors:
-  surface: '#f5fafa'
-  surface-dim: '#d5dbdb'
-  surface-bright: '#f5fafa'
+  surface: '#f7f9ff'
+  surface-dim: '#d9dff0'
+  surface-bright: '#ffffff'
   surface-container-lowest: '#ffffff'
-  surface-container-low: '#eff5f4'
-  surface-container: '#e9efef'
-  surface-container-high: '#e4e9e9'
-  surface-container-highest: '#dee4e3'
-  on-surface: '#171d1d'
-  on-surface-variant: '#3d4949'
-  inverse-surface: '#2c3132'
-  inverse-on-surface: '#ecf2f1'
-  outline: '#6d7a79'
-  outline-variant: '#bcc9c8'
-  surface-tint: '#006a69'
-  primary: '#006a69'
+  surface-container-low: '#eff3fd'
+  surface-container: '#e8edfa'
+  surface-container-high: '#e1e8f7'
+  surface-container-highest: '#d9e1f2'
+  on-surface: '#1a1b2e'
+  on-surface-variant: '#44485f'
+  inverse-surface: '#2e3048'
+  inverse-on-surface: '#eff1fb'
+  outline: '#737892'
+  outline-variant: '#c3c8dc'
+  surface-tint: '#624cab'
+  primary: '#624cab'
   on-primary: '#ffffff'
-  primary-container: '#2faead'
-  on-primary-container: '#003c3b'
-  inverse-primary: '#64d8d7'
-  secondary: '#b6231f'
+  primary-container: '#c1cefe'
+  on-primary-container: '#1a1b2e'
+  inverse-primary: '#a0ddff'
+  secondary: '#485bba'
   on-secondary: '#ffffff'
-  secondary-container: '#fd574b'
-  on-secondary-container: '#5c0004'
-  tertiary: '#954920'
+  secondary-container: '#30467f'
+  on-secondary-container: '#ffffff'
+  tertiary: '#397597'
   on-tertiary: '#ffffff'
-  tertiary-container: '#e28658'
-  on-tertiary-container: '#5e2300'
-  error: '#ba1a1a'
+  tertiary-container: '#397597'
+  on-tertiary-container: '#ffffff'
+  error: '#b3261e'
   on-error: '#ffffff'
-  error-container: '#ffdad6'
-  on-error-container: '#93000a'
-  primary-fixed: '#82f5f3'
-  primary-fixed-dim: '#64d8d7'
-  on-primary-fixed: '#002020'
-  on-primary-fixed-variant: '#00504f'
-  secondary-fixed: '#ffdad6'
-  secondary-fixed-dim: '#ffb4ab'
-  on-secondary-fixed: '#410002'
-  on-secondary-fixed-variant: '#93000a'
-  tertiary-fixed: '#ffdbcc'
-  tertiary-fixed-dim: '#ffb693'
-  on-tertiary-fixed: '#351000'
-  on-tertiary-fixed-variant: '#77320a'
-  background: '#f5fafa'
-  on-background: '#171d1d'
-  surface-variant: '#dee4e3'
+  error-container: '#f9dedc'
+  on-error-container: '#8c1d18'
+  primary-fixed: '#e2e6ff'
+  primary-fixed-dim: '#c1cefe'
+  on-primary-fixed: '#17023f'
+  on-primary-fixed-variant: '#4a357f'
+  secondary-fixed: '#dfe4ff'
+  secondary-fixed-dim: '#c1cefe'
+  on-secondary-fixed: '#101643'
+  on-secondary-fixed-variant: '#4f5fa8'
+  tertiary-fixed: '#d4f0ff'
+  tertiary-fixed-dim: '#a0ddff'
+  on-tertiary-fixed: '#05202c'
+  on-tertiary-fixed-variant: '#1a5e7a'
+  background: '#f7f9ff'
+  on-background: '#1a1b2e'
+  surface-variant: '#d9e1f2'
 typography:
   display-lg:
     fontFamily: Quicksand
@@ -107,27 +107,81 @@ spacing:
   margin-desktop: 40px
 ---
 
+> **The palette was replaced after the mockups were exported.** The `screen.png`
+> and `code.html` files beside this one still show the original teal / coral /
+> orange scheme. Their layout, spacing, type scale and corner-radius guidance is
+> still the reference; their **colors are not** - never color-pick from a mockup.
+> This file and `frontend/tailwind.config.js` are the only sources of truth for
+> color, and they must agree.
+
 ## Brand & Style
 
 The design system is crafted for the wedding planning experience, balancing the logistical complexity of event management with the joy and whimsy of a wedding. It targets couples and professional planners who require high-utility tools that don't feel clinical or cold.
 
-The aesthetic is **Playful Modernism**. It rejects the rigid, perfect symmetry of traditional SaaS products in favor of organic, "blobby" shapes and asymmetric corner radii that feel hand-drawn and human. The UI evokes a sense of celebration through vibrant colors while maintaining clarity through generous whitespace and a persistent architectural structure.
+The aesthetic is **Playful Modernism**. It rejects the rigid, perfect symmetry of traditional SaaS products in favor of organic, "blobby" shapes and asymmetric corner radii that feel hand-drawn and human. The shapes carry the personality; the color stays quiet, because this is a tool someone opens daily for months.
 
 Key visual pillars:
 - **Asymmetry:** Intentional variation in roundedness to create a friendly, less "corporate" rhythm.
-- **Vibrancy:** High-saturation primary and secondary colors used as functional backgrounds rather than just accents.
+- **Calm:** Every hue is muted and deep. Nothing is bright; contrast comes from value, not saturation.
 - **Tactile Softness:** Elements appear soft to the touch, utilizing subtle gradients and translucent overlays to suggest depth without heavy shadows.
 
 ## Colors
 
-The palette is anchored by a sophisticated **Deep Teal** which provides a professional foundation. This is contrasted by **Coral** and **Orange** to inject energy and urgency into the planning process.
+The palette is five cool hues in one family, anchored by a **Deep Violet**
+(#624CAB) and running out through periwinkle to a pale **Sky** (#A0DDFF). All
+five are light as given, so each was **muted and darkened until white text passes
+AA on it**. The source hue sets the character; the derived tone is what ships.
+
+| Source | Ships as | Token | Role |
+| --- | --- | --- | --- |
+| `#624CAB` Deep Violet | `#624CAB` (6.69:1) | `primary` | Brand, headings, active nav, every call to action |
+| `#7189FF` Periwinkle | `#485BBA` (6.03:1) | `secondary` | Confirmed |
+| `#758ECD` Muted Periwinkle | `#30467F` (9.10:1) | `secondary-container` | Declined |
+| `#A0DDFF` Sky | `#397597` (5.04:1) | `tertiary` | Pending |
+| `#C1CEFE` Lavender | `#C1CEFE` | `primary-container` | The navigation drawer, with dark ink |
+
+Sky also appears undarkened as the dotted grid, where nothing sits on top of it.
+
+### The contrast rule that shapes everything
+
+**Every filled surface is dark enough for white text.** The source palette is
+not: `#A0DDFF` against white is 1.4:1. So each hue is pulled back to at most 45%
+saturation, then darkened until it clears 5:1. The muting is what keeps the
+result calm at that depth - darkening alone turns `#7189FF` into an electric
+`#2549FF`.
+
+This buys a property worth protecting: **a token works as a fill and as an icon
+or text on white.** A status icon and its summary card can therefore be the same
+token and match exactly, instead of the icon needing a darker sibling.
+
+When adding a hue, derive it the same way: cap saturation, then lower lightness
+until white passes AA. A light fill with dark ink is the exception here, not the
+pattern - only the drawer does it.
 
 ### Functional Application
-- **Primary (Teal):** Used for the main sidebar, active states, and "Success" or "Task" related metrics.
-- **Secondary (Coral):** Reserved for high-importance metrics like Budget tracking and "Urgent" status indicators.
-- **Tertiary (Orange):** Used for guest-related data and primary Action Buttons (CTAs) to ensure they stand out against the cool background.
-- **Neutral (Gray):** Primarily for secondary text and icons to ensure legibility without competing with the vibrant brand colors.
-- **Background:** A very light mint-tinted gray (#F4F8F7) featuring a subtle dotted grid pattern (8px spacing) to reinforce the "planner" or "notebook" feel.
+- **Primary (Deep Violet):** Brand mark, headings, the active nav pill, and every
+  call to action. Actions are the one thing that never borrows a status color.
+- **Status tones (Confirmed / Pending / Declined):** Owned by their status and
+  used nowhere else, as fills and as icons alike.
+- **Lavender:** The navigation drawer only - the single light fill, carrying dark
+  ink at 10.9:1.
+- **Neutral (Cool Gray):** Secondary text and icons. The ramp is blue-tinted
+  (#F7F9FF through #D9E1F2); a mint-tinted neutral fights this palette.
+- **Background:** #F7F9FF with a dotted grid at 8px spacing, the dots in Sky at
+  55% opacity. At full strength the grid turns the page into a wash.
+
+### Status color
+
+The RSVP states (and any status set that follows) are told apart by **icon and by
+value, not by hue** - the palette is one cool family, so nothing in it reads as
+"declined" the way a red would. That is an accepted trade, and it makes the icon
+load-bearing: every status carries a distinct glyph, and color is never the only
+signal.
+
+A status icon and its summary card always use the same token, so they match
+exactly. Confirmed `#485BBA`, Pending `#397597`, Declined `#30467F` - deliberately
+spread across the value range (6.0:1, 5.0:1, 9.1:1) so they separate by darkness
+when their hues will not.
 
 ## Typography
 
@@ -172,22 +226,23 @@ The defining characteristic of this design system is its **asymmetric organic ge
 ## Components
 
 ### Buttons
-- **Primary CTA:** Pill-shaped, tertiary orange (#E28658) background, white text. Large padding (16px vertical, 32px horizontal).
-- **Secondary:** Pill-shaped, teal outline or transparent background with teal text.
+- **Primary CTA:** Pill-shaped, deep violet (#624CAB) background, white text. Large padding (16px vertical, 32px horizontal).
+- **Secondary:** Pill-shaped, deep violet outline on white with deep violet text.
 
 ### Stat Cards
-- **Solid Fill:** Cards for "Tasks", "Budget", and "Guests" use full-bleed primary, secondary, and tertiary colors.
+- **Solid Fill:** Full-bleed status tone, white text, white progress bar.
 - **Icon Container:** Icons within these cards sit inside a circular white container with 20% opacity.
-- **Progress Bars:** Highly contrasting pill-shaped tracks (e.g., dark teal bar on a light teal card) to show progress at a glance.
+- **Progress Bars:** Pill-shaped tracks in the card's own text color (white), so the bar contrasts with the fill the same way the label does.
 
 ### List Rows
 - **Container:** White background with a standard 16px radius.
-- **Checkbox:** Circular stroke (not square). When checked, it fills with Teal and shows a white checkmark.
-- **Status Pills:** Small, uppercase labels with background colors matching the importance (Red/Coral for Urgent, Gray for Scheduled).
+- **Checkbox:** Circular stroke (not square). When checked, it fills with deep violet and shows a white checkmark. (Not implemented anywhere yet - see issue #37.)
+- **Status Icons:** A filled Material Symbols glyph in the status's own color, right-aligned beside the row's actions. Labels are carried by `aria-label` and a hover title, not by visible text.
 
 ### Navigation
-- **Active State:** The active sidebar item features a solid teal background with a "pill" shape and white text/icon.
-- **Hover State:** Subtle shift in background color or light gray fill.
+- **Drawer:** Lavender (#C1CEFE) with dark ink text throughout.
+- **Active State:** The active sidebar item features a solid deep violet background with a "pill" shape and white text/icon.
+- **Hover State:** A translucent white fill (`white/40`), which reads on the lavender drawer where a gray fill would not.
 
 ### Inputs
 - **Search Bar:** Large, pill-shaped input with a light border and a search icon prefix. Background should be white or a slightly lighter tint of the background color.

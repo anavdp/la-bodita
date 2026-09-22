@@ -136,8 +136,12 @@ several of the decisions below.
 `design/mockups/stitch_duplicate_of_la_bodita_dashboard_planner/` holds the
 approved reference for every screen: one folder per screen with a
 `screen.png` and a `code.html` (Stitch-exported reference markup — useful
-for exact spacing/color/radius values, but not meant to be pasted in as-is;
+for exact spacing/radius values, but not meant to be pasted in as-is;
 componentize idiomatically instead).
+
+The mockups' **colors are stale**: the palette was replaced after they were
+exported. Take color from `organic_celebration/DESIGN.md` and
+`frontend/tailwind.config.js` only, never from a mockup.
 
 `organic_celebration/DESIGN.md` in that same directory is the canonical
 design system spec (exact color tokens, Quicksand/Be Vietnam Pro type scale,

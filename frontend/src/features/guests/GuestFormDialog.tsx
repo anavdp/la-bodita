@@ -256,7 +256,7 @@ export function GuestFormDialog({ guest, onSave, onClose }: GuestFormDialogProps
             <button
               type="submit"
               disabled={isSaving}
-              className="rounded-full bg-secondary px-8 py-3 font-label-md text-label-md text-on-secondary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="rounded-full bg-primary px-8 py-3 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {t(isSaving ? "guests.form.saving" : "guests.form.save")}
             </button>
