@@ -6,10 +6,12 @@ from datetime import date
 os.environ.setdefault("DATABASE_URL", "sqlite://")
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.database import Base
+from app.database import Base, get_session
+from app.main import app
 from app.models import Wedding
 
 
@@ -36,3 +38,12 @@ def wedding(db_session: Session) -> Wedding:
     db_session.add(wedding)
     db_session.commit()
     return wedding
+
+
+@pytest.fixture
+def client(db_session: Session) -> Generator[TestClient, None, None]:
+    """The API driven against the test session, so a request sees fixture data."""
+    app.dependency_overrides[get_session] = lambda: db_session
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()
