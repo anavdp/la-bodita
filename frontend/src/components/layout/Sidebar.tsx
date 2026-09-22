@@ -52,7 +52,7 @@ export function Sidebar() {
         <button
           type="button"
           onClick={toggleLanguage}
-          className="mb-4 flex w-full items-center justify-center rounded-full border border-secondary bg-surface-container-lowest py-2 font-label-md text-label-md text-secondary transition-colors hover:bg-secondary/5"
+          className="mb-4 flex w-full items-center justify-center rounded-full border border-primary bg-surface-container-lowest py-2 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
         >
           {t("layout.language", { code: language.toUpperCase() })}
         </button>

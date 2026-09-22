@@ -72,8 +72,8 @@ export function GuestStats({ guests }: { guests: Guest[] }) {
         share={summary.shareDeclined}
         icon={rsvpIcon.declined}
         shapeClass="organic-shape-1"
-        toneClass="bg-secondary-container text-on-secondary"
-        barClass="bg-on-secondary"
+        toneClass="bg-secondary-container text-on-secondary-container"
+        barClass="bg-on-secondary-container"
       />
     </div>
   );
