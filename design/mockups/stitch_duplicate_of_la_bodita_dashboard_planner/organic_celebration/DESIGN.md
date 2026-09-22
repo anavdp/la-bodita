@@ -25,9 +25,9 @@ colors:
   on-secondary: '#ffffff'
   secondary-container: '#ef233c'
   on-secondary-container: '#ffffff'
-  tertiary: '#347884'
+  tertiary: '#7189ff'
   on-tertiary: '#ffffff'
-  tertiary-container: '#347884'
+  tertiary-container: '#7189ff'
   on-tertiary-container: '#ffffff'
   error: '#b3261e'
   on-error: '#ffffff'
@@ -85,6 +85,12 @@ typography:
     fontSize: 14px
     fontWeight: '400'
     lineHeight: 20px
+  label-lg:
+    fontFamily: Be Vietnam Pro
+    fontSize: 19px
+    fontWeight: '700'
+    lineHeight: 24px
+    letterSpacing: 0.02em
   label-md:
     fontFamily: Be Vietnam Pro
     fontSize: 12px
@@ -140,40 +146,51 @@ it - that legibility is the whole point.
 | Token | Value | Role | On white text |
 | --- | --- | --- | --- |
 | `primary` | `#624CAB` Violet | Brand, headings, active nav, every CTA, **Confirmed** | 6.69:1 |
-| `tertiary` | `#347884` Teal | **Pending** | 5.04:1 |
+| `tertiary` | `#7189FF` Periwinkle | **Pending** | 3.12:1 |
 | `secondary-container` | `#EF233C` Red | **Declined** | 4.22:1 |
 | `primary-container` | `#C1CEFE` Lavender | The drawer, with dark ink | 10.91:1 (ink) |
 
-The teal is `#5EB1BF` darkened until white text works on it; at its original
-lightness it was 2.47:1.
+Confirmed and Pending are neighbours on purpose - two shades of "nothing is
+wrong" - with Declined the outlier. Pending is the one color here that does not
+clear 4.5:1 against white; see below for how it earns its place anyway.
 
 ### The contrast rule that shapes everything
 
-**Every filled surface is dark enough for white text.** This is the constraint a
-new color has to satisfy before anything else - most colors picked by eye do not.
-`#5EB1BF` is 2.47:1 against white; `#F27059` is 2.90:1. To derive one: cap the
-saturation (45% is a good ceiling), then lower the lightness until white clears
-4.5:1. Darkening alone is not enough - it turns `#7189FF` into an electric
-`#2549FF`, louder than what you started with.
+Filled surfaces carry white text, and most colors picked by eye are not dark
+enough for that: `#5EB1BF` is 2.47:1 against white, `#F27059` is 2.90:1. There
+are two honest ways out, and this system uses both.
 
-This buys a property worth protecting: **a token works as a fill and as an icon
-or text on white.** A status icon and its summary card are therefore the same
-token and match exactly, instead of the icon needing a darker sibling.
+**Darken the color.** Cap the saturation (45% is a good ceiling), then lower the
+lightness until white clears 4.5:1. Darkening alone is not enough - it turns
+`#7189FF` into an electric `#2549FF`, louder than what you started with.
 
-Two accepted exceptions, both deliberate:
+**Or size the type up.** WCAG's threshold drops to 3:1 for large text, which
+means **at least 18.66px and bold (700)**, or 24px at any weight. Nothing smaller
+qualifies - 14px semibold is still normal text and still needs 4.5:1. This is why
+stat card labels are `label-lg` (19px/700) rather than the 12px `label-md` a
+caption would normally use: it lets `#7189FF` keep the hue it was chosen for at
+3.12:1, and it is what the cards are built around.
 
-- **Declined `#EF233C` is 4.22:1**, just under AA for its 12px card label. It was
-  chosen for how immediately it reads as "declined", and `#EB112C` would clear
-  the bar if that ever matters more.
-- **The lavender drawer** is the one light fill, carrying dark ink at 10.9:1.
+**Translucent text must be measured composited.** `opacity-80` white on
+`#7189FF` is 2.55:1, not 3.12:1 - below even the large-text bar. Status text is
+therefore always full opacity. Reading `color` alone will tell you the wrong
+number.
+
+Together these buy a property worth protecting: **a token works as a fill and as
+an icon or text on white.** A status icon and its summary card are the same token
+and match exactly, instead of the icon needing a darker sibling. Pending's icon
+sits at 3.12:1, above the 3:1 required of a graphical object.
+
+One accepted exception: **the lavender drawer** is the single light fill,
+carrying dark ink at 10.9:1.
 
 ### Functional Application
 - **Primary (Deep Violet):** Brand mark, headings, the active nav pill, every
   call to action - and Confirmed. The CTA and the Confirmed status share this
   color by choice; violet is the brand color and the CTA earns it. This is the
   one place a status and an action overlap, and it stays the only one.
-- **Status tones (Teal / Red):** Owned by their status and used nowhere else, as
-  fills and as icons alike.
+- **Status tones (Periwinkle / Red):** Owned by their status and used nowhere
+  else, as fills and as icons alike.
 - **Lavender:** The navigation drawer only - the single light fill, carrying dark
   ink at 10.9:1.
 - **Neutral (Cool Gray):** Secondary text and icons. The ramp is blue-tinted
@@ -184,8 +201,9 @@ Two accepted exceptions, both deliberate:
 ### Status color
 
 Status colors are the one place the interface is allowed to be loud. Confirmed
-`#624CAB`, Pending `#347884`, Declined `#EF233C` - three hues far enough apart
-that a full guest list is scannable without reading a word.
+`#624CAB`, Pending `#7189FF`, Declined `#EF233C` - the first two close together,
+the third deliberately apart, so "somebody said no" is the thing that catches the
+eye on a full guest list.
 
 Color is still never the *only* signal: every status carries its own icon
 (`check_circle`, `hourglass_empty`, `cancel`), which is what carries the meaning
@@ -240,6 +258,8 @@ The defining characteristic of this design system is its **asymmetric organic ge
 
 ### Stat Cards
 - **Solid Fill:** Full-bleed status tone, white text, white progress bar.
+- **Label:** `label-lg` (19px/700) uppercase at full opacity, not a small caption. The size is load-bearing - see the contrast rule above.
+- **Grid:** Three across from `lg` up, two on a tablet, one on a phone. Three across a tablet clips the labels.
 - **Icon Container:** Icons within these cards sit inside a circular white container with 20% opacity.
 - **Progress Bars:** Pill-shaped tracks in the card's own text color (white), so the bar contrasts with the fill the same way the label does.
 

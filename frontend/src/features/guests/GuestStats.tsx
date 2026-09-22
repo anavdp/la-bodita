@@ -25,7 +25,10 @@ function StatCard({ label, count, share, icon, shapeClass, toneClass, barClass }
         </div>
         <div>
           <p className="font-headline-md text-headline-md">{count}</p>
-          <p className="font-label-md text-label-md uppercase tracking-wider opacity-80">{label}</p>
+          {/* 19px bold, at full opacity: that is what puts the label over the 3:1
+              large-text bar on every card. `opacity-80` alone dropped pending to
+              2.55:1, below even that. */}
+          <p className="font-label-lg text-label-lg uppercase">{label}</p>
         </div>
       </div>
       <div
@@ -46,8 +49,10 @@ export function GuestStats({ guests }: { guests: Guest[] }) {
   const { t } = useTranslation();
   const summary = summariseRsvps(guests);
 
+  // DESIGN.md's breakpoints: one column on a phone, two on a tablet, three from
+  // desktop up. Three across a tablet clips the card labels.
   return (
-    <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+    <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       <StatCard
         label={t("guests.confirmed")}
         count={summary.confirmed}
