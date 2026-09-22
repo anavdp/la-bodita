@@ -21,13 +21,13 @@ colors:
   primary-container: '#c1cefe'
   on-primary-container: '#1a1b2e'
   inverse-primary: '#a0ddff'
-  secondary: '#485bba'
+  secondary: '#624cab'
   on-secondary: '#ffffff'
-  secondary-container: '#30467f'
+  secondary-container: '#ef233c'
   on-secondary-container: '#ffffff'
-  tertiary: '#397597'
+  tertiary: '#347884'
   on-tertiary: '#ffffff'
-  tertiary-container: '#397597'
+  tertiary-container: '#347884'
   on-tertiary-container: '#ffffff'
   error: '#b3261e'
   on-error: '#ffffff'
@@ -122,47 +122,58 @@ The aesthetic is **Playful Modernism**. It rejects the rigid, perfect symmetry o
 
 Key visual pillars:
 - **Asymmetry:** Intentional variation in roundedness to create a friendly, less "corporate" rhythm.
-- **Calm:** Every hue is muted and deep. Nothing is bright; contrast comes from value, not saturation.
+- **Calm chrome, loud status:** The furniture of the app is cool and quiet so it can be looked at daily; the RSVP states are vivid so they can be read at a glance. Color is spent where it carries meaning.
 - **Tactile Softness:** Elements appear soft to the touch, utilizing subtle gradients and translucent overlays to suggest depth without heavy shadows.
 
 ## Colors
 
-The palette is five cool hues in one family, anchored by a **Deep Violet**
-(#624CAB) and running out through periwinkle to a pale **Sky** (#A0DDFF). All
-five are light as given, so each was **muted and darkened until white text passes
-AA on it**. The source hue sets the character; the derived tone is what ships.
+The palette has two jobs, and they are kept apart.
 
-| Source | Ships as | Token | Role |
+**The chrome** is cool and quiet, so the interface recedes: a **Deep Violet**
+(#624CAB) for the brand and every action, **Lavender** (#C1CEFE) for the
+navigation drawer, and **Sky** (#A0DDFF) for the dotted grid behind every screen.
+
+**The statuses** are three separate hues, chosen so a glance tells you which is
+which. They do not belong to the chrome family and are not meant to blend with
+it - that legibility is the whole point.
+
+| Token | Value | Role | On white text |
 | --- | --- | --- | --- |
-| `#624CAB` Deep Violet | `#624CAB` (6.69:1) | `primary` | Brand, headings, active nav, every call to action |
-| `#7189FF` Periwinkle | `#485BBA` (6.03:1) | `secondary` | Confirmed |
-| `#758ECD` Muted Periwinkle | `#30467F` (9.10:1) | `secondary-container` | Declined |
-| `#A0DDFF` Sky | `#397597` (5.04:1) | `tertiary` | Pending |
-| `#C1CEFE` Lavender | `#C1CEFE` | `primary-container` | The navigation drawer, with dark ink |
+| `primary` | `#624CAB` Violet | Brand, headings, active nav, every CTA, **Confirmed** | 6.69:1 |
+| `tertiary` | `#347884` Teal | **Pending** | 5.04:1 |
+| `secondary-container` | `#EF233C` Red | **Declined** | 4.22:1 |
+| `primary-container` | `#C1CEFE` Lavender | The drawer, with dark ink | 10.91:1 (ink) |
 
-Sky also appears undarkened as the dotted grid, where nothing sits on top of it.
+The teal is `#5EB1BF` darkened until white text works on it; at its original
+lightness it was 2.47:1.
 
 ### The contrast rule that shapes everything
 
-**Every filled surface is dark enough for white text.** The source palette is
-not: `#A0DDFF` against white is 1.4:1. So each hue is pulled back to at most 45%
-saturation, then darkened until it clears 5:1. The muting is what keeps the
-result calm at that depth - darkening alone turns `#7189FF` into an electric
-`#2549FF`.
+**Every filled surface is dark enough for white text.** This is the constraint a
+new color has to satisfy before anything else - most colors picked by eye do not.
+`#5EB1BF` is 2.47:1 against white; `#F27059` is 2.90:1. To derive one: cap the
+saturation (45% is a good ceiling), then lower the lightness until white clears
+4.5:1. Darkening alone is not enough - it turns `#7189FF` into an electric
+`#2549FF`, louder than what you started with.
 
 This buys a property worth protecting: **a token works as a fill and as an icon
-or text on white.** A status icon and its summary card can therefore be the same
+or text on white.** A status icon and its summary card are therefore the same
 token and match exactly, instead of the icon needing a darker sibling.
 
-When adding a hue, derive it the same way: cap saturation, then lower lightness
-until white passes AA. A light fill with dark ink is the exception here, not the
-pattern - only the drawer does it.
+Two accepted exceptions, both deliberate:
+
+- **Declined `#EF233C` is 4.22:1**, just under AA for its 12px card label. It was
+  chosen for how immediately it reads as "declined", and `#EB112C` would clear
+  the bar if that ever matters more.
+- **The lavender drawer** is the one light fill, carrying dark ink at 10.9:1.
 
 ### Functional Application
-- **Primary (Deep Violet):** Brand mark, headings, the active nav pill, and every
-  call to action. Actions are the one thing that never borrows a status color.
-- **Status tones (Confirmed / Pending / Declined):** Owned by their status and
-  used nowhere else, as fills and as icons alike.
+- **Primary (Deep Violet):** Brand mark, headings, the active nav pill, every
+  call to action - and Confirmed. The CTA and the Confirmed status share this
+  color by choice; violet is the brand color and the CTA earns it. This is the
+  one place a status and an action overlap, and it stays the only one.
+- **Status tones (Teal / Red):** Owned by their status and used nowhere else, as
+  fills and as icons alike.
 - **Lavender:** The navigation drawer only - the single light fill, carrying dark
   ink at 10.9:1.
 - **Neutral (Cool Gray):** Secondary text and icons. The ramp is blue-tinted
@@ -172,16 +183,14 @@ pattern - only the drawer does it.
 
 ### Status color
 
-The RSVP states (and any status set that follows) are told apart by **icon and by
-value, not by hue** - the palette is one cool family, so nothing in it reads as
-"declined" the way a red would. That is an accepted trade, and it makes the icon
-load-bearing: every status carries a distinct glyph, and color is never the only
-signal.
+Status colors are the one place the interface is allowed to be loud. Confirmed
+`#624CAB`, Pending `#347884`, Declined `#EF233C` - three hues far enough apart
+that a full guest list is scannable without reading a word.
 
-A status icon and its summary card always use the same token, so they match
-exactly. Confirmed `#485BBA`, Pending `#397597`, Declined `#30467F` - deliberately
-spread across the value range (6.0:1, 5.0:1, 9.1:1) so they separate by darkness
-when their hues will not.
+Color is still never the *only* signal: every status carries its own icon
+(`check_circle`, `hourglass_empty`, `cancel`), which is what carries the meaning
+for anyone who cannot separate the hues. A status icon and its summary card
+always use the same token, so they match exactly.
 
 ## Typography
 
