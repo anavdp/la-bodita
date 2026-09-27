@@ -76,6 +76,17 @@ describe("GuestTable", () => {
     expect(screen.getByRole("img", { name: "Other" })).toHaveTextContent("🌍");
   });
 
+  it("given a guest with no relationship or side yet, when the row is rendered, then both read as not specified", () => {
+    renderTable([aGuest({ firstName: "Maria", lastName: "Rossi", relationshipType: null, side: null })]);
+
+    const row = screen.getByRole("row", { name: /Maria Rossi/ });
+    const cells = within(row).getAllByRole("cell");
+    expect(cells[2]).toHaveTextContent("—");
+    expect(cells[2]).toHaveAccessibleName("Not specified");
+    expect(cells[3]).toHaveTextContent("—");
+    expect(cells[3]).toHaveAccessibleName("Not specified");
+  });
+
   it("given a child guest, when the row is rendered, then the type column says so", () => {
     renderTable([aGuest({ firstName: "Lucia", lastName: "Mendoza", isChild: true })]);
 

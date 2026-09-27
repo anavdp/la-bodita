@@ -260,3 +260,32 @@ def test_given_a_required_field_when_it_is_patched_to_null_then_it_is_rejected(
     )
 
     assert response.status_code == 422
+
+
+def test_given_no_relationship_or_side_when_a_guest_is_created_then_both_are_left_empty(
+    client: TestClient, wedding: Wedding
+):
+    """A name is all a guest needs up front; how they are related can come later."""
+    response = client.post(
+        GUESTS_URL.format(wedding_id=wedding.id),
+        json={"first_name": "Maria", "last_name": "Rossi"},
+    )
+
+    assert response.status_code == 201
+    assert response.json()["relationship_type"] is None
+    assert response.json()["side"] is None
+
+
+def test_given_a_relationship_and_side_when_they_are_patched_to_null_then_both_are_cleared(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    guest = add_guest(db_session, wedding)
+
+    response = client.patch(
+        f"{GUESTS_URL.format(wedding_id=wedding.id)}/{guest.id}",
+        json={"relationship_type": None, "side": None},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["relationship_type"] is None
+    assert response.json()["side"] is None

@@ -12,6 +12,33 @@ describe("GuestFormDialog", () => {
     expect(screen.getByRole("dialog", { name: "Add Guest" })).toBeInTheDocument();
     expect(screen.getByLabelText("First name")).toHaveValue("");
     expect(screen.getByLabelText("RSVP status")).toHaveValue("pending");
+    expect(screen.getByLabelText("Relationship")).toHaveValue("");
+    expect(screen.getByLabelText("Side")).toHaveValue("");
+  });
+
+  it("given only a name, when a new guest is saved, then relationship and side are left empty", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    renderWithProviders(<GuestFormDialog guest={null} onSave={onSave} onClose={vi.fn()} />);
+
+    await userEvent.type(screen.getByLabelText("First name"), "Maria");
+    await userEvent.type(screen.getByLabelText("Last name"), "Rossi");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ relationshipType: null, side: null }),
+    );
+  });
+
+  it("given a guest with a side, when it is set back to not specified, then the side is cleared", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    renderWithProviders(
+      <GuestFormDialog guest={aGuest({ side: "italy" })} onSave={onSave} onClose={vi.fn()} />,
+    );
+
+    await userEvent.selectOptions(screen.getByLabelText("Side"), "");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ side: null }));
   });
 
   it("given an existing guest, when the dialog opens, then it is filled in for editing", () => {

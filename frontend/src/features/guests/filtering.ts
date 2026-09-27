@@ -1,6 +1,6 @@
 import type { Guest } from "../../api/types";
 
-export function fullName(guest: Guest): string {
+export function fullName(guest: Pick<Guest, "firstName" | "lastName">): string {
   return `${guest.firstName} ${guest.lastName}`;
 }
 

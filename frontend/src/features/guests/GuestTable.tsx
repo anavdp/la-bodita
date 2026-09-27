@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { Guest, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { fullName } from "./filtering";
+import { NotSpecified } from "./NotSpecified";
 import {
   relationshipLabelKey,
   rsvpIcon,
@@ -84,19 +85,27 @@ export function GuestTable({ guests, onEdit, onDelete, onChangeRsvp }: GuestTabl
                   {t(guest.isChild ? "guests.type.child" : "guests.type.adult")}
                 </td>
                 <td className="px-4 py-4 text-on-surface-variant">
-                  {t(relationshipLabelKey(guest.relationshipType))}
+                  {guest.relationshipType === null ? (
+                    <NotSpecified />
+                  ) : (
+                    t(relationshipLabelKey(guest.relationshipType))
+                  )}
                 </td>
                 <td className="px-4 py-4">
                   {/* The flag is the label: the country's name is what it is announced
                       as, and what it says on hover. */}
-                  <span
-                    role="img"
-                    aria-label={t(sideLabelKey(guest.side))}
-                    title={t(sideLabelKey(guest.side))}
-                    className="text-2xl leading-none"
-                  >
-                    {sideFlag[guest.side]}
-                  </span>
+                  {guest.side === null ? (
+                    <NotSpecified />
+                  ) : (
+                    <span
+                      role="img"
+                      aria-label={t(sideLabelKey(guest.side))}
+                      title={t(sideLabelKey(guest.side))}
+                      className="text-2xl leading-none"
+                    >
+                      {sideFlag[guest.side]}
+                    </span>
+                  )}
                 </td>
 
                 {/* The status is the icon itself, and the icon is how you change it.

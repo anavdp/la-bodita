@@ -1,4 +1,12 @@
-import { createGuest, deleteGuest, listGuests, updateGuest } from "./guests";
+import {
+  createGuest,
+  deleteGuest,
+  guestImportTemplateUrl,
+  importGuests,
+  listGuests,
+  previewGuestImport,
+  updateGuest,
+} from "./guests";
 import { listWeddings } from "./weddings";
 
 const jsonResponse = (body: unknown, status = 200) =>
@@ -103,6 +111,100 @@ describe("the guest API", () => {
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe("http://localhost:8000/api/weddings/3/guests/9");
     expect(init.method).toBe("DELETE");
+  });
+
+  it("given a wedding, when the import template is linked, then it is that wedding's template", () => {
+    expect(guestImportTemplateUrl(3)).toBe(
+      "http://localhost:8000/api/weddings/3/guests/import/template",
+    );
+  });
+
+  it("given a CSV file, when it is previewed, then it is uploaded and each row comes back in app terms", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) =>
+      jsonResponse({
+        rows: [
+          {
+            row_number: 2,
+            guest: {
+              first_name: "Maria",
+              last_name: "Rossi",
+              is_child: false,
+              gender: null,
+              relationship_type: null,
+              side: "italy",
+              rsvp_status: "pending",
+              phone: null,
+              email: null,
+            },
+            errors: [],
+          },
+          { row_number: 3, guest: null, errors: [{ field: "first_name", code: "missing" }] },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const file = new File(["first_name,last_name\nMaria,Rossi\n,Mendoza\n"], "guests.csv");
+
+    const rows = await previewGuestImport(3, file);
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("http://localhost:8000/api/weddings/3/guests/import/preview");
+    expect(init.method).toBe("POST");
+    expect((init.body as FormData).get("file")).toBe(file);
+    expect(rows).toEqual([
+      {
+        rowNumber: 2,
+        guest: {
+          firstName: "Maria",
+          lastName: "Rossi",
+          isChild: false,
+          gender: null,
+          relationshipType: null,
+          side: "italy",
+          rsvpStatus: "pending",
+          phone: null,
+          email: null,
+        },
+        errors: [],
+      },
+      { rowNumber: 3, guest: null, errors: [{ field: "first_name", code: "missing" }] },
+    ]);
+  });
+
+  it("given previewed guests, when the import is confirmed, then they are posted together in API terms", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse([], 201));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await importGuests(3, [
+      {
+        firstName: "Maria",
+        lastName: "Rossi",
+        isChild: false,
+        gender: null,
+        relationshipType: null,
+        side: null,
+        rsvpStatus: "pending",
+        phone: null,
+        email: null,
+      },
+    ]);
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("http://localhost:8000/api/weddings/3/guests/bulk");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body as string)).toEqual([
+      {
+        first_name: "Maria",
+        last_name: "Rossi",
+        is_child: false,
+        gender: null,
+        relationship_type: null,
+        side: null,
+        rsvp_status: "pending",
+        phone: null,
+        email: null,
+      },
+    ]);
   });
 
   it("given the app starts, when weddings are listed, then the tenant roots come back", async () => {

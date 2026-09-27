@@ -1,5 +1,5 @@
-import { request } from "./client";
-import type { Guest, GuestDraft } from "./types";
+import { apiUrl, request } from "./client";
+import type { Guest, GuestDraft, GuestImportError, GuestImportRow } from "./types";
 
 /** The wire shape: the API speaks snake_case, the app speaks camelCase. */
 interface GuestPayload {
@@ -16,6 +16,14 @@ interface GuestPayload {
   email: string | null;
 }
 
+type GuestDraftPayload = Omit<GuestPayload, "id" | "wedding_id">;
+
+interface GuestImportRowPayload {
+  row_number: number;
+  guest: GuestDraftPayload | null;
+  errors: GuestImportError[];
+}
+
 const payloadKeys: Record<keyof GuestDraft, keyof GuestPayload> = {
   firstName: "first_name",
   lastName: "last_name",
@@ -29,9 +37,11 @@ const payloadKeys: Record<keyof GuestDraft, keyof GuestPayload> = {
 };
 
 function toGuest(payload: GuestPayload): Guest {
+  return { id: payload.id, weddingId: payload.wedding_id, ...toDraft(payload) };
+}
+
+function toDraft(payload: GuestDraftPayload): GuestDraft {
   return {
-    id: payload.id,
-    weddingId: payload.wedding_id,
     firstName: payload.first_name,
     lastName: payload.last_name,
     isChild: payload.is_child,
@@ -82,4 +92,31 @@ export async function updateGuest(
 
 export function deleteGuest(weddingId: number, guestId: number): Promise<void> {
   return request<void>(`${guestsUrl(weddingId)}/${guestId}`, { method: "DELETE" });
+}
+
+export function guestImportTemplateUrl(weddingId: number): string {
+  return apiUrl(`${guestsUrl(weddingId)}/import/template`);
+}
+
+/** Validates a filled-in template without saving anything. */
+export async function previewGuestImport(weddingId: number, file: File): Promise<GuestImportRow[]> {
+  const form = new FormData();
+  form.append("file", file);
+  const payload = await request<{ rows: GuestImportRowPayload[] }>(
+    `${guestsUrl(weddingId)}/import/preview`,
+    { method: "POST", body: form },
+  );
+  return payload.rows.map((row) => ({
+    rowNumber: row.row_number,
+    guest: row.guest === null ? null : toDraft(row.guest),
+    errors: row.errors,
+  }));
+}
+
+/** Creates every previewed guest in one request. */
+export async function importGuests(weddingId: number, drafts: GuestDraft[]): Promise<void> {
+  await request<GuestPayload[]>(`${guestsUrl(weddingId)}/bulk`, {
+    method: "POST",
+    body: drafts.map(toPayload),
+  });
 }
