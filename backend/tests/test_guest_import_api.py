@@ -323,3 +323,26 @@ def test_given_a_household_name_already_on_the_list_when_imported_then_a_new_hou
     )
 
     assert db_session.scalar(select(func.count()).select_from(Household)) == 2
+
+
+def test_given_relationships_typed_with_spaces_or_dashes_when_previewed_then_they_match_the_vocabulary(
+    client: TestClient, wedding: Wedding
+):
+    """A spreadsheet says "Plus one"; the API says plus_one."""
+    content = csv_of(
+        "Maria,Rossi,,,Plus One,,,,",
+        "Lucia,Mendoza,,,bride friends,,,,",
+        "Carlos,Mendoza,,,groom-friends,,,,",
+        "Ana,Perez,,,GROOM_FRIENDS,,,,",
+    )
+
+    response = preview(client, wedding.id, content)
+
+    rows = response.json()["rows"]
+    assert [row["errors"] for row in rows] == [[], [], [], []]
+    assert [row["guest"]["relationship_type"] for row in rows] == [
+        "plus_one",
+        "bride_friends",
+        "groom_friends",
+        "groom_friends",
+    ]

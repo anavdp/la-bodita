@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { aGuest } from "../../testing/guestFactory";
@@ -222,5 +222,19 @@ describe("GuestFormDialog", () => {
 
     // Already on their own: nothing to send, so their RSVP link stays the same.
     expect(onSave.mock.calls[0][0].householdId).toBeUndefined();
+  });
+  it("given the relationship picker, when it opens, then it offers the bride's and groom's friends and plus ones", () => {
+    renderWithProviders(<GuestFormDialog guest={null} onSave={vi.fn()} onClose={vi.fn()} />);
+
+    const options = within(screen.getByLabelText("Relationship")).getAllByRole("option");
+    expect(options.map((option) => option.textContent)).toEqual([
+      "Not specified",
+      "Family",
+      "Friends",
+      "Bride's friends",
+      "Groom's friends",
+      "Plus one",
+      "Other",
+    ]);
   });
 });

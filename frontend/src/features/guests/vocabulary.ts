@@ -3,7 +3,14 @@ import type { TranslationKey } from "../../i18n/translations";
 
 export const rsvpStatuses: RsvpStatus[] = ["pending", "confirmed", "declined"];
 export const guestSides: GuestSide[] = ["venezuela", "italy", "spain", "other"];
-export const relationshipTypes: GuestRelationshipType[] = ["family", "friends", "other"];
+export const relationshipTypes: GuestRelationshipType[] = [
+  "family",
+  "friends",
+  "bride_friends",
+  "groom_friends",
+  "plus_one",
+  "other",
+];
 export const guestGenders: GuestGender[] = ["female", "male", "other"];
 
 export const rsvpLabelKey = (status: RsvpStatus): TranslationKey => `guests.rsvp.${status}`;

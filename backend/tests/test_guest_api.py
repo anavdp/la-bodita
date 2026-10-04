@@ -408,3 +408,15 @@ def test_given_a_family_when_one_member_is_deleted_then_the_household_stays_for_
     client.delete(f"{GUESTS_URL.format(wedding_id=wedding.id)}/{maria.id}")
 
     assert household_ids(db_session) == [family.id]
+
+
+def test_given_the_newer_relationship_types_when_guests_are_created_then_each_is_stored(
+    client: TestClient, wedding: Wedding
+):
+    for relationship in ("plus_one", "bride_friends", "groom_friends"):
+        response = client.post(
+            GUESTS_URL.format(wedding_id=wedding.id), json=a_guest(relationship_type=relationship)
+        )
+
+        assert response.status_code == 201
+        assert response.json()["relationship_type"] == relationship

@@ -18,6 +18,9 @@ class GuestGender(str, Enum):
 class GuestRelationshipType(str, Enum):
     FAMILY = "family"
     FRIENDS = "friends"
+    BRIDE_FRIENDS = "bride_friends"
+    GROOM_FRIENDS = "groom_friends"
+    PLUS_ONE = "plus_one"
     OTHER = "other"
 
 

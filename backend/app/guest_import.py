@@ -8,6 +8,7 @@ after the couple has seen the preview.
 
 import csv
 import io
+import re
 
 from pydantic import ValidationError
 
@@ -80,6 +81,9 @@ def parse_guest_rows(text: str) -> list[GuestImportRow]:
         for column in LOWERCASED_COLUMNS:
             if column in values:
                 values[column] = values[column].lower()
+        # "Plus one" and "groom-friends" are how a person types plus_one and groom_friends.
+        if "relationship_type" in values:
+            values["relationship_type"] = re.sub(r"[\s-]+", "_", values["relationship_type"])
         rows.append(validate_row(row_number, values))
     return rows
 

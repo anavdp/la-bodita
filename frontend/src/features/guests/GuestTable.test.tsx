@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import type { Guest } from "../../api/types";
 import { aGuest } from "../../testing/guestFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
+import { LanguageProvider } from "../../i18n/LanguageProvider";
 import { GuestTable } from "./GuestTable";
 
 const noop = () => {};
@@ -258,5 +259,22 @@ describe("GuestTable one-person households", () => {
 
     const cells = within(screen.getByRole("row", { name: /Carlos Mendoza/ })).getAllByRole("cell");
     expect(cells[1]).toBeEmptyDOMElement();
+  });
+});
+
+describe("GuestTable relationships", () => {
+  it("given a plus one, when the row is rendered in Spanish, then the relationship reads in Spanish", () => {
+    renderWithProviders(
+      <LanguageProvider initialLanguage="es">
+        <GuestTable
+          guests={[aGuest({ firstName: "Pino", lastName: "Rossi", relationshipType: "plus_one" })]}
+          onEdit={noop}
+          onDelete={noop}
+          onChangeRsvp={noop}
+        />
+      </LanguageProvider>,
+    );
+
+    expect(within(screen.getByRole("row", { name: /Pino Rossi/ })).getByText("Acompañante")).toBeInTheDocument();
   });
 });
