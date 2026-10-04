@@ -237,4 +237,17 @@ describe("GuestFormDialog", () => {
       "Other",
     ]);
   });
+  it("given the side picker, when it opens, then the United States is one of the sides", () => {
+    renderWithProviders(<GuestFormDialog guest={null} onSave={vi.fn()} onClose={vi.fn()} />);
+
+    const options = within(screen.getByLabelText("Side")).getAllByRole("option");
+    expect(options.map((option) => option.textContent)).toEqual([
+      "Not specified",
+      "Venezuela",
+      "Italy",
+      "Spain",
+      "United States",
+      "Other",
+    ]);
+  });
 });

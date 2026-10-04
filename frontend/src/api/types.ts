@@ -1,6 +1,6 @@
 /** The vocabularies the API accepts, mirrored from `app/models/guest.py`. */
 export type RsvpStatus = "pending" | "confirmed" | "declined";
-export type GuestSide = "venezuela" | "italy" | "spain" | "other";
+export type GuestSide = "venezuela" | "italy" | "spain" | "usa" | "other";
 export type GuestRelationshipType =
   | "family"
   | "friends"

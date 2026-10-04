@@ -28,6 +28,7 @@ class GuestSide(str, Enum):
     VENEZUELA = "venezuela"
     ITALY = "italy"
     SPAIN = "spain"
+    USA = "usa"
     OTHER = "other"
 
 

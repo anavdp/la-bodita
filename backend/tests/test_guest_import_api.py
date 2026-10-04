@@ -346,3 +346,13 @@ def test_given_relationships_typed_with_spaces_or_dashes_when_previewed_then_the
         "groom_friends",
         "groom_friends",
     ]
+
+
+def test_given_the_united_states_spelled_out_when_previewed_then_it_reads_as_the_usa_side(
+    client: TestClient, wedding: Wedding
+):
+    content = csv_of("Sarah,Rizzo,,,,USA,,,", "Sol,Hidalgo,,,,United States,,,", "Karina,Avendaño,,,,us,,,")
+
+    response = preview(client, wedding.id, content)
+
+    assert [row["guest"]["side"] for row in response.json()["rows"]] == ["usa", "usa", "usa"]

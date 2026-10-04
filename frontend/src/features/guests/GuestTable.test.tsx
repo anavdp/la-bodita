@@ -278,3 +278,19 @@ describe("GuestTable relationships", () => {
     expect(within(screen.getByRole("row", { name: /Pino Rossi/ })).getByText("Acompañante")).toBeInTheDocument();
   });
 });
+
+describe("GuestTable sides", () => {
+  it("given a guest from the United States, when the row is rendered, then their side is the US flag", () => {
+    renderWithProviders(
+      <GuestTable
+        guests={[aGuest({ firstName: "Sarah", lastName: "Rizzo", side: "usa" })]}
+        onEdit={noop}
+        onDelete={noop}
+        onChangeRsvp={noop}
+      />,
+    );
+
+    const row = screen.getByRole("row", { name: /Sarah Rizzo/ });
+    expect(within(row).getByRole("img", { name: "United States" })).toHaveTextContent("🇺🇸");
+  });
+});

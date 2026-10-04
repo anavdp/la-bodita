@@ -32,6 +32,9 @@ LOWERCASED_COLUMNS = ("is_child", "gender", "relationship_type", "side")
 # A 150-guest list is a few kilobytes; anything near this is not a guest list.
 MAX_FILE_BYTES = 1_048_576
 
+# Other ways a spreadsheet spells a side.
+SIDE_ALIASES = {"us": "usa", "united states": "usa", "united_states": "usa"}
+
 ERROR_CODES = {"missing": "missing", "string_too_short": "missing", "string_too_long": "too_long"}
 
 
@@ -81,6 +84,8 @@ def parse_guest_rows(text: str) -> list[GuestImportRow]:
         for column in LOWERCASED_COLUMNS:
             if column in values:
                 values[column] = values[column].lower()
+        if "side" in values:
+            values["side"] = SIDE_ALIASES.get(values["side"], values["side"])
         # "Plus one" and "groom-friends" are how a person types plus_one and groom_friends.
         if "relationship_type" in values:
             values["relationship_type"] = re.sub(r"[\s-]+", "_", values["relationship_type"])

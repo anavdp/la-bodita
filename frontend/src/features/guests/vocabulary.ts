@@ -2,7 +2,7 @@ import type { GuestGender, GuestRelationshipType, GuestSide, RsvpStatus } from "
 import type { TranslationKey } from "../../i18n/translations";
 
 export const rsvpStatuses: RsvpStatus[] = ["pending", "confirmed", "declined"];
-export const guestSides: GuestSide[] = ["venezuela", "italy", "spain", "other"];
+export const guestSides: GuestSide[] = ["venezuela", "italy", "spain", "usa", "other"];
 export const relationshipTypes: GuestRelationshipType[] = [
   "family",
   "friends",
@@ -22,12 +22,13 @@ export const genderLabelKey = (gender: GuestGender): TranslationKey => `guests.g
 /**
  * Each side of the family as its own flag. "Other" has no country behind it, so
  * it gets the globe. Country flag emoji do not render on Windows, where they
- * fall back to the two-letter code (ES, VE, IT) - still readable, just plainer.
+ * fall back to the two-letter code (ES, VE, IT, US) - still readable, just plainer.
  */
 export const sideFlag: Record<GuestSide, string> = {
   venezuela: "🇻🇪",
   italy: "🇮🇹",
   spain: "🇪🇸",
+  usa: "🇺🇸",
   other: "🌍",
 };
 

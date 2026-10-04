@@ -420,3 +420,12 @@ def test_given_the_newer_relationship_types_when_guests_are_created_then_each_is
 
         assert response.status_code == 201
         assert response.json()["relationship_type"] == relationship
+
+
+def test_given_a_guest_from_the_united_states_when_created_then_their_side_is_stored(
+    client: TestClient, wedding: Wedding
+):
+    response = client.post(GUESTS_URL.format(wedding_id=wedding.id), json=a_guest(side="usa"))
+
+    assert response.status_code == 201
+    assert response.json()["side"] == "usa"
