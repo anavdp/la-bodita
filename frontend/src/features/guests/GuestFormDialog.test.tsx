@@ -206,4 +206,21 @@ describe("GuestFormDialog", () => {
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ householdId: null }));
     });
   });
+  it("given a guest on their own, when the dialog opens, then they read as on their own and stay put", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    renderWithProviders(
+      <GuestFormDialog
+        guest={aGuest({ householdId: 30 })}
+        households={[{ id: 10, label: "Famiglia Rossi" }]}
+        onSave={onSave}
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText("Household")).toHaveValue("");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    // Already on their own: nothing to send, so their RSVP link stays the same.
+    expect(onSave.mock.calls[0][0].householdId).toBeUndefined();
+  });
 });

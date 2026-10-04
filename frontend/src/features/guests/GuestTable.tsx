@@ -16,7 +16,7 @@ import {
 
 interface GuestTableProps {
   guests: Guest[];
-  /** Names the household column; a guest whose household has not loaded shows a dash. */
+  /** Names the household column. Someone on their own shows blank: their household is just them. */
   households?: Household[];
   onEdit: (guest: Guest) => void;
   onDelete: (guest: Guest) => void;
@@ -33,7 +33,11 @@ const menuItem =
 
 export function GuestTable({ guests, households = [], onEdit, onDelete, onChangeRsvp }: GuestTableProps) {
   const { t } = useTranslation();
-  const householdNames = new Map(households.map((household) => [household.id, household.name]));
+  const householdNames = new Map(
+    households
+      .filter((household) => household.guestIds.length > 1)
+      .map((household) => [household.id, household.name]),
+  );
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
@@ -86,7 +90,7 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                   <span className="font-title-lg text-title-lg text-on-surface">{name}</span>
                 </td>
                 <td className="px-4 py-4 text-on-surface-variant">
-                  {householdNames.get(guest.householdId) ?? <NotSpecified />}
+                  {householdNames.get(guest.householdId)}
                 </td>
                 <td className="px-4 py-4 text-on-surface-variant">
                   {t(guest.isChild ? "guests.type.child" : "guests.type.adult")}

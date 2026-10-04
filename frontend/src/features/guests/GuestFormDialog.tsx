@@ -22,7 +22,7 @@ export interface HouseholdOption {
 interface GuestFormDialogProps {
   /** The guest being edited, or null to create a new one. */
   guest: Guest | null;
-  /** The households a guest can join; none picked means a household of their own. */
+  /** The families a guest can join; none picked means a household of their own. */
   households?: HouseholdOption[];
   onSave: (draft: GuestDraft) => Promise<void>;
   onClose: () => void;
@@ -36,12 +36,13 @@ const fieldLabel = "mb-1 block font-label-md text-label-md uppercase text-on-sur
 const orNull = (value: string): string | null => (value.trim() === "" ? null : value.trim());
 
 /**
- * Which household to send: nothing when it is unchanged (or a new guest is on
- * their own), null to split an existing guest off, otherwise the one picked.
+ * Which household to send: nothing when it is unchanged (or a guest already on
+ * their own stays that way), null to split a family member off, otherwise the
+ * one picked.
  */
-function chosenHousehold(guest: Guest | null, picked: string): number | null | undefined {
+function chosenHousehold(guest: Guest | null, picked: string, isInFamily: boolean): number | null | undefined {
   if (picked === "") {
-    return guest === null ? undefined : null;
+    return isInFamily ? null : undefined;
   }
   const householdId = Number(picked);
   return householdId === guest?.householdId ? undefined : householdId;
@@ -62,7 +63,9 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
   const [rsvpStatus, setRsvpStatus] = useState<RsvpStatus>(guest?.rsvpStatus ?? "pending");
   const [phone, setPhone] = useState(guest?.phone ?? "");
   const [email, setEmail] = useState(guest?.email ?? "");
-  const [household, setHousehold] = useState(guest === null ? "" : String(guest.householdId));
+  // The picker lists families only, so a guest on their own starts on "On their own".
+  const isInFamily = guest !== null && households.some((option) => option.id === guest.householdId);
+  const [household, setHousehold] = useState(isInFamily ? String(guest.householdId) : "");
 
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -98,7 +101,7 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
         rsvpStatus,
         phone: orNull(phone),
         email: orNull(email),
-        householdId: chosenHousehold(guest, household),
+        householdId: chosenHousehold(guest, household, isInFamily),
       });
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : t("guests.form.saveFailed"));

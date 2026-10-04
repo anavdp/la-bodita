@@ -228,7 +228,7 @@ describe("GuestTable households", () => {
       <GuestTable
         guests={[maria, carlos]}
         households={[
-          { id: 10, name: "Famiglia Rossi", rsvpToken: "a", guestIds: [maria.id] },
+          { id: 10, name: "Famiglia Rossi", rsvpToken: "a", guestIds: [maria.id, 99] },
           { id: 20, name: "Carlos Mendoza", rsvpToken: "b", guestIds: [carlos.id] },
         ]}
         onEdit={noop}
@@ -240,5 +240,23 @@ describe("GuestTable households", () => {
     expect(within(screen.getByRole("row", { name: /Maria Rossi/ })).getByText("Famiglia Rossi")).toBeInTheDocument();
     // Every row is a guest: no household heading rows in between.
     expect(screen.getAllByRole("row")).toHaveLength(3);
+  });
+});
+
+describe("GuestTable one-person households", () => {
+  it("given a guest on their own, when the row is rendered, then the household cell is left blank", () => {
+    const carlos = aGuest({ firstName: "Carlos", lastName: "Mendoza", householdId: 20 });
+    renderWithProviders(
+      <GuestTable
+        guests={[carlos]}
+        households={[{ id: 20, name: "Carlos Mendoza", rsvpToken: "b", guestIds: [carlos.id] }]}
+        onEdit={noop}
+        onDelete={noop}
+        onChangeRsvp={noop}
+      />,
+    );
+
+    const cells = within(screen.getByRole("row", { name: /Carlos Mendoza/ })).getAllByRole("cell");
+    expect(cells[1]).toBeEmptyDOMElement();
   });
 });

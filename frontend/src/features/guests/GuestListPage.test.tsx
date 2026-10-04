@@ -37,7 +37,7 @@ describe("GuestListPage", () => {
 
   it("given an existing family, when a guest is added to it, then the guest is created in that household", async () => {
     vi.mocked(householdsApi.listHouseholds).mockResolvedValue([
-      { id: maria.householdId, name: "Famiglia Rossi", rsvpToken: "t", guestIds: [maria.id] },
+      { id: maria.householdId, name: "Famiglia Rossi", rsvpToken: "t", guestIds: [maria.id, 99] },
     ]);
     vi.mocked(guestsApi.createGuest).mockResolvedValue(maria);
     renderWithProviders(<GuestListPage />);
@@ -327,6 +327,16 @@ describe("the Households tab", () => {
     );
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(householdsApi.listHouseholds).toHaveBeenCalledTimes(2);
+  });
+
+  it("given a guest being edited, when the household picker opens, then it offers only households of two or more", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Paolo Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: "Add Guest" }));
+
+    const options = within(screen.getByLabelText("Household")).getAllByRole("option");
+    expect(options.map((option) => option.textContent)).toEqual(["On their own", "Famiglia Rossi"]);
   });
 
   it("given a household, when it is renamed, then the change is saved against it", async () => {

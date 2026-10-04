@@ -70,10 +70,12 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     const needle = term.trim().toLowerCase();
     return households.filter((household) => household.name.toLowerCase().includes(needle));
   }, [households, term]);
-  /** The guest form's household picker, alphabetical. */
+  /** The guest form's household picker: families only, alphabetical. Being on
+   * your own is the picker's own "On their own" choice. */
   const householdOptions = useMemo(
     () =>
       households
+        .filter((household) => household.guestIds.length > 1)
         .map((household) => ({ id: household.id, label: household.name }))
         .sort((first, second) => first.label.localeCompare(second.label)),
     [households],

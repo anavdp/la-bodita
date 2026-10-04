@@ -127,7 +127,7 @@ const en = {
   "guests.household.copied": "RSVP link copied",
   "guests.column.household": "Household",
   "guests.form.household": "Household",
-  "guests.form.householdNew": "On their own (new household)",
+  "guests.form.householdNew": "On their own",
 
   "rsvp.loading": "Loading your invitation...",
   "rsvp.notFound": "This invitation link is not valid.",
@@ -307,7 +307,7 @@ const es: Record<TranslationKey, string> = {
   "guests.household.copied": "Enlace de confirmación copiado",
   "guests.column.household": "Familia",
   "guests.form.household": "Familia",
-  "guests.form.householdNew": "Por su cuenta (nueva familia)",
+  "guests.form.householdNew": "Por su cuenta",
 
   "rsvp.loading": "Cargando tu invitación...",
   "rsvp.notFound": "Este enlace de invitación no es válido.",
