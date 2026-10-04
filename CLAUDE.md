@@ -88,15 +88,25 @@ with low-value tests just to clear the number.
 
 Work is tracked as GitHub issues on the `MVP` milestone, labeled by area
 (`area:backend`, `area:frontend`, `area:design`, `area:infra`), with a
-Projects board at github.com/users/anavdp/projects/1. Workflow: one branch +
-one PR per issue, PR body includes `Closes #N` to auto-close on merge.
+Projects board at github.com/users/anavdp/projects/1. Reference the issue in
+the commit message (`Closes #N`) so it auto-closes once pushed.
+
+**Git workflow:**
+- **No branches.** Trunk-based development only: all work is committed
+  directly on `main`. Don't create feature branches or open PRs.
+- **Never push without Vicky's explicit approval.** When a feature is ready,
+  she tests it locally first, then approves the push.
+- **Committing is allowed, but only with every test passing** — the
+  pre-commit gate (backend pytest + 85% coverage, frontend Vitest + 85%
+  coverage). Never bypass it with `--no-verify`.
+
 Schema lands one vertical slice at a time, not in a single migration: issue
 #25 sets up the `Base`/mixin conventions and the `WEDDING` tenant root, then
 each entity gets its own table+migration issue, endpoint issue, and screen so
 it can be built end to end. Slice order is in #25 — each slice creates its
 tables complete and only FKs *up* at tables that already exist, so no slice
-back-patches an earlier one. Keep the Alembic history linear by merging one
-slice branch at a time.
+back-patches an earlier one. Keep the Alembic history linear: one migration
+head at a time, each new revision on top of the latest.
 
 ## Architecture: data model
 
