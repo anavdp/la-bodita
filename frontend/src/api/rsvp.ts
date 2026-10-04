@@ -2,7 +2,7 @@ import { request } from "./client";
 import type { RsvpAnswer, RsvpInvitation, RsvpStatus } from "./types";
 
 interface RsvpInvitationPayload {
-  household_name: string | null;
+  household_name: string;
   wedding_name: string;
   wedding_date: string | null;
   guests: { id: number; first_name: string; last_name: string; rsvp_status: RsvpStatus }[];

@@ -73,6 +73,27 @@ describe("RsvpPage", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("Thank you! Your answers are saved.");
   });
 
+  it("given a whole household coming, when everyone is marked at once, then every member is set to attending", async () => {
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Everyone is coming" }));
+
+    for (const name of ["Maria Rossi", "Paolo Rossi"]) {
+      expect(within(screen.getByRole("group", { name })).getByRole("radio", { name: "Attending" })).toBeChecked();
+    }
+    expect(rsvpApi.answerInvitation).not.toHaveBeenCalled();
+  });
+
+  it("given a household that cannot come, when no one is marked at once, then every member is set to not attending", async () => {
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "No one is coming" }));
+
+    for (const name of ["Maria Rossi", "Paolo Rossi"]) {
+      expect(within(screen.getByRole("group", { name })).getByRole("radio", { name: "Not attending" })).toBeChecked();
+    }
+  });
+
   it("given nobody has answered yet, when the page opens, then sending waits for an answer", async () => {
     vi.mocked(rsvpApi.getInvitation).mockResolvedValue({
       ...invitation,
@@ -81,6 +102,8 @@ describe("RsvpPage", () => {
     renderPage();
 
     expect(await screen.findByRole("button", { name: "Send RSVP" })).toBeDisabled();
+    // One person answers for themselves; the all-at-once buttons would only repeat that.
+    expect(screen.queryByRole("button", { name: "Everyone is coming" })).not.toBeInTheDocument();
   });
 
   it("given an answer that fails to save, when it is sent, then the household is told to try again", async () => {

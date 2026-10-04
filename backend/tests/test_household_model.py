@@ -16,6 +16,7 @@ def test_given_a_guest_added_without_a_household_when_it_is_saved_then_it_gets_a
 
     assert guest.household_id is not None
     assert guest.household.wedding_id == wedding.id
+    assert guest.household.name == "Maria Rossi"
     assert [member.id for member in guest.household.guests] == [guest.id]
 
 
@@ -48,8 +49,8 @@ def test_given_a_household_when_guests_join_it_then_they_share_it(db_session: Se
 def test_given_a_new_household_when_it_is_saved_then_it_gets_a_long_private_rsvp_token(
     db_session: Session, wedding: Wedding
 ):
-    first = Household(wedding_id=wedding.id)
-    second = Household(wedding_id=wedding.id)
+    first = Household(wedding_id=wedding.id, name="Rossi")
+    second = Household(wedding_id=wedding.id, name="Mendoza")
     db_session.add_all([first, second])
     db_session.commit()
 
@@ -62,10 +63,19 @@ def test_given_two_households_when_they_share_a_token_then_the_database_rejects_
 ):
     db_session.add_all(
         [
-            Household(wedding_id=wedding.id, rsvp_token="same"),
-            Household(wedding_id=wedding.id, rsvp_token="same"),
+            Household(wedding_id=wedding.id, name="Rossi", rsvp_token="same"),
+            Household(wedding_id=wedding.id, name="Mendoza", rsvp_token="same"),
         ]
     )
+
+    with pytest.raises(IntegrityError):
+        db_session.commit()
+
+
+def test_given_a_household_without_a_name_when_it_is_saved_then_the_database_rejects_it(
+    db_session: Session, wedding: Wedding
+):
+    db_session.add(Household(wedding_id=wedding.id))
 
     with pytest.raises(IntegrityError):
         db_session.commit()

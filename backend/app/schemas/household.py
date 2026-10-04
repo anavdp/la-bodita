@@ -1,17 +1,38 @@
 from datetime import date
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
 from app.models.guest import RsvpStatus
+from app.schemas.guest import RequiredText
+
+# A household exists for its guests: it is created with at least one, and to
+# empty it you delete it.
+Members = Annotated[list[int], Field(min_length=1)]
 
 
 class HouseholdRead(BaseModel):
     """A household as the guest list needs it: who is in it, and their private RSVP link."""
 
     id: int
-    name: str | None
+    name: str
     rsvp_token: str
     guest_ids: list[int]
+
+
+class HouseholdCreate(BaseModel):
+    """A household and who is in it; guests listed move out of wherever they were."""
+
+    name: RequiredText
+    guest_ids: Members
+
+
+class HouseholdUpdate(BaseModel):
+    """A rename, a new membership, or both. `guest_ids` is the full list of members:
+    newcomers move in, and anyone left out splits off into a household of their own."""
+
+    name: RequiredText | None = None
+    guest_ids: Members | None = None
 
 
 class RsvpGuest(BaseModel):
@@ -24,7 +45,7 @@ class RsvpGuest(BaseModel):
 
 
 class RsvpInvitation(BaseModel):
-    household_name: str | None
+    household_name: str
     wedding_name: str
     wedding_date: date | None
     guests: list[RsvpGuest]

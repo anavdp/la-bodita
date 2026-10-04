@@ -35,16 +35,22 @@ export type GuestImportDraft = Omit<GuestDraft, "householdId"> & { household: st
 
 export interface Household {
   id: number;
-  /** Null for a household nobody named, e.g. someone added on their own. */
-  name: string | null;
+  /** Someone added on their own gets a household named after them. */
+  name: string;
   /** The private part of the household's RSVP link. */
   rsvpToken: string;
   guestIds: number[];
 }
 
 /** What a household sees when it opens its RSVP link. */
+/** What the Households screen sends: a name and the full list of members. */
+export interface HouseholdDraft {
+  name: string;
+  guestIds: number[];
+}
+
 export interface RsvpInvitation {
-  householdName: string | null;
+  householdName: string;
   weddingName: string;
   weddingDate: string | null;
   guests: RsvpGuest[];

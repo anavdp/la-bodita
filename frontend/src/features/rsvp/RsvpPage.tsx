@@ -8,7 +8,6 @@ import type { RsvpAnswer, RsvpInvitation, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "../guests/filtering";
-import { householdLabel } from "../guests/households";
 
 /** A member's choice on the form: undecided until they pick one. */
 type Choice = "yes" | "no" | null;
@@ -73,6 +72,12 @@ export function RsvpPage() {
     setChoices((current) => ({ ...current, [guestId]: choice }));
   };
 
+  /** The usual case is a whole household answering the same way. */
+  const chooseForEveryone = (choice: Choice) => {
+    setIsSaved(false);
+    setChoices(Object.fromEntries((invitation?.guests ?? []).map((guest) => [guest.id, choice])));
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setSaveError(false);
@@ -105,11 +110,29 @@ export function RsvpPage() {
           </p>
         )}
         <p className="mb-1 font-title-lg text-title-lg text-on-surface">
-          {t("rsvp.invitationFor", { label: householdLabel(invitation.householdName, invitation.guests) })}
+          {t("rsvp.invitationFor", { label: invitation.householdName })}
         </p>
         <p className="mb-6 font-body-sm text-body-sm text-on-surface-variant">{t("rsvp.prompt")}</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {invitation.guests.length > 1 && (
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => chooseForEveryone("yes")}
+                className="rounded-full border border-primary px-6 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
+              >
+                {t("rsvp.everyone")}
+              </button>
+              <button
+                type="button"
+                onClick={() => chooseForEveryone("no")}
+                className="rounded-full border border-primary px-6 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
+              >
+                {t("rsvp.noOne")}
+              </button>
+            </div>
+          )}
           {invitation.guests.map((guest) => (
             <fieldset key={guest.id} className="rounded-lg border border-outline-variant px-4 py-3">
               <legend className="px-1 font-label-lg text-label-lg text-on-surface">{fullName(guest)}</legend>

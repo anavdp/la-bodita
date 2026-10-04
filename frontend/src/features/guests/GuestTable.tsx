@@ -3,8 +3,6 @@ import { useState } from "react";
 import type { Guest, Household, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { fullName } from "./filtering";
-import { groupByHousehold, rsvpUrl } from "./households";
-import type { HouseholdGroup } from "./households";
 import { NotSpecified } from "./NotSpecified";
 import {
   relationshipLabelKey,
@@ -17,10 +15,8 @@ import {
 } from "./vocabulary";
 
 interface GuestTableProps {
-  /** The guests to show - possibly narrowed by a search. */
   guests: Guest[];
-  /** The whole list, so a household is labelled and counted by all its members. */
-  allGuests?: Guest[];
+  /** Names the household column; a guest whose household has not loaded shows a dash. */
   households?: Household[];
   onEdit: (guest: Guest) => void;
   onDelete: (guest: Guest) => void;
@@ -35,67 +31,11 @@ const menuPanel =
 const menuItem =
   "flex items-center gap-2 rounded px-3 py-2 text-left font-label-md text-label-md transition-colors hover:bg-surface-container-high";
 
-/** Open or copy a household's private RSVP page. */
-function RsvpLinkActions({ group }: { group: HouseholdGroup & { rsvpToken: string } }) {
+export function GuestTable({ guests, households = [], onEdit, onDelete, onChangeRsvp }: GuestTableProps) {
   const { t } = useTranslation();
-  const [isCopied, setIsCopied] = useState(false);
-  const url = rsvpUrl(group.rsvpToken);
-  // The clipboard API only exists on a secure origin; the link itself always works.
-  const canCopy = typeof navigator !== "undefined" && navigator.clipboard !== undefined;
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(url);
-    setIsCopied(true);
-  };
-
-  return (
-    <span className="inline-flex items-center gap-1">
-      <a
-        href={url}
-        target="_blank"
-        rel="noreferrer"
-        aria-label={t("guests.household.openLink", { label: group.label })}
-        title={t("guests.household.openLink", { label: group.label })}
-        className="flex h-8 w-8 items-center justify-center rounded-full text-outline transition-colors hover:text-primary"
-      >
-        <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-          open_in_new
-        </span>
-      </a>
-      {canCopy && (
-        <button
-          type="button"
-          onClick={() => void copy()}
-          aria-label={
-            isCopied ? t("guests.household.copied") : t("guests.household.copyLink", { label: group.label })
-          }
-          title={isCopied ? t("guests.household.copied") : t("guests.household.copyLink", { label: group.label })}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-outline transition-colors hover:text-primary"
-        >
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            {isCopied ? "check" : "link"}
-          </span>
-        </button>
-      )}
-    </span>
-  );
-}
-
-const hasRsvpLink = (group: HouseholdGroup): group is HouseholdGroup & { rsvpToken: string } =>
-  group.rsvpToken !== null;
-
-export function GuestTable({
-  guests,
-  allGuests = guests,
-  households = [],
-  onEdit,
-  onDelete,
-  onChangeRsvp,
-}: GuestTableProps) {
-  const { t } = useTranslation();
+  const householdNames = new Map(households.map((household) => [household.id, household.name]));
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-  const groups = groupByHousehold(guests, allGuests, households);
 
   const closeMenus = () => {
     setOpenMenu(null);
@@ -121,6 +61,7 @@ export function GuestTable({
         <thead>
           <tr className="border-b border-surface-variant font-label-md text-label-md uppercase text-on-surface-variant">
             <th className="px-4 py-4 font-semibold">{t("guests.column.name")}</th>
+            <th className="px-4 py-4 font-semibold">{t("guests.column.household")}</th>
             <th className="px-4 py-4 font-semibold">{t("guests.column.type")}</th>
             <th className="px-4 py-4 font-semibold">{t("guests.column.relationship")}</th>
             <th className="px-4 py-4 font-semibold">{t("guests.column.side")}</th>
@@ -128,25 +69,8 @@ export function GuestTable({
             <th className="px-4 py-4 text-right font-semibold">{t("guests.column.actions")}</th>
           </tr>
         </thead>
-        {groups.map((group) => {
-          // A family gets a heading row; someone on their own carries the link in their row.
-          const isFamily = group.memberCount > 1;
-          return (
-            <tbody key={group.householdId} aria-label={group.label} className="font-body-sm text-body-sm">
-              {isFamily && (
-                <tr className="border-b border-surface-container bg-surface-container-low">
-                  <td colSpan={6} className="px-4 py-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="font-title-lg text-title-lg text-primary">{group.label}</span>
-                      <span className="font-label-md text-label-md text-on-surface-variant">
-                        {t("guests.household.members", { count: group.memberCount })}
-                      </span>
-                      {hasRsvpLink(group) && <RsvpLinkActions group={group} />}
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {group.guests.map((guest) => {
+        <tbody className="font-body-sm text-body-sm">
+          {guests.map((guest) => {
             const name = fullName(guest);
             const statusLabel = t(rsvpLabelKey(guest.rsvpStatus));
 
@@ -159,10 +83,10 @@ export function GuestTable({
                   {/* The mockup starts each row with the design system's circular
                       checkbox, but with nothing selectable behind it. It comes back
                       with batch confirmation (issue #37). */}
-                  <span className="inline-flex items-center gap-2">
-                    <span className="font-title-lg text-title-lg text-on-surface">{name}</span>
-                    {!isFamily && hasRsvpLink(group) && <RsvpLinkActions group={group} />}
-                  </span>
+                  <span className="font-title-lg text-title-lg text-on-surface">{name}</span>
+                </td>
+                <td className="px-4 py-4 text-on-surface-variant">
+                  {householdNames.get(guest.householdId) ?? <NotSpecified />}
                 </td>
                 <td className="px-4 py-4 text-on-surface-variant">
                   {t(guest.isChild ? "guests.type.child" : "guests.type.adult")}
@@ -301,10 +225,8 @@ export function GuestTable({
                 </td>
               </tr>
             );
-              })}
-            </tbody>
-          );
-        })}
+          })}
+        </tbody>
       </table>
     </div>
   );

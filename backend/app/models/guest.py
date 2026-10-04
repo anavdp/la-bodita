@@ -93,6 +93,11 @@ class Guest(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     email: Mapped[str | None] = mapped_column(default=None)
 
 
+def household_of_one(guest: Guest) -> Household:
+    """A new household for a guest invited alone, named after them."""
+    return Household(wedding_id=guest.wedding_id, name=f"{guest.first_name} {guest.last_name}")
+
+
 @event.listens_for(Session, "before_flush")
 def give_lone_guests_a_household(session: Session, flush_context, instances) -> None:
     """A guest added without a household is invited alone: a household of one.
@@ -102,4 +107,4 @@ def give_lone_guests_a_household(session: Session, flush_context, instances) -> 
     """
     for guest in session.new:
         if isinstance(guest, Guest) and guest.household_id is None and guest.household is None:
-            guest.household = Household(wedding_id=guest.wedding_id)
+            guest.household = household_of_one(guest)

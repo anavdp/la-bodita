@@ -61,6 +61,13 @@ describe("AppRoutes", () => {
     expect(screen.getByRole("navigation", { name: "Main navigation" })).toBeInTheDocument();
   });
 
+  it("given the households route, when it is visited, then the guest list opens on its households tab", async () => {
+    renderAt("/guests/households");
+
+    expect(await screen.findByRole("button", { name: "Add Household" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Households" })).toHaveAttribute("aria-current", "page");
+  });
+
   it("given the root, when it is visited, then the guest list is where the app opens", async () => {
     renderAt("/");
 

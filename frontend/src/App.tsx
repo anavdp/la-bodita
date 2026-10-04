@@ -18,7 +18,8 @@ export function AppRoutes() {
       <Route path="/rsvp/:token" element={<RsvpPage />} />
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to="/guests" replace />} />
-        <Route path="/guests" element={<GuestListPage />} />
+        <Route path="/guests" element={<GuestListPage tab="guests" />} />
+        <Route path="/guests/households" element={<GuestListPage tab="households" />} />
         <Route path="/dashboard" element={<ComingSoon titleKey="nav.dashboard" />} />
         <Route path="/items" element={<ComingSoon titleKey="nav.items" />} />
         <Route path="/checklist" element={<ComingSoon titleKey="nav.checklist" />} />

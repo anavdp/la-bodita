@@ -236,7 +236,7 @@ def test_given_existing_guests_when_the_household_migration_runs_then_each_gets_
             " (1, 'Maria', 'Rossi'), (1, 'Carlos', 'Mendoza')"
         )
 
-    command.upgrade(config, "head")
+    command.upgrade(config, "8d4f2a6c1e07")
 
     with engine.connect() as connection:
         guest_households = connection.exec_driver_sql("select household_id from guest").scalars().all()
@@ -255,15 +255,79 @@ def test_given_the_household_migration_when_it_is_downgraded_then_guests_survive
     engine = create_engine(database_url)
     with engine.begin() as connection:
         connection.exec_driver_sql("insert into wedding (id, name) values (1, 'La Bodita')")
-        connection.exec_driver_sql("insert into household (id, wedding_id, rsvp_token) values (1, 1, 'abc')")
+        connection.exec_driver_sql(
+            "insert into household (id, wedding_id, name, rsvp_token) values (1, 1, 'Rossi', 'abc')"
+        )
         connection.exec_driver_sql(
             "insert into guest (wedding_id, household_id, first_name, last_name) values (1, 1, 'Maria', 'Rossi')"
         )
 
     command.downgrade(config, "5b3e7d2a9c41")
 
-    inspector = inspect(engine)
+    inspector = inspect(create_engine(database_url))
     assert "household" not in inspector.get_table_names()
     assert "household_id" not in guest_column_nullability(database_url)
     with engine.connect() as connection:
         assert connection.exec_driver_sql("select count(*) from guest").scalar_one() == 1
+
+
+def test_given_unnamed_households_when_the_naming_migration_runs_then_each_is_named_after_its_members(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'household_naming_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "8d4f2a6c1e07")
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("insert into wedding (id, name) values (1, 'La Bodita')")
+        connection.exec_driver_sql(
+            "insert into household (id, wedding_id, name, rsvp_token) values"
+            " (1, 1, NULL, 'a'), (2, 1, NULL, 'b'), (3, 1, 'Famiglia', 'c'), (4, 1, NULL, 'd')"
+        )
+        connection.exec_driver_sql(
+            "insert into guest (wedding_id, household_id, first_name, last_name) values"
+            " (1, 1, 'Maria', 'Rossi'),"
+            " (1, 2, 'Lucia', 'Mendoza'), (1, 2, 'Carlos', 'Mendoza'), (1, 2, 'Ana', 'Perez'),"
+            " (1, 3, 'Paolo', 'Rossi')"
+        )
+
+    command.upgrade(config, "head")
+
+    with engine.connect() as connection:
+        names = dict(connection.exec_driver_sql("select id, name from household").all())
+        surviving_guests = connection.exec_driver_sql("select count(*) from guest").scalar_one()
+    # Rebuilding the household table must not cascade into the guests that point at it.
+    assert surviving_guests == 5
+    assert names == {1: "Maria Rossi", 2: "Mendoza & Perez", 3: "Famiglia", 4: "Household 4"}
+    household_columns = inspect(create_engine(database_url)).get_columns("household")
+    assert {column["name"]: column["nullable"] for column in household_columns}["name"] is False
+
+
+def test_given_the_naming_migration_when_it_is_downgraded_then_household_names_are_optional_again(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'household_naming_downgrade_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "head")
+
+    command.downgrade(config, "8d4f2a6c1e07")
+
+    household_columns = inspect(create_engine(database_url)).get_columns("household")
+    assert {column["name"]: column["nullable"] for column in household_columns}["name"] is True
+
+
+def test_given_guests_before_households_when_upgraded_to_head_in_one_go_then_every_guest_survives_named(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'household_one_go_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "5b3e7d2a9c41")
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("insert into wedding (id, name) values (1, 'La Bodita')")
+        connection.exec_driver_sql(
+            "insert into guest (wedding_id, first_name, last_name) values (1, 'Maria', 'Rossi'), (1, 'Carlos', 'Mendoza')"
+        )
+
+    command.upgrade(config, "head")
+
+    with engine.connect() as connection:
+        rows = connection.exec_driver_sql(
+            "select guest.first_name, household.name from guest join household on household.id = guest.household_id"
+            " order by guest.id"
+        ).all()
+    assert [tuple(row) for row in rows] == [("Maria", "Maria Rossi"), ("Carlos", "Carlos Mendoza")]

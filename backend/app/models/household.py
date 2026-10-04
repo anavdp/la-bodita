@@ -25,8 +25,9 @@ class Household(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
 
     __tablename__ = "household"
 
-    # Optional: a household of one is labelled by its member, a family by its CSV name.
-    name: Mapped[str | None] = mapped_column(default=None)
+    # Someone invited alone gets a household named after them; a family is named
+    # by the couple (or by the CSV's household column).
+    name: Mapped[str]
     rsvp_token: Mapped[str] = mapped_column(unique=True, default=new_rsvp_token)
 
     guests: Mapped[list["Guest"]] = relationship(

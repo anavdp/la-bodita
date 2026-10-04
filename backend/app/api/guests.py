@@ -13,6 +13,7 @@ from app.guest_import import (
     template_csv,
 )
 from app.models import Guest, Household, Wedding
+from app.models.guest import household_of_one
 from app.schemas import GuestCreate, GuestImportGuest, GuestImportPreview, GuestRead, GuestUpdate
 
 router = APIRouter(prefix="/api/weddings/{wedding_id}/guests", tags=["guests"])
@@ -150,15 +151,13 @@ def update_guest(
 ) -> Guest:
     changes = payload.model_dump(exclude_unset=True)
     previous_household_id = guest.household_id
-    if "household_id" in changes:
-        household_id = changes.pop("household_id")
-        guest.household = (
-            Household(wedding_id=wedding.id)
-            if household_id is None
-            else find_household(session, wedding, household_id)
-        )
+    household_id = changes.pop("household_id", previous_household_id)
     for field, value in changes.items():
         setattr(guest, field, value)
+    if household_id is None:
+        guest.household = household_of_one(guest)
+    elif household_id != previous_household_id:
+        guest.household = find_household(session, wedding, household_id)
     session.commit()
     if guest.household_id != previous_household_id:
         remove_household_if_empty(session, previous_household_id)

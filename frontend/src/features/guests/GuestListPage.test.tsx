@@ -266,3 +266,121 @@ describe("changing an RSVP from the table", () => {
     expect(guestsApi.importGuests).not.toHaveBeenCalled();
   });
 });
+
+describe("the Households tab", () => {
+  const paolo = aGuest({ firstName: "Paolo", lastName: "Rossi", householdId: maria.householdId });
+  const rossi = {
+    id: maria.householdId,
+    name: "Famiglia Rossi",
+    rsvpToken: "rossi-token",
+    guestIds: [maria.id, paolo.id],
+  };
+  const mendoza = { id: carlos.householdId, name: "Carlos Mendoza", rsvpToken: "c", guestIds: [carlos.id] };
+
+  beforeEach(() => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria, paolo]);
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([mendoza, rossi]);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  const renderHouseholds = (options = {}) =>
+    renderWithProviders(<GuestListPage tab="households" />, { route: "/guests/households", ...options });
+
+  it("given the households tab, when it opens, then it lists households and offers to add one", async () => {
+    renderHouseholds();
+
+    expect(await screen.findByRole("row", { name: /Famiglia Rossi/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Households" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Guests" })).toHaveAttribute("href", "/guests");
+    expect(screen.getByRole("button", { name: "Add Household" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Guest" })).not.toBeInTheDocument();
+  });
+
+  it("given the guests tab, when it opens, then the household tab is one click away", async () => {
+    renderWithProviders(<GuestListPage />);
+
+    expect(await screen.findByRole("link", { name: "Households" })).toHaveAttribute("href", "/guests/households");
+    expect(screen.getByRole("link", { name: "Guests" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("given a search term, when households are listed, then only matching names are shown", async () => {
+    renderHouseholds({ searchTerm: "zzz" });
+
+    expect(await screen.findByText("No households match “zzz”.")).toBeInTheDocument();
+  });
+
+  it("given guests on their own, when a household is added with them, then it is created and the list reloads", async () => {
+    vi.mocked(householdsApi.createHousehold).mockResolvedValue(rossi);
+    renderHouseholds();
+    await screen.findByRole("row", { name: /Famiglia Rossi/ });
+
+    await userEvent.click(screen.getByRole("button", { name: "Add Household" }));
+    await userEvent.type(screen.getByLabelText("Household name"), "Amici");
+    await userEvent.click(screen.getByRole("checkbox", { name: /Carlos Mendoza/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(householdsApi.createHousehold).toHaveBeenCalledWith(1, { name: "Amici", guestIds: [carlos.id] }),
+    );
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(householdsApi.listHouseholds).toHaveBeenCalledTimes(2);
+  });
+
+  it("given a household, when it is renamed, then the change is saved against it", async () => {
+    vi.mocked(householdsApi.updateHousehold).mockResolvedValue(rossi);
+    renderHouseholds();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Actions for Famiglia Rossi" }));
+    await userEvent.click(screen.getByRole("button", { name: "Edit" }));
+    await userEvent.clear(screen.getByLabelText("Household name"));
+    await userEvent.type(screen.getByLabelText("Household name"), "I Rossi");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(householdsApi.updateHousehold).toHaveBeenCalledWith(1, rossi.id, {
+        name: "I Rossi",
+        guestIds: [maria.id, paolo.id],
+      }),
+    );
+  });
+
+  it("given a household, when its details are opened, then its members are shown", async () => {
+    renderHouseholds();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Actions for Famiglia Rossi" }));
+    await userEvent.click(screen.getByRole("button", { name: "See details" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Famiglia Rossi" });
+    expect(within(dialog).getByText("Paolo Rossi")).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("given a household, when it is deleted keeping its guests, then the guests are kept", async () => {
+    vi.mocked(householdsApi.deleteHousehold).mockResolvedValue(undefined);
+    renderHouseholds();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Actions for Famiglia Rossi" }));
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }));
+    await userEvent.click(screen.getByRole("button", { name: "Keep the guests, each on their own" }));
+
+    await waitFor(() => expect(householdsApi.deleteHousehold).toHaveBeenCalledWith(1, rossi.id, false));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("given the households are open, when a dialog is cancelled, then nothing changes", async () => {
+    renderHouseholds();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Add Household" }));
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await userEvent.click(screen.getByRole("button", { name: "Actions for Famiglia Rossi" }));
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }));
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(householdsApi.deleteHousehold).not.toHaveBeenCalled();
+  });
+});

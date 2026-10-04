@@ -42,6 +42,16 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        # Batch mode rebuilds a table by copying it and dropping the original. With
+        # foreign keys enforced, dropping a parent table (household) cascades and
+        # deletes its children (guests). So migrations run with enforcement off -
+        # set before any transaction starts, the only time SQLite honours it - and
+        # integrity is checked once they are done instead.
+        connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
+        # Close the transaction that statement opened, so Alembic opens - and
+        # commits - its own rather than deferring to this one.
+        connection.commit()
+
         # SQLite cannot ALTER most things in place; batch mode rewrites the table.
         context.configure(
             connection=connection,
@@ -51,6 +61,10 @@ def run_migrations_online() -> None:
 
         with context.begin_transaction():
             context.run_migrations()
+
+        violations = connection.exec_driver_sql("PRAGMA foreign_key_check").all()
+        if violations:
+            raise RuntimeError(f"migrations left dangling foreign keys: {violations}")
 
 
 if context.is_offline_mode():

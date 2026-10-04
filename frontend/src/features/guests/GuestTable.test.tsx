@@ -31,6 +31,7 @@ describe("GuestTable", () => {
 
     expect(screen.getAllByRole("columnheader").map((header) => header.textContent)).toEqual([
       "Name",
+      "Household",
       "Type",
       "Relationship",
       "Side",
@@ -81,10 +82,11 @@ describe("GuestTable", () => {
 
     const row = screen.getByRole("row", { name: /Maria Rossi/ });
     const cells = within(row).getAllByRole("cell");
-    expect(cells[2]).toHaveTextContent("—");
-    expect(cells[2]).toHaveAccessibleName("Not specified");
+    // After name, household and type come relationship and side.
     expect(cells[3]).toHaveTextContent("—");
     expect(cells[3]).toHaveAccessibleName("Not specified");
+    expect(cells[4]).toHaveTextContent("—");
+    expect(cells[4]).toHaveAccessibleName("Not specified");
   });
 
   it("given a child guest, when the row is rendered, then the type column says so", () => {
@@ -219,64 +221,24 @@ describe("the row menus' room to open", () => {
 });
 
 describe("GuestTable households", () => {
-  const maria = aGuest({ firstName: "Maria", lastName: "Rossi", householdId: 10 });
-  const paolo = aGuest({ firstName: "Paolo", lastName: "Rossi", householdId: 10 });
-  const carlos = aGuest({ firstName: "Carlos", lastName: "Mendoza", householdId: 20 });
-  const households = [
-    { id: 10, name: "Famiglia Rossi", rsvpToken: "rossi-token", guestIds: [maria.id, paolo.id] },
-    { id: 20, name: null, rsvpToken: "mendoza-token", guestIds: [carlos.id] },
-  ];
-
-  function renderGrouped(guests: Guest[]) {
-    return renderWithProviders(
+  it("given guests in households, when the table is rendered, then each row names its household", () => {
+    const maria = aGuest({ firstName: "Maria", lastName: "Rossi", householdId: 10 });
+    const carlos = aGuest({ firstName: "Carlos", lastName: "Mendoza", householdId: 20 });
+    renderWithProviders(
       <GuestTable
-        guests={guests}
-        allGuests={[maria, paolo, carlos]}
-        households={households}
+        guests={[maria, carlos]}
+        households={[
+          { id: 10, name: "Famiglia Rossi", rsvpToken: "a", guestIds: [maria.id] },
+          { id: 20, name: "Carlos Mendoza", rsvpToken: "b", guestIds: [carlos.id] },
+        ]}
         onEdit={noop}
         onDelete={noop}
         onChangeRsvp={noop}
       />,
     );
-  }
 
-  it("given a family, when the table is rendered, then its members sit together under the household", () => {
-    renderGrouped([maria, paolo, carlos]);
-
-    const family = screen.getByRole("rowgroup", { name: "Famiglia Rossi" });
-    expect(within(family).getByText("Household of 2")).toBeInTheDocument();
-    expect(within(family).getByText("Maria Rossi")).toBeInTheDocument();
-    expect(within(family).getByText("Paolo Rossi")).toBeInTheDocument();
-    expect(within(family).queryByText("Carlos Mendoza")).not.toBeInTheDocument();
-  });
-
-  it("given a household, when its RSVP link is opened, then it points at that household's private page", () => {
-    renderGrouped([maria, paolo, carlos]);
-
-    expect(screen.getByRole("link", { name: "Open RSVP page for Famiglia Rossi" })).toHaveAttribute(
-      "href",
-      `${window.location.origin}/rsvp/rossi-token`,
-    );
-    expect(screen.getByRole("link", { name: "Open RSVP page for Carlos Mendoza" })).toHaveAttribute(
-      "href",
-      `${window.location.origin}/rsvp/mendoza-token`,
-    );
-  });
-
-  it("given a household, when its RSVP link is copied, then the link lands on the clipboard", async () => {
-    const user = userEvent.setup();
-    renderGrouped([maria, paolo, carlos]);
-
-    await user.click(screen.getByRole("button", { name: "Copy RSVP link for Famiglia Rossi" }));
-
-    await expect(navigator.clipboard.readText()).resolves.toBe(`${window.location.origin}/rsvp/rossi-token`);
-    expect(screen.getByRole("button", { name: "RSVP link copied" })).toBeInTheDocument();
-  });
-
-  it("given a guest on their own, when the table is rendered, then no household heading is added for them", () => {
-    renderGrouped([carlos]);
-
-    expect(screen.queryByText(/Household of/)).not.toBeInTheDocument();
-    expect(screen.getByText("Carlos Mendoza")).toBeInTheDocument();
+    expect(within(screen.getByRole("row", { name: /Maria Rossi/ })).getByText("Famiglia Rossi")).toBeInTheDocument();
+    // Every row is a guest: no household heading rows in between.
+    expect(screen.getAllByRole("row")).toHaveLength(3);
   });
 });

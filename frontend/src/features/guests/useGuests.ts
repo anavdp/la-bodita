@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { createGuest, deleteGuest, importGuests, listGuests, updateGuest } from "../../api/guests";
-import { listHouseholds } from "../../api/households";
-import type { Guest, GuestDraft, GuestImportDraft, Household } from "../../api/types";
+import { createHousehold, deleteHousehold, listHouseholds, updateHousehold } from "../../api/households";
+import type { Guest, GuestDraft, GuestImportDraft, Household, HouseholdDraft } from "../../api/types";
 
 export interface GuestsState {
   guests: Guest[];
@@ -14,6 +14,9 @@ export interface GuestsState {
   addGuests: (drafts: GuestImportDraft[]) => Promise<void>;
   editGuest: (guestId: number, changes: Partial<GuestDraft>) => Promise<void>;
   removeGuest: (guestId: number) => Promise<void>;
+  addHousehold: (draft: HouseholdDraft) => Promise<void>;
+  editHousehold: (householdId: number, draft: HouseholdDraft) => Promise<void>;
+  removeHousehold: (householdId: number, deleteGuests: boolean) => Promise<void>;
 }
 
 /**
@@ -88,6 +91,33 @@ export function useGuests(weddingId: number | null): GuestsState {
     [weddingId, load],
   );
 
+  /** Every household change can move guests too, so both lists are re-read. */
+  const changeThenReload = useCallback(
+    async (change: (weddingId: number) => Promise<unknown>) => {
+      if (weddingId === null) return;
+      await change(weddingId);
+      await load();
+    },
+    [weddingId, load],
+  );
+
+  const addHousehold = useCallback(
+    (draft: HouseholdDraft) => changeThenReload((id) => createHousehold(id, draft)),
+    [changeThenReload],
+  );
+
+  const editHousehold = useCallback(
+    (householdId: number, draft: HouseholdDraft) =>
+      changeThenReload((id) => updateHousehold(id, householdId, draft)),
+    [changeThenReload],
+  );
+
+  const removeHousehold = useCallback(
+    (householdId: number, deleteGuests: boolean) =>
+      changeThenReload((id) => deleteHousehold(id, householdId, deleteGuests)),
+    [changeThenReload],
+  );
+
   return {
     guests,
     households,
@@ -98,5 +128,8 @@ export function useGuests(weddingId: number | null): GuestsState {
     addGuests,
     editGuest,
     removeGuest,
+    addHousehold,
+    editHousehold,
+    removeHousehold,
   };
 }

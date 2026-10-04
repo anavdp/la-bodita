@@ -292,7 +292,7 @@ def test_given_a_relationship_and_side_when_they_are_patched_to_null_then_both_a
     assert response.json()["side"] is None
 
 
-def add_household(db_session: Session, wedding: Wedding, name: str | None = None) -> Household:
+def add_household(db_session: Session, wedding: Wedding, name: str = "Rossi") -> Household:
     household = Household(wedding_id=wedding.id, name=name)
     db_session.add(household)
     db_session.commit()
@@ -373,6 +373,7 @@ def test_given_a_guest_in_a_family_when_their_household_is_cleared_then_they_spl
     assert response.status_code == 200
     assert response.json()["household_id"] not in (None, family.id)
     assert len(household_ids(db_session)) == 2
+    assert db_session.get(Household, response.json()["household_id"]).name == "Maria Rossi"
 
 
 def test_given_another_weddings_household_when_a_guest_is_moved_into_it_then_it_is_rejected(

@@ -307,7 +307,7 @@ def test_given_rows_sharing_a_household_when_the_import_is_confirmed_then_they_l
     assert household_of["Maria"] == household_of["Paolo"]
     assert len(set(household_of.values())) == 4
     names = db_session.scalars(select(Household.name).order_by(Household.id)).all()
-    assert names == ["Rossi", "Mendoza", None, None]
+    assert names == ["Rossi", "Mendoza", "Carlos Mendoza", "Ana Perez"]
 
 
 def test_given_a_household_name_already_on_the_list_when_imported_then_a_new_household_is_created(
