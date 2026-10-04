@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, UploadFile, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database import get_session
@@ -12,8 +12,8 @@ from app.guest_import import (
     parse_guest_rows,
     template_csv,
 )
-from app.models import Guest, Wedding
-from app.schemas import GuestCreate, GuestImportPreview, GuestRead, GuestUpdate
+from app.models import Guest, Household, Wedding
+from app.schemas import GuestCreate, GuestImportGuest, GuestImportPreview, GuestRead, GuestUpdate
 
 router = APIRouter(prefix="/api/weddings/{wedding_id}/guests", tags=["guests"])
 
@@ -41,6 +41,26 @@ def get_scoped_guest(guest_id: int, wedding: WeddingDependency, session: Session
 GuestDependency = Annotated[Guest, Depends(get_scoped_guest)]
 
 
+def find_household(session: Session, wedding: Wedding, household_id: int) -> Household:
+    """A household named in a request body: a bad id is a bad payload, hence 422."""
+    household = session.get(Household, household_id)
+    if household is None or household.wedding_id != wedding.id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Household not found"
+        )
+    return household
+
+
+def remove_household_if_empty(session: Session, household_id: int) -> None:
+    """A household exists for its guests; once the last one leaves, so does it."""
+    members = session.scalar(
+        select(func.count()).select_from(Guest).where(Guest.household_id == household_id)
+    )
+    if members == 0:
+        session.delete(session.get(Household, household_id))
+        session.commit()
+
+
 @router.get("", response_model=list[GuestRead])
 def list_guests(wedding: WeddingDependency, session: SessionDependency) -> list[Guest]:
     statement = (
@@ -53,6 +73,8 @@ def list_guests(wedding: WeddingDependency, session: SessionDependency) -> list[
 
 @router.post("", response_model=GuestRead, status_code=status.HTTP_201_CREATED)
 def create_guest(payload: GuestCreate, wedding: WeddingDependency, session: SessionDependency) -> Guest:
+    if payload.household_id is not None:
+        find_household(session, wedding, payload.household_id)
     guest = Guest(wedding_id=wedding.id, **payload.model_dump())
     session.add(guest)
     session.commit()
@@ -62,16 +84,29 @@ def create_guest(payload: GuestCreate, wedding: WeddingDependency, session: Sess
 
 @router.post("/bulk", response_model=list[GuestRead], status_code=status.HTTP_201_CREATED)
 def create_guests(
-    payload: Annotated[list[GuestCreate], Body(min_length=1)],
+    payload: Annotated[list[GuestImportGuest], Body(min_length=1)],
     wedding: WeddingDependency,
     session: SessionDependency,
 ) -> list[Guest]:
     """Confirms a CSV import: the rows the preview accepted, saved in one commit.
 
-    Create-only by design - a guest already on the list is not matched, so
-    importing the same file twice lists everyone twice.
+    Rows sharing a household value (matched ignoring case and surrounding spaces)
+    are invited together; a row without one gets a household of one.
+
+    Create-only by design - a guest already on the list is not matched, and
+    neither is a household, so importing the same file twice lists everyone twice.
     """
-    guests = [Guest(wedding_id=wedding.id, **guest.model_dump()) for guest in payload]
+    households: dict[str, Household] = {}
+    guests = []
+    for row in payload:
+        fields = row.model_dump(exclude={"household"})
+        guest = Guest(wedding_id=wedding.id, **fields)
+        if row.household:
+            key = row.household.casefold()
+            if key not in households:
+                households[key] = Household(wedding_id=wedding.id, name=row.household)
+            guest.household = households[key]
+        guests.append(guest)
     session.add_all(guests)
     session.commit()
     for guest in guests:
@@ -110,15 +145,30 @@ def read_guest(guest: GuestDependency) -> Guest:
 
 
 @router.patch("/{guest_id}", response_model=GuestRead)
-def update_guest(payload: GuestUpdate, guest: GuestDependency, session: SessionDependency) -> Guest:
-    for field, value in payload.model_dump(exclude_unset=True).items():
+def update_guest(
+    payload: GuestUpdate, guest: GuestDependency, wedding: WeddingDependency, session: SessionDependency
+) -> Guest:
+    changes = payload.model_dump(exclude_unset=True)
+    previous_household_id = guest.household_id
+    if "household_id" in changes:
+        household_id = changes.pop("household_id")
+        guest.household = (
+            Household(wedding_id=wedding.id)
+            if household_id is None
+            else find_household(session, wedding, household_id)
+        )
+    for field, value in changes.items():
         setattr(guest, field, value)
     session.commit()
+    if guest.household_id != previous_household_id:
+        remove_household_if_empty(session, previous_household_id)
     session.refresh(guest)
     return guest
 
 
 @router.delete("/{guest_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_guest(guest: GuestDependency, session: SessionDependency) -> None:
+    household_id = guest.household_id
     session.delete(guest)
     session.commit()
+    remove_household_if_empty(session, household_id)

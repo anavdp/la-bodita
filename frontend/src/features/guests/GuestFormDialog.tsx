@@ -14,9 +14,16 @@ import {
   sideLabelKey,
 } from "./vocabulary";
 
+export interface HouseholdOption {
+  id: number;
+  label: string;
+}
+
 interface GuestFormDialogProps {
   /** The guest being edited, or null to create a new one. */
   guest: Guest | null;
+  /** The households a guest can join; none picked means a household of their own. */
+  households?: HouseholdOption[];
   onSave: (draft: GuestDraft) => Promise<void>;
   onClose: () => void;
 }
@@ -28,7 +35,19 @@ const fieldLabel = "mb-1 block font-label-md text-label-md uppercase text-on-sur
 /** An empty string in a form means "nothing entered"; the API wants null. */
 const orNull = (value: string): string | null => (value.trim() === "" ? null : value.trim());
 
-export function GuestFormDialog({ guest, onSave, onClose }: GuestFormDialogProps) {
+/**
+ * Which household to send: nothing when it is unchanged (or a new guest is on
+ * their own), null to split an existing guest off, otherwise the one picked.
+ */
+function chosenHousehold(guest: Guest | null, picked: string): number | null | undefined {
+  if (picked === "") {
+    return guest === null ? undefined : null;
+  }
+  const householdId = Number(picked);
+  return householdId === guest?.householdId ? undefined : householdId;
+}
+
+export function GuestFormDialog({ guest, households = [], onSave, onClose }: GuestFormDialogProps) {
   const { t } = useTranslation();
   const titleId = useId();
 
@@ -43,6 +62,7 @@ export function GuestFormDialog({ guest, onSave, onClose }: GuestFormDialogProps
   const [rsvpStatus, setRsvpStatus] = useState<RsvpStatus>(guest?.rsvpStatus ?? "pending");
   const [phone, setPhone] = useState(guest?.phone ?? "");
   const [email, setEmail] = useState(guest?.email ?? "");
+  const [household, setHousehold] = useState(guest === null ? "" : String(guest.householdId));
 
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,6 +98,7 @@ export function GuestFormDialog({ guest, onSave, onClose }: GuestFormDialogProps
         rsvpStatus,
         phone: orNull(phone),
         email: orNull(email),
+        householdId: chosenHousehold(guest, household),
       });
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : t("guests.form.saveFailed"));
@@ -229,6 +250,25 @@ export function GuestFormDialog({ guest, onSave, onClose }: GuestFormDialogProps
                 onChange={(event) => setEmail(event.target.value)}
               />
             </div>
+          </div>
+
+          <div>
+            <label className={fieldLabel} htmlFor="guest-household">
+              {t("guests.form.household")}
+            </label>
+            <select
+              id="guest-household"
+              className={field}
+              value={household}
+              onChange={(event) => setHousehold(event.target.value)}
+            >
+              <option value="">{t("guests.form.householdNew")}</option>
+              {households.map((option) => (
+                <option key={option.id} value={String(option.id)}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <label className="flex items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">

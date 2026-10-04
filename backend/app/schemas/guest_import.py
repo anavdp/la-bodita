@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from app.schemas.guest import GuestCreate
+from app.schemas.guest import GuestFields, OptionalText
 
 
 class GuestImportRowError(BaseModel):
@@ -10,11 +10,18 @@ class GuestImportRowError(BaseModel):
     code: str
 
 
+class GuestImportGuest(GuestFields):
+    """A spreadsheet guest. Rows of one file sharing a `household` value are invited
+    together; a row without one is a household of one."""
+
+    household: OptionalText | None = None
+
+
 class GuestImportRow(BaseModel):
     """One spreadsheet row: the guest it would become, or why it cannot become one."""
 
     row_number: int
-    guest: GuestCreate | None
+    guest: GuestImportGuest | None
     errors: list[GuestImportRowError]
 
 

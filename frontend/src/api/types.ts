@@ -7,6 +7,8 @@ export type GuestGender = "female" | "male" | "other";
 export interface Guest {
   id: number;
   weddingId: number;
+  /** Every guest belongs to exactly one household; alone means a household of one. */
+  householdId: number;
   firstName: string;
   lastName: string;
   isChild: boolean;
@@ -19,8 +21,46 @@ export interface Guest {
   email: string | null;
 }
 
-/** A guest before the API has given it an identity. */
-export type GuestDraft = Omit<Guest, "id" | "weddingId">;
+/**
+ * A guest before the API has given it an identity. `householdId` left out means
+ * "a new household of one" on create and "unchanged" on edit; null on edit
+ * splits the guest off on their own.
+ */
+export type GuestDraft = Omit<Guest, "id" | "weddingId" | "householdId"> & {
+  householdId?: number | null;
+};
+
+/** A spreadsheet guest: rows of one file sharing a `household` are invited together. */
+export type GuestImportDraft = Omit<GuestDraft, "householdId"> & { household: string | null };
+
+export interface Household {
+  id: number;
+  /** Null for a household nobody named, e.g. someone added on their own. */
+  name: string | null;
+  /** The private part of the household's RSVP link. */
+  rsvpToken: string;
+  guestIds: number[];
+}
+
+/** What a household sees when it opens its RSVP link. */
+export interface RsvpInvitation {
+  householdName: string | null;
+  weddingName: string;
+  weddingDate: string | null;
+  guests: RsvpGuest[];
+}
+
+export interface RsvpGuest {
+  id: number;
+  firstName: string;
+  lastName: string;
+  rsvpStatus: RsvpStatus;
+}
+
+export interface RsvpAnswer {
+  guestId: number;
+  attending: boolean;
+}
 
 /** The columns of the CSV import template, as the file spells them. */
 export type GuestImportField =
@@ -31,7 +71,8 @@ export type GuestImportField =
   | "relationship_type"
   | "side"
   | "phone"
-  | "email";
+  | "email"
+  | "household";
 
 export interface GuestImportError {
   field: GuestImportField;
@@ -42,7 +83,7 @@ export interface GuestImportError {
 export interface GuestImportRow {
   /** The row as numbered in the spreadsheet, header included. */
   rowNumber: number;
-  guest: GuestDraft | null;
+  guest: GuestImportDraft | null;
   errors: GuestImportError[];
 }
 

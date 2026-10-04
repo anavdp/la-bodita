@@ -134,4 +134,76 @@ describe("GuestFormDialog", () => {
 
     expect(onClose).toHaveBeenCalled();
   });
+
+  describe("household", () => {
+    const households = [
+      { id: 10, label: "Famiglia Rossi" },
+      { id: 20, label: "Carlos Mendoza" },
+    ];
+
+    it("given a new guest, when no household is picked, then they are added on their own", async () => {
+      const onSave = vi.fn().mockResolvedValue(undefined);
+      renderWithProviders(
+        <GuestFormDialog guest={null} households={households} onSave={onSave} onClose={vi.fn()} />,
+      );
+
+      expect(screen.getByLabelText("Household")).toHaveValue("");
+      await userEvent.type(screen.getByLabelText("First name"), "Maria");
+      await userEvent.type(screen.getByLabelText("Last name"), "Rossi");
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      expect(onSave.mock.calls[0][0].householdId).toBeUndefined();
+    });
+
+    it("given a guest, when their household is left as it was, then it is not sent", async () => {
+      const onSave = vi.fn().mockResolvedValue(undefined);
+      renderWithProviders(
+        <GuestFormDialog
+          guest={aGuest({ householdId: 10 })}
+          households={households}
+          onSave={onSave}
+          onClose={vi.fn()}
+        />,
+      );
+
+      expect(screen.getByLabelText("Household")).toHaveValue("10");
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      expect(onSave.mock.calls[0][0].householdId).toBeUndefined();
+    });
+
+    it("given a guest, when they are moved to another household, then the new one is sent", async () => {
+      const onSave = vi.fn().mockResolvedValue(undefined);
+      renderWithProviders(
+        <GuestFormDialog
+          guest={aGuest({ householdId: 10 })}
+          households={households}
+          onSave={onSave}
+          onClose={vi.fn()}
+        />,
+      );
+
+      await userEvent.selectOptions(screen.getByLabelText("Household"), "Carlos Mendoza");
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ householdId: 20 }));
+    });
+
+    it("given a guest in a family, when they are set on their own, then they split off", async () => {
+      const onSave = vi.fn().mockResolvedValue(undefined);
+      renderWithProviders(
+        <GuestFormDialog
+          guest={aGuest({ householdId: 10 })}
+          households={households}
+          onSave={onSave}
+          onClose={vi.fn()}
+        />,
+      );
+
+      await userEvent.selectOptions(screen.getByLabelText("Household"), "");
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ householdId: null }));
+    });
+  });
 });

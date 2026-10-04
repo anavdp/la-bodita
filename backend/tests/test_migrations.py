@@ -106,6 +106,7 @@ def test_given_an_empty_database_when_migrations_run_then_the_guest_table_exists
     assert columns == {
         "id",
         "wedding_id",
+        "household_id",
         "first_name",
         "last_name",
         "is_child",
@@ -126,10 +127,8 @@ def test_given_the_guest_migration_when_it_runs_then_the_wedding_foreign_key_is_
     command.upgrade(build_alembic_config(database_url), "head")
 
     inspector = inspect(create_engine(database_url))
-    foreign_keys = inspector.get_foreign_keys("guest")
-    assert len(foreign_keys) == 1
-    assert foreign_keys[0]["name"] == "fk_guest_wedding_id_wedding"
-    assert foreign_keys[0]["referred_table"] == "wedding"
+    foreign_keys = {key["name"]: key["referred_table"] for key in inspector.get_foreign_keys("guest")}
+    assert foreign_keys["fk_guest_wedding_id_wedding"] == "wedding"
     indexed_columns = [index["column_names"] for index in inspector.get_indexes("guest")]
     assert ["wedding_id"] in indexed_columns
 
@@ -197,7 +196,7 @@ def test_given_guests_without_relationship_or_side_when_the_migration_is_downgra
 ):
     database_url = f"sqlite:///{tmp_path / 'guest_optional_backfill_check.db'}"
     config = build_alembic_config(database_url)
-    command.upgrade(config, "head")
+    command.upgrade(config, "5b3e7d2a9c41")
     engine = create_engine(database_url)
     with engine.begin() as connection:
         connection.exec_driver_sql("insert into wedding (id, name) values (1, 'La Bodita')")
@@ -210,3 +209,61 @@ def test_given_guests_without_relationship_or_side_when_the_migration_is_downgra
     with engine.connect() as connection:
         row = connection.exec_driver_sql("select relationship_type, side from guest").one()
     assert tuple(row) == ("other", "other")
+
+
+def test_given_an_empty_database_when_migrations_run_then_the_household_table_exists(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'household_schema_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    inspector = inspect(create_engine(database_url))
+    columns = {column["name"] for column in inspector.get_columns("household")}
+    assert columns == {"id", "wedding_id", "name", "rsvp_token", "created_at", "updated_at"}
+    guest_foreign_keys = {key["name"]: key["referred_table"] for key in inspector.get_foreign_keys("guest")}
+    assert guest_foreign_keys["fk_guest_household_id_household"] == "household"
+    assert guest_column_nullability(database_url)["household_id"] is False
+
+
+def test_given_existing_guests_when_the_household_migration_runs_then_each_gets_a_household_of_one(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'household_backfill_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "5b3e7d2a9c41")
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("insert into wedding (id, name) values (1, 'La Bodita')")
+        connection.exec_driver_sql(
+            "insert into guest (wedding_id, first_name, last_name) values"
+            " (1, 'Maria', 'Rossi'), (1, 'Carlos', 'Mendoza')"
+        )
+
+    command.upgrade(config, "head")
+
+    with engine.connect() as connection:
+        guest_households = connection.exec_driver_sql("select household_id from guest").scalars().all()
+        households = connection.exec_driver_sql("select wedding_id, rsvp_token from household").all()
+    assert len(set(guest_households)) == 2
+    assert len(households) == 2
+    assert all(wedding_id == 1 for wedding_id, _ in households)
+    assert len({token for _, token in households}) == 2
+    assert all(len(token) >= 32 for _, token in households)
+
+
+def test_given_the_household_migration_when_it_is_downgraded_then_guests_survive_without_households(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'household_downgrade_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "head")
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("insert into wedding (id, name) values (1, 'La Bodita')")
+        connection.exec_driver_sql("insert into household (id, wedding_id, rsvp_token) values (1, 1, 'abc')")
+        connection.exec_driver_sql(
+            "insert into guest (wedding_id, household_id, first_name, last_name) values (1, 1, 'Maria', 'Rossi')"
+        )
+
+    command.downgrade(config, "5b3e7d2a9c41")
+
+    inspector = inspect(engine)
+    assert "household" not in inspector.get_table_names()
+    assert "household_id" not in guest_column_nullability(database_url)
+    with engine.connect() as connection:
+        assert connection.exec_driver_sql("select count(*) from guest").scalar_one() == 1

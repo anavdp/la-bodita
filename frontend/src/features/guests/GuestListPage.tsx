@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import type { Guest, GuestDraft, RsvpStatus } from "../../api/types";
+import type { Guest, GuestDraft, GuestImportDraft, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -10,6 +10,7 @@ import { GuestFormDialog } from "./GuestFormDialog";
 import { GuestImportDialog } from "./GuestImportDialog";
 import { GuestStats } from "./GuestStats";
 import { GuestTable } from "./GuestTable";
+import { groupByHousehold } from "./households";
 import { useGuests } from "./useGuests";
 
 /** Which guest the dialog is open for: a guest to edit, or null to create one. */
@@ -21,8 +22,17 @@ export function GuestListPage() {
   const { term } = useSearch();
 
   const weddingId = wedding?.id ?? null;
-  const { guests, isLoading, hasLoadError, reload, addGuest, addGuests, editGuest, removeGuest } =
-    useGuests(weddingId);
+  const {
+    guests,
+    households,
+    isLoading,
+    hasLoadError,
+    reload,
+    addGuest,
+    addGuests,
+    editGuest,
+    removeGuest,
+  } = useGuests(weddingId);
 
   const [dialogTarget, setDialogTarget] = useState<DialogTarget>(null);
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -30,6 +40,14 @@ export function GuestListPage() {
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
 
   const visibleGuests = useMemo(() => filterGuestsByName(guests, term), [guests, term]);
+  /** Every household, labelled, for the form's picker and the header count. */
+  const householdOptions = useMemo(
+    () =>
+      groupByHousehold(guests, guests, households)
+        .map((group) => ({ id: group.householdId, label: group.label }))
+        .sort((first, second) => first.label.localeCompare(second.label)),
+    [guests, households],
+  );
 
   const handleSave = async (draft: GuestDraft) => {
     if (dialogTarget?.guest) {
@@ -40,7 +58,7 @@ export function GuestListPage() {
     setDialogTarget(null);
   };
 
-  const handleImport = async (drafts: GuestDraft[]) => {
+  const handleImport = async (drafts: GuestImportDraft[]) => {
     await addGuests(drafts);
     setIsImportOpen(false);
   };
@@ -94,6 +112,8 @@ export function GuestListPage() {
     return (
       <GuestTable
         guests={visibleGuests}
+        allGuests={guests}
+        households={households}
         onEdit={(guest) => setDialogTarget({ guest })}
         onDelete={handleDelete}
         onChangeRsvp={handleChangeRsvp}
@@ -107,6 +127,14 @@ export function GuestListPage() {
         <div>
           <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("guests.title")}</h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.subtitle")}</p>
+          {guests.length > 0 && (
+            <p className="mt-2 font-label-md text-label-md text-on-surface-variant">
+              {t("guests.householdSummary", {
+                guests: guests.length,
+                households: householdOptions.length,
+              })}
+            </p>
+          )}
         </div>
         <div className="flex flex-wrap gap-3">
           <button
@@ -141,6 +169,7 @@ export function GuestListPage() {
       {dialogTarget !== null && (
         <GuestFormDialog
           guest={dialogTarget.guest}
+          households={householdOptions}
           onSave={handleSave}
           onClose={() => setDialogTarget(null)}
         />

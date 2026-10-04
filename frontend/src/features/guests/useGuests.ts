@@ -1,25 +1,29 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { createGuest, deleteGuest, importGuests, listGuests, updateGuest } from "../../api/guests";
-import type { Guest, GuestDraft } from "../../api/types";
+import { listHouseholds } from "../../api/households";
+import type { Guest, GuestDraft, GuestImportDraft, Household } from "../../api/types";
 
 export interface GuestsState {
   guests: Guest[];
+  households: Household[];
   isLoading: boolean;
   hasLoadError: boolean;
   reload: () => void;
   addGuest: (draft: GuestDraft) => Promise<void>;
-  addGuests: (drafts: GuestDraft[]) => Promise<void>;
+  addGuests: (drafts: GuestImportDraft[]) => Promise<void>;
   editGuest: (guestId: number, changes: Partial<GuestDraft>) => Promise<void>;
   removeGuest: (guestId: number) => Promise<void>;
 }
 
 /**
- * The guest list for one wedding. Mutations re-read the list afterwards, so the
- * order on screen stays the order the API sorts by.
+ * The guest list for one wedding, with the households its guests are grouped
+ * into. Mutations re-read both afterwards, so the order on screen stays the
+ * order the API sorts by and a moved guest lands in the right household.
  */
 export function useGuests(weddingId: number | null): GuestsState {
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [households, setHouseholds] = useState<Household[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoadError, setHasLoadError] = useState(false);
 
@@ -30,7 +34,12 @@ export function useGuests(weddingId: number | null): GuestsState {
 
     setIsLoading(true);
     try {
-      setGuests(await listGuests(weddingId));
+      const [loadedGuests, loadedHouseholds] = await Promise.all([
+        listGuests(weddingId),
+        listHouseholds(weddingId),
+      ]);
+      setGuests(loadedGuests);
+      setHouseholds(loadedHouseholds);
       setHasLoadError(false);
     } catch {
       setHasLoadError(true);
@@ -53,7 +62,7 @@ export function useGuests(weddingId: number | null): GuestsState {
   );
 
   const addGuests = useCallback(
-    async (drafts: GuestDraft[]) => {
+    async (drafts: GuestImportDraft[]) => {
       if (weddingId === null) return;
       await importGuests(weddingId, drafts);
       await load();
@@ -81,6 +90,7 @@ export function useGuests(weddingId: number | null): GuestsState {
 
   return {
     guests,
+    households,
     isLoading,
     hasLoadError,
     reload: () => void load(),

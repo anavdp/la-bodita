@@ -1,10 +1,11 @@
 from enum import Enum
 
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import false
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey, event, false
+from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database import Base
+from app.models.household import Household
 from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin
 
 
@@ -58,13 +59,17 @@ def stored_as_text(enum_type: type[Enum], name: str) -> SQLEnum:
 class Guest(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     """Someone invited to the wedding.
 
-    Self-contained by design: a guest points up at its wedding and nothing else.
+    A guest points up at its wedding and at the household it is invited with.
     `phone` and `email` are captured now; the features that use them (invites,
     reminders) are post-MVP.
     """
 
     __tablename__ = "guest"
 
+    household_id: Mapped[int] = mapped_column(
+        ForeignKey("household.id", ondelete="CASCADE"), index=True
+    )
+    household: Mapped[Household] = relationship(back_populates="guests")
     first_name: Mapped[str]
     last_name: Mapped[str]
     # Drives budgeting: children are usually costed differently by the venue.
@@ -86,3 +91,15 @@ class Guest(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     )
     phone: Mapped[str | None] = mapped_column(default=None)
     email: Mapped[str | None] = mapped_column(default=None)
+
+
+@event.listens_for(Session, "before_flush")
+def give_lone_guests_a_household(session: Session, flush_context, instances) -> None:
+    """A guest added without a household is invited alone: a household of one.
+
+    Done at flush time so every way a guest is created - the API, an import, the
+    seed script, a test - gets the same rule without having to remember it.
+    """
+    for guest in session.new:
+        if isinstance(guest, Guest) and guest.household_id is None and guest.household is None:
+            guest.household = Household(wedding_id=guest.wedding_id)

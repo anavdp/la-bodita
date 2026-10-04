@@ -3,13 +3,13 @@ import userEvent from "@testing-library/user-event";
 
 import { ApiError } from "../../api/client";
 import * as guestsApi from "../../api/guests";
-import type { GuestDraft, GuestImportRow } from "../../api/types";
+import type { GuestImportDraft, GuestImportRow } from "../../api/types";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { GuestImportDialog } from "./GuestImportDialog";
 
 vi.mock("../../api/guests");
 
-const aDraft = (overrides: Partial<GuestDraft> = {}): GuestDraft => ({
+const aDraft = (overrides: Partial<GuestImportDraft> = {}): GuestImportDraft => ({
   firstName: "Maria",
   lastName: "Rossi",
   isChild: false,
@@ -19,6 +19,7 @@ const aDraft = (overrides: Partial<GuestDraft> = {}): GuestDraft => ({
   rsvpStatus: "pending",
   phone: null,
   email: null,
+  household: null,
   ...overrides,
 });
 
@@ -41,7 +42,7 @@ const mixedPreview: GuestImportRow[] = [
 
 const csvFile = () => new File(["first_name,last_name\n"], "guests.csv", { type: "text/csv" });
 
-function renderDialog(handlers: { onImport?: (drafts: GuestDraft[]) => Promise<void>; onClose?: () => void } = {}) {
+function renderDialog(handlers: { onImport?: (drafts: GuestImportDraft[]) => Promise<void>; onClose?: () => void } = {}) {
   const onImport = handlers.onImport ?? vi.fn().mockResolvedValue(undefined);
   const onClose = handlers.onClose ?? vi.fn();
   renderWithProviders(<GuestImportDialog weddingId={1} onImport={onImport} onClose={onClose} />);
@@ -212,5 +213,27 @@ describe("GuestImportDialog", () => {
     await userEvent.keyboard("{Escape}");
 
     expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
+  it("given rows with a household, when they are previewed, then each shows the household it joins", async () => {
+    vi.mocked(guestsApi.previewGuestImport).mockResolvedValue([
+      { rowNumber: 2, guest: aDraft({ household: "Famiglia Rossi" }), errors: [] },
+      { rowNumber: 3, guest: aDraft({ firstName: "Carlos", lastName: "Mendoza" }), errors: [] },
+    ]);
+    const { onImport } = renderDialog();
+
+    await uploadFile();
+
+    const table = await screen.findByRole("table", { name: "Guests to import" });
+    expect(within(table).getByRole("columnheader", { name: "Household" })).toBeInTheDocument();
+    expect(within(table).getByRole("row", { name: /Maria Rossi/ })).toHaveTextContent("Famiglia Rossi");
+    expect(within(table).getByRole("row", { name: /Carlos Mendoza/ })).toHaveTextContent("On their own");
+
+    await userEvent.click(screen.getByRole("button", { name: "Import 2 guests" }));
+
+    expect(onImport).toHaveBeenCalledWith([
+      expect.objectContaining({ household: "Famiglia Rossi" }),
+      expect.objectContaining({ household: null }),
+    ]);
   });
 });

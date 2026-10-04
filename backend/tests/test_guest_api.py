@@ -1,7 +1,8 @@
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Guest, Wedding
+from app.models import Guest, Household, Wedding
 
 GUESTS_URL = "/api/weddings/{wedding_id}/guests"
 
@@ -289,3 +290,120 @@ def test_given_a_relationship_and_side_when_they_are_patched_to_null_then_both_a
     assert response.status_code == 200
     assert response.json()["relationship_type"] is None
     assert response.json()["side"] is None
+
+
+def add_household(db_session: Session, wedding: Wedding, name: str | None = None) -> Household:
+    household = Household(wedding_id=wedding.id, name=name)
+    db_session.add(household)
+    db_session.commit()
+    return household
+
+
+def household_ids(db_session: Session) -> list[int]:
+    return list(db_session.scalars(select(Household.id).order_by(Household.id)))
+
+
+def test_given_no_household_when_a_guest_is_created_then_it_gets_a_household_of_one(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    response = client.post(GUESTS_URL.format(wedding_id=wedding.id), json=a_guest())
+
+    assert response.status_code == 201
+    assert household_ids(db_session) == [response.json()["household_id"]]
+
+
+def test_given_an_existing_household_when_a_guest_is_created_in_it_then_they_join_it(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    household = add_household(db_session, wedding, name="Rossi")
+
+    response = client.post(
+        GUESTS_URL.format(wedding_id=wedding.id), json=a_guest(household_id=household.id)
+    )
+
+    assert response.status_code == 201
+    assert response.json()["household_id"] == household.id
+    assert household_ids(db_session) == [household.id]
+
+
+def test_given_another_weddings_household_when_a_guest_is_created_in_it_then_it_is_rejected(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    other_wedding = Wedding(name="Otra boda")
+    db_session.add(other_wedding)
+    db_session.commit()
+    foreign_household = add_household(db_session, other_wedding)
+
+    response = client.post(
+        GUESTS_URL.format(wedding_id=wedding.id), json=a_guest(household_id=foreign_household.id)
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Household not found"
+
+
+def test_given_a_guest_alone_when_they_move_into_another_household_then_their_empty_one_is_removed(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = add_guest(db_session, wedding, first_name="Maria")
+    paolo = add_guest(db_session, wedding, first_name="Paolo")
+    paolos_old_household = paolo.household_id
+
+    response = client.patch(
+        f"{GUESTS_URL.format(wedding_id=wedding.id)}/{paolo.id}",
+        json={"household_id": maria.household_id},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["household_id"] == maria.household_id
+    assert paolos_old_household not in household_ids(db_session)
+
+
+def test_given_a_guest_in_a_family_when_their_household_is_cleared_then_they_split_off_alone(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    family = add_household(db_session, wedding, name="Rossi")
+    maria = add_guest(db_session, wedding, first_name="Maria", household_id=family.id)
+    add_guest(db_session, wedding, first_name="Paolo", household_id=family.id)
+
+    response = client.patch(
+        f"{GUESTS_URL.format(wedding_id=wedding.id)}/{maria.id}", json={"household_id": None}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["household_id"] not in (None, family.id)
+    assert len(household_ids(db_session)) == 2
+
+
+def test_given_another_weddings_household_when_a_guest_is_moved_into_it_then_it_is_rejected(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    guest = add_guest(db_session, wedding)
+
+    response = client.patch(
+        f"{GUESTS_URL.format(wedding_id=wedding.id)}/{guest.id}", json={"household_id": 404}
+    )
+
+    assert response.status_code == 422
+
+
+def test_given_the_last_member_of_a_household_when_they_are_deleted_then_the_household_goes_too(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    guest = add_guest(db_session, wedding)
+
+    client.delete(f"{GUESTS_URL.format(wedding_id=wedding.id)}/{guest.id}")
+
+    assert household_ids(db_session) == []
+
+
+def test_given_a_family_when_one_member_is_deleted_then_the_household_stays_for_the_rest(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    family = add_household(db_session, wedding)
+    maria = add_guest(db_session, wedding, first_name="Maria", household_id=family.id)
+    add_guest(db_session, wedding, first_name="Paolo", household_id=family.id)
+
+    client.delete(f"{GUESTS_URL.format(wedding_id=wedding.id)}/{maria.id}")
+
+    assert household_ids(db_session) == [family.id]

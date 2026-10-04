@@ -3,7 +3,7 @@ import type { ChangeEvent } from "react";
 
 import { ApiError } from "../../api/client";
 import { guestImportTemplateUrl, previewGuestImport } from "../../api/guests";
-import type { GuestDraft, GuestImportRow } from "../../api/types";
+import type { GuestImportDraft, GuestImportRow } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "./filtering";
@@ -13,7 +13,7 @@ import { relationshipLabelKey, sideLabelKey } from "./vocabulary";
 interface GuestImportDialogProps {
   weddingId: number;
   /** Saves the previewed guests; the dialog stays open and explains if it throws. */
-  onImport: (drafts: GuestDraft[]) => Promise<void>;
+  onImport: (drafts: GuestImportDraft[]) => Promise<void>;
   onClose: () => void;
 }
 
@@ -148,6 +148,7 @@ export function GuestImportDialog({ weddingId, onImport, onClose }: GuestImportD
                   <th className={cell}>{t("guests.column.type")}</th>
                   <th className={cell}>{t("guests.column.relationship")}</th>
                   <th className={cell}>{t("guests.column.side")}</th>
+                  <th className={cell}>{t("guests.column.household")}</th>
                 </tr>
               </thead>
               <tbody className="font-body-sm text-body-sm text-on-surface-variant">
@@ -170,6 +171,7 @@ export function GuestImportDialog({ weddingId, onImport, onClose }: GuestImportD
                         <td className={cell}>
                           {guest.side === null ? <NotSpecified /> : t(sideLabelKey(guest.side))}
                         </td>
+                        <td className={cell}>{guest.household ?? t("guests.household.alone")}</td>
                       </tr>
                     ),
                 )}

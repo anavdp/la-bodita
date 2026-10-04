@@ -1,10 +1,11 @@
 import { apiUrl, request } from "./client";
-import type { Guest, GuestDraft, GuestImportError, GuestImportRow } from "./types";
+import type { Guest, GuestDraft, GuestImportDraft, GuestImportError, GuestImportRow } from "./types";
 
 /** The wire shape: the API speaks snake_case, the app speaks camelCase. */
 interface GuestPayload {
   id: number;
   wedding_id: number;
+  household_id: number;
   first_name: string;
   last_name: string;
   is_child: boolean;
@@ -16,15 +17,17 @@ interface GuestPayload {
   email: string | null;
 }
 
-type GuestDraftPayload = Omit<GuestPayload, "id" | "wedding_id">;
+type GuestDraftPayload = Omit<GuestPayload, "id" | "wedding_id" | "household_id">;
+
+type GuestImportDraftPayload = GuestDraftPayload & { household: string | null };
 
 interface GuestImportRowPayload {
   row_number: number;
-  guest: GuestDraftPayload | null;
+  guest: GuestImportDraftPayload | null;
   errors: GuestImportError[];
 }
 
-const payloadKeys: Record<keyof GuestDraft, keyof GuestPayload> = {
+const payloadKeys: Record<keyof GuestDraft | keyof GuestImportDraft, string> = {
   firstName: "first_name",
   lastName: "last_name",
   isChild: "is_child",
@@ -34,10 +37,17 @@ const payloadKeys: Record<keyof GuestDraft, keyof GuestPayload> = {
   rsvpStatus: "rsvp_status",
   phone: "phone",
   email: "email",
+  householdId: "household_id",
+  household: "household",
 };
 
 function toGuest(payload: GuestPayload): Guest {
-  return { id: payload.id, weddingId: payload.wedding_id, ...toDraft(payload) };
+  return {
+    ...toDraft(payload),
+    id: payload.id,
+    weddingId: payload.wedding_id,
+    householdId: payload.household_id,
+  };
 }
 
 function toDraft(payload: GuestDraftPayload): GuestDraft {
@@ -55,9 +65,11 @@ function toDraft(payload: GuestDraftPayload): GuestDraft {
 }
 
 /** Only the fields the caller actually set, so a PATCH stays partial. */
-function toPayload(changes: Partial<GuestDraft>): Partial<GuestPayload> {
+function toPayload(changes: Partial<GuestDraft> | GuestImportDraft): Record<string, unknown> {
   return Object.fromEntries(
-    Object.entries(changes).map(([field, value]) => [payloadKeys[field as keyof GuestDraft], value]),
+    Object.entries(changes)
+      .filter(([, value]) => value !== undefined)
+      .map(([field, value]) => [payloadKeys[field as keyof typeof payloadKeys], value]),
   );
 }
 
@@ -108,13 +120,13 @@ export async function previewGuestImport(weddingId: number, file: File): Promise
   );
   return payload.rows.map((row) => ({
     rowNumber: row.row_number,
-    guest: row.guest === null ? null : toDraft(row.guest),
+    guest: row.guest === null ? null : { ...toDraft(row.guest), household: row.guest.household },
     errors: row.errors,
   }));
 }
 
 /** Creates every previewed guest in one request. */
-export async function importGuests(weddingId: number, drafts: GuestDraft[]): Promise<void> {
+export async function importGuests(weddingId: number, drafts: GuestImportDraft[]): Promise<void> {
   await request<GuestPayload[]>(`${guestsUrl(weddingId)}/bulk`, {
     method: "POST",
     body: drafts.map(toPayload),

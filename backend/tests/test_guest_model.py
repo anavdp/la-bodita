@@ -136,6 +136,7 @@ def test_given_the_guest_table_when_it_is_inspected_then_it_carries_only_this_sl
     assert columns == {
         "id",
         "wedding_id",
+        "household_id",
         "first_name",
         "last_name",
         "is_child",
@@ -150,14 +151,17 @@ def test_given_the_guest_table_when_it_is_inspected_then_it_carries_only_this_sl
     }
 
 
-def test_given_the_guest_table_when_its_foreign_keys_are_inspected_then_wedding_is_the_only_one():
-    """Slice 2 is self-contained: guests hang off the tenant root and nothing else."""
-    foreign_keys = Guest.__table__.foreign_key_constraints
+def test_given_the_guest_table_when_its_foreign_keys_are_inspected_then_they_point_at_wedding_and_household():
+    """Guests hang off the tenant root and the household they are invited with."""
+    foreign_keys = {
+        constraint.name: constraint.referred_table.name
+        for constraint in Guest.__table__.foreign_key_constraints
+    }
 
-    assert len(foreign_keys) == 1
-    constraint = next(iter(foreign_keys))
-    assert constraint.name == "fk_guest_wedding_id_wedding"
-    assert constraint.referred_table.name == "wedding"
+    assert foreign_keys == {
+        "fk_guest_wedding_id_wedding": "wedding",
+        "fk_guest_household_id_household": "household",
+    }
 
 
 def test_given_the_guest_model_when_required_fields_are_inspected_then_only_the_optional_ones_are_nullable():
@@ -165,7 +169,7 @@ def test_given_the_guest_model_when_required_fields_are_inspected_then_only_the_
     inspected = inspect(Guest)
 
     assert inspected.primary_key[0].name == "id"
-    for required in ("first_name", "last_name", "is_child", "rsvp_status"):
+    for required in ("household_id", "first_name", "last_name", "is_child", "rsvp_status"):
         assert columns[required].nullable is False, required
     for optional in ("gender", "relationship_type", "side", "phone", "email"):
         assert columns[optional].nullable is True, optional

@@ -5,6 +5,7 @@ from app.models.guest import (
     GuestSide,
     RsvpStatus,
 )
+from app.models.household import Household
 from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin
 from app.models.wedding import Wedding
 
@@ -13,6 +14,7 @@ __all__ = [
     "GuestGender",
     "GuestRelationshipType",
     "GuestSide",
+    "Household",
     "PrimaryKeyMixin",
     "RsvpStatus",
     "TimestampMixin",

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import guests, weddings
+from app.api import guests, households, rsvp, weddings
 from app.config import settings
 
 app = FastAPI(title=settings.app_name)
@@ -16,6 +16,8 @@ app.add_middleware(
 
 app.include_router(weddings.router)
 app.include_router(guests.router)
+app.include_router(households.router)
+app.include_router(rsvp.router)
 
 
 @app.get("/")

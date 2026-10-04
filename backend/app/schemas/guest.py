@@ -17,7 +17,9 @@ REQUIRED_FIELDS = (
 )
 
 
-class GuestCreate(BaseModel):
+class GuestFields(BaseModel):
+    """What describes a guest, whichever way they arrive - a form or a spreadsheet row."""
+
     first_name: RequiredText
     last_name: RequiredText
     relationship_type: GuestRelationshipType | None = None
@@ -29,8 +31,16 @@ class GuestCreate(BaseModel):
     email: OptionalText | None = None
 
 
+class GuestCreate(GuestFields):
+    # Omitted: the guest is invited alone, in a new household of one.
+    household_id: int | None = None
+
+
 class GuestUpdate(BaseModel):
-    """A partial update: an omitted field is left alone, an explicit null clears it."""
+    """A partial update: an omitted field is left alone, an explicit null clears it.
+
+    `household_id: null` splits the guest off into a new household of one.
+    """
 
     first_name: RequiredText | None = None
     last_name: RequiredText | None = None
@@ -41,6 +51,7 @@ class GuestUpdate(BaseModel):
     rsvp_status: RsvpStatus | None = None
     phone: OptionalText | None = None
     email: OptionalText | None = None
+    household_id: int | None = None
 
     @model_validator(mode="after")
     def reject_nulls_for_required_fields(self) -> "GuestUpdate":
@@ -59,6 +70,7 @@ class GuestRead(BaseModel):
 
     id: int
     wedding_id: int
+    household_id: int
     first_name: str
     last_name: str
     is_child: bool

@@ -28,6 +28,7 @@ describe("the guest API", () => {
         {
           id: 1,
           wedding_id: 3,
+          household_id: 4,
           first_name: "Maria",
           last_name: "Rossi",
           is_child: false,
@@ -49,6 +50,7 @@ describe("the guest API", () => {
       {
         id: 1,
         weddingId: 3,
+        householdId: 4,
         firstName: "Maria",
         lastName: "Rossi",
         isChild: false,
@@ -102,6 +104,16 @@ describe("the guest API", () => {
     expect(init.body).toBe(JSON.stringify({ rsvp_status: "confirmed" }));
   });
 
+  it("given a new household, when a guest is moved, then the household id is patched in API terms", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse({ id: 9 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await updateGuest(3, 9, { householdId: 12 });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(init.body).toBe(JSON.stringify({ household_id: 12 }));
+  });
+
   it("given a guest, when it is deleted, then it is removed from the wedding's collection", async () => {
     const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse(null, 204));
     vi.stubGlobal("fetch", fetchMock);
@@ -135,6 +147,7 @@ describe("the guest API", () => {
               rsvp_status: "pending",
               phone: null,
               email: null,
+              household: "Rossi",
             },
             errors: [],
           },
@@ -164,6 +177,7 @@ describe("the guest API", () => {
           rsvpStatus: "pending",
           phone: null,
           email: null,
+          household: "Rossi",
         },
         errors: [],
       },
@@ -186,6 +200,7 @@ describe("the guest API", () => {
         rsvpStatus: "pending",
         phone: null,
         email: null,
+        household: "Rossi",
       },
     ]);
 
@@ -203,6 +218,7 @@ describe("the guest API", () => {
         rsvp_status: "pending",
         phone: null,
         email: null,
+        household: "Rossi",
       },
     ]);
   });

@@ -69,7 +69,7 @@ const en = {
   "guests.import.open": "Import CSV",
   "guests.import.title": "Import guests from CSV",
   "guests.import.intro":
-    "Download the template, fill in one guest per row in your spreadsheet app, and upload it here. Only first_name and last_name are required.",
+    "Download the template, fill in one guest per row in your spreadsheet app, and upload it here. Only first_name and last_name are required. Give people who are invited together the same household value.",
   "guests.import.template": "Download the CSV template",
   "guests.import.file": "CSV file",
   "guests.import.checking": "Checking your file...",
@@ -119,6 +119,29 @@ const en = {
   "guests.form.cancel": "Cancel",
   "guests.form.nameRequired": "First and last name are required.",
   "guests.form.saveFailed": "We could not save this guest.",
+
+  "guests.householdSummary": "Guests: {guests} · Households: {households}",
+  "guests.household.members": "Household of {count}",
+  "guests.household.alone": "On their own",
+  "guests.household.openLink": "Open RSVP page for {label}",
+  "guests.household.copyLink": "Copy RSVP link for {label}",
+  "guests.household.copied": "RSVP link copied",
+  "guests.column.household": "Household",
+  "guests.form.household": "Household",
+  "guests.form.householdNew": "On their own (new household)",
+
+  "rsvp.loading": "Loading your invitation...",
+  "rsvp.notFound": "This invitation link is not valid.",
+  "rsvp.loadFailed": "We could not load your invitation.",
+  "rsvp.invitationFor": "Invitation for {label}",
+  "rsvp.prompt": "Let us know who will be there. Each person answers for themselves.",
+  "rsvp.attending": "Attending",
+  "rsvp.notAttending": "Not attending",
+  "rsvp.send": "Send RSVP",
+  "rsvp.sending": "Sending...",
+  "rsvp.saved": "Thank you! Your answers are saved.",
+  "rsvp.saveFailed": "We could not save your answers.",
+  "rsvp.otherLanguage": "Español",
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -190,7 +213,7 @@ const es: Record<TranslationKey, string> = {
   "guests.import.open": "Importar CSV",
   "guests.import.title": "Importar invitados desde CSV",
   "guests.import.intro":
-    "Descarga la plantilla, rellena un invitado por fila en tu hoja de cálculo y súbela aquí. Solo first_name y last_name son obligatorios.",
+    "Descarga la plantilla, rellena un invitado por fila en tu hoja de cálculo y súbela aquí. Solo first_name y last_name son obligatorios. Pon el mismo valor en household a quienes se invitan juntos.",
   "guests.import.template": "Descargar la plantilla CSV",
   "guests.import.file": "Archivo CSV",
   "guests.import.checking": "Revisando tu archivo...",
@@ -240,6 +263,29 @@ const es: Record<TranslationKey, string> = {
   "guests.form.cancel": "Cancelar",
   "guests.form.nameRequired": "El nombre y el apellido son obligatorios.",
   "guests.form.saveFailed": "No pudimos guardar este invitado.",
+
+  "guests.householdSummary": "Invitados: {guests} · Familias: {households}",
+  "guests.household.members": "Familia de {count}",
+  "guests.household.alone": "Por su cuenta",
+  "guests.household.openLink": "Abrir la página de confirmación de {label}",
+  "guests.household.copyLink": "Copiar el enlace de confirmación de {label}",
+  "guests.household.copied": "Enlace de confirmación copiado",
+  "guests.column.household": "Familia",
+  "guests.form.household": "Familia",
+  "guests.form.householdNew": "Por su cuenta (nueva familia)",
+
+  "rsvp.loading": "Cargando tu invitación...",
+  "rsvp.notFound": "Este enlace de invitación no es válido.",
+  "rsvp.loadFailed": "No pudimos cargar tu invitación.",
+  "rsvp.invitationFor": "Invitación para {label}",
+  "rsvp.prompt": "Cuéntanos quién vendrá. Cada persona responde por sí misma.",
+  "rsvp.attending": "Asistirá",
+  "rsvp.notAttending": "No asistirá",
+  "rsvp.send": "Enviar respuesta",
+  "rsvp.sending": "Enviando...",
+  "rsvp.saved": "¡Gracias! Tus respuestas están guardadas.",
+  "rsvp.saveFailed": "No pudimos guardar tus respuestas.",
+  "rsvp.otherLanguage": "English",
 };
 
 export const translations: Record<Language, Record<TranslationKey, string>> = { en, es };

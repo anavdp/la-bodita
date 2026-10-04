@@ -2,10 +2,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models import Guest, Wedding
+from app.models import Guest, Household, Wedding
 
 GUESTS_URL = "/api/weddings/{wedding_id}/guests"
-TEMPLATE_HEADER = "first_name,last_name,is_child,gender,relationship_type,side,phone,email"
+TEMPLATE_HEADER = "first_name,last_name,is_child,gender,relationship_type,side,phone,email,household"
 
 
 def preview(client: TestClient, wedding_id: int, content: str | bytes):
@@ -47,7 +47,9 @@ def test_given_an_unknown_wedding_when_the_template_is_downloaded_then_it_is_not
 def test_given_a_full_row_when_the_file_is_previewed_then_the_guest_is_parsed_but_not_saved(
     client: TestClient, db_session: Session, wedding: Wedding
 ):
-    content = csv_of("Lucia,Mendoza,true,female,friends,venezuela,+58 412 555 0134,lucia@example.com")
+    content = csv_of(
+        "Lucia,Mendoza,true,female,friends,venezuela,+58 412 555 0134,lucia@example.com,Familia Mendoza"
+    )
 
     response = preview(client, wedding.id, content)
 
@@ -65,6 +67,7 @@ def test_given_a_full_row_when_the_file_is_previewed_then_the_guest_is_parsed_bu
                 "rsvp_status": "pending",
                 "phone": "+58 412 555 0134",
                 "email": "lucia@example.com",
+                "household": "Familia Mendoza",
             },
             "errors": [],
         }
@@ -276,3 +279,47 @@ def test_given_an_unknown_wedding_when_the_import_is_confirmed_then_it_is_not_fo
     )
 
     assert response.status_code == 404
+
+
+def test_given_a_household_longer_than_it_can_hold_when_previewed_then_the_row_is_rejected(
+    client: TestClient, wedding: Wedding
+):
+    response = preview(client, wedding.id, csv_of(f"Maria,Rossi,,,,,,,{'R' * 101}"))
+
+    assert response.json()["rows"][0]["errors"] == [{"field": "household", "code": "too_long"}]
+
+
+def test_given_rows_sharing_a_household_when_the_import_is_confirmed_then_they_land_in_one_household(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    guests = [
+        {"first_name": "Maria", "last_name": "Rossi", "household": "Rossi"},
+        {"first_name": "Paolo", "last_name": "Rossi", "household": " rossi "},
+        {"first_name": "Lucia", "last_name": "Mendoza", "household": "Mendoza"},
+        {"first_name": "Carlos", "last_name": "Mendoza"},
+        {"first_name": "Ana", "last_name": "Perez"},
+    ]
+
+    response = client.post(f"{GUESTS_URL.format(wedding_id=wedding.id)}/bulk", json=guests)
+
+    assert response.status_code == 201
+    household_of = {guest["first_name"]: guest["household_id"] for guest in response.json()}
+    assert household_of["Maria"] == household_of["Paolo"]
+    assert len(set(household_of.values())) == 4
+    names = db_session.scalars(select(Household.name).order_by(Household.id)).all()
+    assert names == ["Rossi", "Mendoza", None, None]
+
+
+def test_given_a_household_name_already_on_the_list_when_imported_then_a_new_household_is_created(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    """Create-only, like the guests themselves: nothing is matched against the existing list."""
+    db_session.add(Household(wedding_id=wedding.id, name="Rossi"))
+    db_session.commit()
+
+    client.post(
+        f"{GUESTS_URL.format(wedding_id=wedding.id)}/bulk",
+        json=[{"first_name": "Maria", "last_name": "Rossi", "household": "Rossi"}],
+    )
+
+    assert db_session.scalar(select(func.count()).select_from(Household)) == 2

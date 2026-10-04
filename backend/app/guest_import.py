@@ -1,9 +1,8 @@
 """Reading a guest list out of the fixed-template CSV.
 
 The template is deliberately fixed rather than mapped: the couple downloads it,
-fills it in, and uploads it back. Every row is validated with `GuestCreate`, the
-same schema a single manual add goes through, so there is one definition of a
-valid guest. Parsing never touches the database - saving is a separate step,
+fills it in, and uploads it back. Every row is validated with the same guest fields
+a single manual add goes through, so there is one definition of a valid guest. Parsing never touches the database - saving is a separate step,
 after the couple has seen the preview.
 """
 
@@ -12,8 +11,7 @@ import io
 
 from pydantic import ValidationError
 
-from app.schemas.guest import GuestCreate
-from app.schemas.guest_import import GuestImportRow, GuestImportRowError
+from app.schemas.guest_import import GuestImportGuest, GuestImportRow, GuestImportRowError
 
 TEMPLATE_COLUMNS = (
     "first_name",
@@ -24,6 +22,7 @@ TEMPLATE_COLUMNS = (
     "side",
     "phone",
     "email",
+    "household",
 )
 REQUIRED_COLUMNS = ("first_name", "last_name")
 # Matched case-insensitively: a spreadsheet user writes "Italy", the API says "italy".
@@ -87,7 +86,7 @@ def parse_guest_rows(text: str) -> list[GuestImportRow]:
 
 def validate_row(row_number: int, values: dict[str, str]) -> GuestImportRow:
     try:
-        guest = GuestCreate.model_validate(values)
+        guest = GuestImportGuest.model_validate(values)
     except ValidationError as failure:
         errors = sorted(
             (

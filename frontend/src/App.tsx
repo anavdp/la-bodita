@@ -3,16 +3,19 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ComingSoon } from "./components/ComingSoon";
 import { AppLayout } from "./components/layout/AppLayout";
 import { GuestListPage } from "./features/guests/GuestListPage";
+import { RsvpPage } from "./features/rsvp/RsvpPage";
 import { LanguageProvider } from "./i18n/LanguageProvider";
 import { WeddingProvider } from "./wedding/WeddingProvider";
 
 /**
- * Every screen sits in the shared shell. Only the guest list is built so far;
- * the rest each have their own issue and show a placeholder until then.
+ * Every planner screen sits in the shared shell. Only the guest list is built so
+ * far; the rest each have their own issue and show a placeholder until then.
+ * The RSVP page is the guests' side, so it stands outside the shell.
  */
 export function AppRoutes() {
   return (
     <Routes>
+      <Route path="/rsvp/:token" element={<RsvpPage />} />
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to="/guests" replace />} />
         <Route path="/guests" element={<GuestListPage />} />

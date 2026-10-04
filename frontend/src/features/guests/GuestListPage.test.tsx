@@ -2,11 +2,13 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import * as guestsApi from "../../api/guests";
+import * as householdsApi from "../../api/households";
 import { aGuest } from "../../testing/guestFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { GuestListPage } from "./GuestListPage";
 
 vi.mock("../../api/guests");
+vi.mock("../../api/households");
 
 const maria = aGuest({ firstName: "Maria", lastName: "Rossi", rsvpStatus: "confirmed" });
 const carlos = aGuest({
@@ -20,6 +22,39 @@ const carlos = aGuest({
 describe("GuestListPage", () => {
   beforeEach(() => {
     vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria]);
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
+  });
+
+  it("given guests in households, when the list loads, then the number of households is shown", async () => {
+    const paolo = aGuest({ firstName: "Paolo", lastName: "Rossi", householdId: maria.householdId });
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria, paolo]);
+
+    renderWithProviders(<GuestListPage />);
+
+    expect(await screen.findByText("Guests: 3 · Households: 2")).toBeInTheDocument();
+    expect(householdsApi.listHouseholds).toHaveBeenCalledWith(1);
+  });
+
+  it("given an existing family, when a guest is added to it, then the guest is created in that household", async () => {
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([
+      { id: maria.householdId, name: "Famiglia Rossi", rsvpToken: "t", guestIds: [maria.id] },
+    ]);
+    vi.mocked(guestsApi.createGuest).mockResolvedValue(maria);
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: "Add Guest" }));
+    await userEvent.type(screen.getByLabelText("First name"), "Paolo");
+    await userEvent.type(screen.getByLabelText("Last name"), "Rossi");
+    await userEvent.selectOptions(screen.getByLabelText("Household"), "Famiglia Rossi");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(guestsApi.createGuest).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ firstName: "Paolo", householdId: maria.householdId }),
+      ),
+    );
   });
 
   afterEach(() => {
@@ -167,6 +202,7 @@ describe("GuestListPage", () => {
 describe("changing an RSVP from the table", () => {
   beforeEach(() => {
     vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria]);
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
   });
 
   it("given a pending guest, when a new status is chosen, then only the RSVP is patched", async () => {
@@ -197,7 +233,8 @@ describe("changing an RSVP from the table", () => {
 
   it("given a filled-in CSV, when it is imported, then the guests are created and the list reloads", async () => {
     const lucia = aGuest({ firstName: "Lucia", lastName: "Mendoza", side: null, relationshipType: null });
-    const { id: _id, weddingId: _weddingId, ...luciaDraft } = lucia;
+    const { id: _id, weddingId: _weddingId, householdId: _householdId, ...luciaFields } = lucia;
+    const luciaDraft = { ...luciaFields, household: null };
     vi.mocked(guestsApi.previewGuestImport).mockResolvedValue([
       { rowNumber: 2, guest: luciaDraft, errors: [] },
     ]);
