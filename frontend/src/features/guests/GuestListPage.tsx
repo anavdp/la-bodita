@@ -7,6 +7,7 @@ import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { filterGuestsByName } from "./filtering";
 import { GuestFormDialog } from "./GuestFormDialog";
+import { GuestImportDialog } from "./GuestImportDialog";
 import { GuestStats } from "./GuestStats";
 import { GuestTable } from "./GuestTable";
 import { useGuests } from "./useGuests";
@@ -20,10 +21,11 @@ export function GuestListPage() {
   const { term } = useSearch();
 
   const weddingId = wedding?.id ?? null;
-  const { guests, isLoading, hasLoadError, reload, addGuest, editGuest, removeGuest } =
+  const { guests, isLoading, hasLoadError, reload, addGuest, addGuests, editGuest, removeGuest } =
     useGuests(weddingId);
 
   const [dialogTarget, setDialogTarget] = useState<DialogTarget>(null);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   /** Which row action failed, if any: the dialog reports its own failures. */
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
 
@@ -36,6 +38,11 @@ export function GuestListPage() {
       await addGuest(draft);
     }
     setDialogTarget(null);
+  };
+
+  const handleImport = async (drafts: GuestDraft[]) => {
+    await addGuests(drafts);
+    setIsImportOpen(false);
   };
 
   const handleDelete = async (guest: Guest) => {
@@ -101,13 +108,23 @@ export function GuestListPage() {
           <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("guests.title")}</h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.subtitle")}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setDialogTarget({ guest: null })}
-          className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
-        >
-          {t("guests.add")}
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setIsImportOpen(true)}
+            disabled={weddingId === null}
+            className="rounded-full border border-primary px-8 py-4 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
+          >
+            {t("guests.import.open")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setDialogTarget({ guest: null })}
+            className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
+          >
+            {t("guests.add")}
+          </button>
+        </div>
       </div>
 
       <GuestStats guests={guests} />
@@ -126,6 +143,14 @@ export function GuestListPage() {
           guest={dialogTarget.guest}
           onSave={handleSave}
           onClose={() => setDialogTarget(null)}
+        />
+      )}
+
+      {isImportOpen && weddingId !== null && (
+        <GuestImportDialog
+          weddingId={weddingId}
+          onImport={handleImport}
+          onClose={() => setIsImportOpen(false)}
         />
       )}
     </>

@@ -13,8 +13,6 @@ REQUIRED_FIELDS = (
     "first_name",
     "last_name",
     "is_child",
-    "relationship_type",
-    "side",
     "rsvp_status",
 )
 
@@ -22,8 +20,8 @@ REQUIRED_FIELDS = (
 class GuestCreate(BaseModel):
     first_name: RequiredText
     last_name: RequiredText
-    relationship_type: GuestRelationshipType
-    side: GuestSide
+    relationship_type: GuestRelationshipType | None = None
+    side: GuestSide | None = None
     is_child: bool = False
     gender: GuestGender | None = None
     rsvp_status: RsvpStatus = RsvpStatus.PENDING
@@ -65,8 +63,8 @@ class GuestRead(BaseModel):
     last_name: str
     is_child: bool
     gender: GuestGender | None
-    relationship_type: GuestRelationshipType
-    side: GuestSide
+    relationship_type: GuestRelationshipType | None
+    side: GuestSide | None
     rsvp_status: RsvpStatus
     phone: str | None
     email: str | None

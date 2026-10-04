@@ -72,10 +72,13 @@ class Guest(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     gender: Mapped[GuestGender | None] = mapped_column(
         stored_as_text(GuestGender, "gender"), default=None
     )
-    relationship_type: Mapped[GuestRelationshipType] = mapped_column(
-        stored_as_text(GuestRelationshipType, "relationship_type")
+    # Optional so a guest can be added (or bulk-imported) by name alone.
+    relationship_type: Mapped[GuestRelationshipType | None] = mapped_column(
+        stored_as_text(GuestRelationshipType, "relationship_type"), default=None
     )
-    side: Mapped[GuestSide] = mapped_column(stored_as_text(GuestSide, "side"))
+    side: Mapped[GuestSide | None] = mapped_column(
+        stored_as_text(GuestSide, "side"), default=None
+    )
     rsvp_status: Mapped[RsvpStatus] = mapped_column(
         stored_as_text(RsvpStatus, "rsvp_status"),
         default=RsvpStatus.PENDING,

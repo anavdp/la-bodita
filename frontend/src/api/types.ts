@@ -11,8 +11,9 @@ export interface Guest {
   lastName: string;
   isChild: boolean;
   gender: GuestGender | null;
-  relationshipType: GuestRelationshipType;
-  side: GuestSide;
+  /** Null until the couple decides; a guest can be added by name alone. */
+  relationshipType: GuestRelationshipType | null;
+  side: GuestSide | null;
   rsvpStatus: RsvpStatus;
   phone: string | null;
   email: string | null;
@@ -20,6 +21,30 @@ export interface Guest {
 
 /** A guest before the API has given it an identity. */
 export type GuestDraft = Omit<Guest, "id" | "weddingId">;
+
+/** The columns of the CSV import template, as the file spells them. */
+export type GuestImportField =
+  | "first_name"
+  | "last_name"
+  | "is_child"
+  | "gender"
+  | "relationship_type"
+  | "side"
+  | "phone"
+  | "email";
+
+export interface GuestImportError {
+  field: GuestImportField;
+  code: "missing" | "invalid" | "too_long";
+}
+
+/** One spreadsheet row of an import preview: a guest to create, or what is wrong with it. */
+export interface GuestImportRow {
+  /** The row as numbered in the spreadsheet, header included. */
+  rowNumber: number;
+  guest: GuestDraft | null;
+  errors: GuestImportError[];
+}
 
 export interface Wedding {
   id: number;

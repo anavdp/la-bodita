@@ -194,4 +194,38 @@ describe("changing an RSVP from the table", () => {
 
     expect(await screen.findByText("We could not update this RSVP.")).toBeInTheDocument();
   });
+
+  it("given a filled-in CSV, when it is imported, then the guests are created and the list reloads", async () => {
+    const lucia = aGuest({ firstName: "Lucia", lastName: "Mendoza", side: null, relationshipType: null });
+    const { id: _id, weddingId: _weddingId, ...luciaDraft } = lucia;
+    vi.mocked(guestsApi.previewGuestImport).mockResolvedValue([
+      { rowNumber: 2, guest: luciaDraft, errors: [] },
+    ]);
+    vi.mocked(guestsApi.importGuests).mockResolvedValue(undefined);
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Carlos Mendoza");
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, lucia, maria]);
+
+    await userEvent.click(screen.getByRole("button", { name: "Import CSV" }));
+    await userEvent.upload(
+      screen.getByLabelText("CSV file"),
+      new File(["first_name,last_name\nLucia,Mendoza\n"], "guests.csv", { type: "text/csv" }),
+    );
+    await userEvent.click(await screen.findByRole("button", { name: "Import 1 guest" }));
+
+    expect(guestsApi.importGuests).toHaveBeenCalledWith(1, [luciaDraft]);
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(await screen.findByText("Lucia Mendoza")).toBeInTheDocument();
+  });
+
+  it("given the import dialog is open, when it is cancelled, then nothing is imported", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Carlos Mendoza");
+
+    await userEvent.click(screen.getByRole("button", { name: "Import CSV" }));
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(guestsApi.importGuests).not.toHaveBeenCalled();
+  });
 });

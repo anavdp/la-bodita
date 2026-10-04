@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { createGuest, deleteGuest, listGuests, updateGuest } from "../../api/guests";
+import { createGuest, deleteGuest, importGuests, listGuests, updateGuest } from "../../api/guests";
 import type { Guest, GuestDraft } from "../../api/types";
 
 export interface GuestsState {
@@ -9,6 +9,7 @@ export interface GuestsState {
   hasLoadError: boolean;
   reload: () => void;
   addGuest: (draft: GuestDraft) => Promise<void>;
+  addGuests: (drafts: GuestDraft[]) => Promise<void>;
   editGuest: (guestId: number, changes: Partial<GuestDraft>) => Promise<void>;
   removeGuest: (guestId: number) => Promise<void>;
 }
@@ -51,6 +52,15 @@ export function useGuests(weddingId: number | null): GuestsState {
     [weddingId, load],
   );
 
+  const addGuests = useCallback(
+    async (drafts: GuestDraft[]) => {
+      if (weddingId === null) return;
+      await importGuests(weddingId, drafts);
+      await load();
+    },
+    [weddingId, load],
+  );
+
   const editGuest = useCallback(
     async (guestId: number, changes: Partial<GuestDraft>) => {
       if (weddingId === null) return;
@@ -75,6 +85,7 @@ export function useGuests(weddingId: number | null): GuestsState {
     hasLoadError,
     reload: () => void load(),
     addGuest,
+    addGuests,
     editGuest,
     removeGuest,
   };

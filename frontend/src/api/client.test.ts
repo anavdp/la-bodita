@@ -1,4 +1,4 @@
-import { ApiError, request } from "./client";
+import { ApiError, apiUrl, request } from "./client";
 
 function respondWith(body: unknown, init: { status?: number } = {}) {
   const status = init.status ?? 200;
@@ -34,6 +34,25 @@ describe("request", () => {
     expect(init.method).toBe("POST");
     expect(init.body).toBe(JSON.stringify({ first_name: "Maria" }));
     expect(new Headers(init.headers).get("Content-Type")).toBe("application/json");
+  });
+
+  it("given a file upload, when it is sent, then the browser is left to set the multipart headers", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => respondWith({ rows: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+    const form = new FormData();
+    form.append("file", new File(["first_name"], "guests.csv"));
+
+    await request("/api/weddings/1/guests/import/preview", { method: "POST", body: form });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(init.body).toBe(form);
+    expect(new Headers(init.headers).has("Content-Type")).toBe(false);
+  });
+
+  it("given a path, when it is turned into a link, then it points at the API base url", () => {
+    expect(apiUrl("/api/weddings/1/guests/import/template")).toBe(
+      "http://localhost:8000/api/weddings/1/guests/import/template",
+    );
   });
 
   it("given a successful response, when it is parsed, then the payload is returned", async () => {

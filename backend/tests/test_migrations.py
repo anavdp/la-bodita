@@ -153,8 +153,60 @@ def test_given_the_guest_migration_when_it_is_downgraded_then_only_the_guest_tab
     config = build_alembic_config(database_url)
     command.upgrade(config, "head")
 
-    command.downgrade(config, "-1")
+    command.downgrade(config, "1fea8ee535b2")
 
     tables = inspect(create_engine(database_url)).get_table_names()
     assert "guest" not in tables
     assert "wedding" in tables
+
+
+def guest_column_nullability(database_url: str) -> dict[str, bool]:
+    columns = inspect(create_engine(database_url)).get_columns("guest")
+    return {column["name"]: column["nullable"] for column in columns}
+
+
+def test_given_migrations_at_head_when_the_guest_table_is_inspected_then_relationship_and_side_are_optional(
+    tmp_path,
+):
+    database_url = f"sqlite:///{tmp_path / 'guest_optional_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    nullability = guest_column_nullability(database_url)
+    assert nullability["relationship_type"] is True
+    assert nullability["side"] is True
+    assert nullability["first_name"] is False
+
+
+def test_given_optional_relationship_and_side_when_the_migration_is_downgraded_then_they_are_required_again(
+    tmp_path,
+):
+    database_url = f"sqlite:///{tmp_path / 'guest_optional_downgrade_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "head")
+
+    command.downgrade(config, "1c9790e79368")
+
+    nullability = guest_column_nullability(database_url)
+    assert nullability["relationship_type"] is False
+    assert nullability["side"] is False
+
+
+def test_given_guests_without_relationship_or_side_when_the_migration_is_downgraded_then_they_fall_back_to_other(
+    tmp_path,
+):
+    database_url = f"sqlite:///{tmp_path / 'guest_optional_backfill_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "head")
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("insert into wedding (id, name) values (1, 'La Bodita')")
+        connection.exec_driver_sql(
+            "insert into guest (wedding_id, first_name, last_name) values (1, 'Maria', 'Rossi')"
+        )
+
+    command.downgrade(config, "1c9790e79368")
+
+    with engine.connect() as connection:
+        row = connection.exec_driver_sql("select relationship_type, side from guest").one()
+    assert tuple(row) == ("other", "other")

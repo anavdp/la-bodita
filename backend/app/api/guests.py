@@ -1,12 +1,19 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Response, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_session
+from app.guest_import import (
+    MAX_FILE_BYTES,
+    GuestImportFileError,
+    decode_upload,
+    parse_guest_rows,
+    template_csv,
+)
 from app.models import Guest, Wedding
-from app.schemas import GuestCreate, GuestRead, GuestUpdate
+from app.schemas import GuestCreate, GuestImportPreview, GuestRead, GuestUpdate
 
 router = APIRouter(prefix="/api/weddings/{wedding_id}/guests", tags=["guests"])
 
@@ -51,6 +58,50 @@ def create_guest(payload: GuestCreate, wedding: WeddingDependency, session: Sess
     session.commit()
     session.refresh(guest)
     return guest
+
+
+@router.post("/bulk", response_model=list[GuestRead], status_code=status.HTTP_201_CREATED)
+def create_guests(
+    payload: Annotated[list[GuestCreate], Body(min_length=1)],
+    wedding: WeddingDependency,
+    session: SessionDependency,
+) -> list[Guest]:
+    """Confirms a CSV import: the rows the preview accepted, saved in one commit.
+
+    Create-only by design - a guest already on the list is not matched, so
+    importing the same file twice lists everyone twice.
+    """
+    guests = [Guest(wedding_id=wedding.id, **guest.model_dump()) for guest in payload]
+    session.add_all(guests)
+    session.commit()
+    for guest in guests:
+        session.refresh(guest)
+    return guests
+
+
+@router.get("/import/template")
+def download_import_template(wedding: WeddingDependency) -> Response:
+    return Response(
+        content=template_csv(),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="guest-list-template.csv"'},
+    )
+
+
+@router.post("/import/preview", response_model=GuestImportPreview)
+async def preview_import(file: UploadFile, wedding: WeddingDependency) -> GuestImportPreview:
+    """Validates every row of an uploaded CSV without saving anything.
+
+    Row problems come back per row, so one typo does not sink a 150-row file.
+    Only a file that cannot be read at all is rejected outright.
+    """
+    try:
+        text = decode_upload(await file.read(MAX_FILE_BYTES + 1))
+        return GuestImportPreview(rows=parse_guest_rows(text))
+    except GuestImportFileError as failure:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=failure.code
+        ) from failure
 
 
 @router.get("/{guest_id}", response_model=GuestRead)

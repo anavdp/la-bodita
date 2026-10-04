@@ -165,7 +165,7 @@ def test_given_the_guest_model_when_required_fields_are_inspected_then_only_the_
     inspected = inspect(Guest)
 
     assert inspected.primary_key[0].name == "id"
-    for required in ("first_name", "last_name", "is_child", "relationship_type", "side", "rsvp_status"):
+    for required in ("first_name", "last_name", "is_child", "rsvp_status"):
         assert columns[required].nullable is False, required
-    for optional in ("gender", "phone", "email"):
+    for optional in ("gender", "relationship_type", "side", "phone", "email"):
         assert columns[optional].nullable is True, optional

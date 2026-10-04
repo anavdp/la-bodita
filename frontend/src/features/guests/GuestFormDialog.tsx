@@ -36,10 +36,10 @@ export function GuestFormDialog({ guest, onSave, onClose }: GuestFormDialogProps
   const [lastName, setLastName] = useState(guest?.lastName ?? "");
   const [isChild, setIsChild] = useState(guest?.isChild ?? false);
   const [gender, setGender] = useState<GuestGender | "">(guest?.gender ?? "");
-  const [relationshipType, setRelationshipType] = useState<GuestRelationshipType>(
-    guest?.relationshipType ?? "family",
+  const [relationshipType, setRelationshipType] = useState<GuestRelationshipType | "">(
+    guest?.relationshipType ?? "",
   );
-  const [side, setSide] = useState<GuestSide>(guest?.side ?? "venezuela");
+  const [side, setSide] = useState<GuestSide | "">(guest?.side ?? "");
   const [rsvpStatus, setRsvpStatus] = useState<RsvpStatus>(guest?.rsvpStatus ?? "pending");
   const [phone, setPhone] = useState(guest?.phone ?? "");
   const [email, setEmail] = useState(guest?.email ?? "");
@@ -73,8 +73,8 @@ export function GuestFormDialog({ guest, onSave, onClose }: GuestFormDialogProps
         lastName: lastName.trim(),
         isChild,
         gender: gender === "" ? null : gender,
-        relationshipType,
-        side,
+        relationshipType: relationshipType === "" ? null : relationshipType,
+        side: side === "" ? null : side,
         rsvpStatus,
         phone: orNull(phone),
         email: orNull(email),
@@ -134,9 +134,10 @@ export function GuestFormDialog({ guest, onSave, onClose }: GuestFormDialogProps
                 className={field}
                 value={relationshipType}
                 onChange={(event) =>
-                  setRelationshipType(event.target.value as GuestRelationshipType)
+                  setRelationshipType(event.target.value as GuestRelationshipType | "")
                 }
               >
+                <option value="">{t("guests.notSpecified")}</option>
                 {relationshipTypes.map((option) => (
                   <option key={option} value={option}>
                     {t(relationshipLabelKey(option))}
@@ -152,8 +153,9 @@ export function GuestFormDialog({ guest, onSave, onClose }: GuestFormDialogProps
                 id="guest-side"
                 className={field}
                 value={side}
-                onChange={(event) => setSide(event.target.value as GuestSide)}
+                onChange={(event) => setSide(event.target.value as GuestSide | "")}
               >
+                <option value="">{t("guests.notSpecified")}</option>
                 {guestSides.map((option) => (
                   <option key={option} value={option}>
                     {t(sideLabelKey(option))}
