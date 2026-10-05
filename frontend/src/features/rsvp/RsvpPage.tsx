@@ -20,14 +20,6 @@ function choicesFrom(invitation: RsvpInvitation): Record<number, Choice> {
   return Object.fromEntries(invitation.guests.map((guest) => [guest.id, choiceFor(guest.rsvpStatus)]));
 }
 
-/** "2026-10-29" read as a calendar day, not as midnight UTC. */
-function formatDate(isoDate: string, language: string): string {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  return new Intl.DateTimeFormat(language === "es" ? "es-ES" : "en-GB", { dateStyle: "long" }).format(
-    new Date(year, month - 1, day),
-  );
-}
-
 /**
  * What a household sees when it opens its private link: everyone invited
  * together, each answering for themselves. Lives outside the planner shell -
@@ -35,7 +27,7 @@ function formatDate(isoDate: string, language: string): string {
  */
 export function RsvpPage() {
   const { token = "" } = useParams();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
 
   const [invitation, setInvitation] = useState<RsvpInvitation | null>(null);
   const [loadError, setLoadError] = useState<TranslationKey | null>(null);
@@ -102,11 +94,8 @@ export function RsvpPage() {
     return (
       <>
         <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{invitation.weddingName}</h1>
-        {invitation.weddingDate !== null && (
-          <p className="mb-6 font-body-lg text-body-lg text-on-surface-variant">
-            {formatDate(invitation.weddingDate, language)}
-          </p>
-        )}
+        {/* Written out rather than read from the wedding record, which holds an older date. */}
+        <p className="mb-6 font-body-lg text-body-lg text-on-surface-variant">{t("rsvp.whenAndWhere")}</p>
         <p className="mb-1 font-title-lg text-title-lg text-on-surface">
           {t("rsvp.invitationFor", { label: invitation.householdName })}
         </p>

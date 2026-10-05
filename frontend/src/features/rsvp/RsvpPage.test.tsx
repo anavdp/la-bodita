@@ -171,4 +171,17 @@ describe("RsvpPage", () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it("given a household link, when it opens, then it says when and where the wedding is, and only once", async () => {
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(screen.getByText("La Bodita will take place on August 14, 2027 in Araure, Venezuela.")).toBeInTheDocument();
+    // The wedding record's own date is not shown, so guests never see two dates.
+    expect(screen.queryByText("29 October 2026")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+
+    expect(screen.getByText("La Bodita se celebrará el 14 de agosto del 2027 en Araure, Venezuela.")).toBeInTheDocument();
+  });
 });

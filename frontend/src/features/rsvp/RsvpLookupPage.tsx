@@ -57,6 +57,7 @@ export function RsvpLookupPage() {
   return (
     <RsvpFrame picture="/rsvp-lookup.jpg">
       <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("rsvp.lookup.title")}</h1>
+      <p className="mb-4 font-body-lg text-body-lg text-on-surface-variant">{t("rsvp.whenAndWhere")}</p>
       <p className="mb-6 font-body-sm text-body-sm text-on-surface-variant">{t("rsvp.lookup.prompt")}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
