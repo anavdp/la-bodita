@@ -76,7 +76,7 @@ describe("AppRoutes", () => {
     await userEvent.type(screen.getByRole("textbox", { name: "Last name" }), "Rossi");
     await userEvent.click(screen.getByRole("button", { name: "Find my invitation" }));
 
-    expect(await screen.findByText("Invitation for Famiglia Rossi")).toBeInTheDocument();
+    expect(await screen.findByText("We'll send you more information about La Bodita very soon.")).toBeInTheDocument();
   });
 
   afterEach(() => {

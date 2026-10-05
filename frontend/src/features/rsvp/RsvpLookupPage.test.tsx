@@ -69,7 +69,9 @@ describe("RsvpLookupPage", () => {
     await searchFor("Maria", "Rossi");
 
     expect(await screen.findByText("We found more than one invitation. Which one is yours?")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: /Famiglia Rossi.*Maria Rossi, Paolo Rossi/ }));
+    // Only who is in each household: its own name is for the couple's planning.
+    expect(screen.queryByText("Famiglia Rossi")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Maria Rossi, Paolo Rossi" }));
     expect(await screen.findByText("Opened invitation rossi-token")).toBeInTheDocument();
   });
 
@@ -128,13 +130,13 @@ describe("RsvpLookupPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-lookup.jpg");
   });
 
-  it("given the lookup page, when it opens, then the wedding date sits beside the title in red", () => {
+  it("given the lookup page, when it opens, then the wedding date sits beside the title", () => {
     renderPage();
 
     const title = screen.getByRole("heading", { name: "Find your invitation" });
     const date = screen.getByText("August 14, 2027");
     expect(title.parentElement).toContainElement(date);
-    expect(date).toHaveClass("text-secondary-container");
+    expect(date).not.toHaveClass("text-secondary-container");
     expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();
   });
 });

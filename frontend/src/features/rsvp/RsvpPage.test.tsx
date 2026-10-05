@@ -9,9 +9,6 @@ import { RsvpPage } from "./RsvpPage";
 
 vi.mock("../../api/rsvp");
 
-/** A sentence that is split across elements (its bold parts), matched as one paragraph. */
-const withText = (sentence: string) => (_content: string, element: Element | null) =>
-  element?.tagName === "P" && element.textContent === sentence;
 
 const invitation: RsvpInvitation = {
   householdName: "Famiglia Rossi",
@@ -42,7 +39,8 @@ describe("RsvpPage", () => {
     expect(screen.getByText("Loading your invitation...")).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "La Bodita" })).toBeInTheDocument();
     expect(rsvpApi.getInvitation).toHaveBeenCalledWith("abc");
-    expect(screen.getByText("Invitation for Famiglia Rossi")).toBeInTheDocument();
+    // The household's own name is for the couple's planning, not for guests.
+    expect(screen.queryByText(/Famiglia Rossi/)).not.toBeInTheDocument();
     const maria = screen.getByRole("group", { name: "Maria Rossi" });
     expect(within(maria).getByRole("radio", { name: "I'll be there" })).not.toBeChecked();
     expect(within(maria).getByRole("radio", { name: "I can't make it" })).not.toBeChecked();
@@ -141,7 +139,7 @@ describe("RsvpPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(screen.getByText("Invitación para Famiglia Rossi")).toBeInTheDocument();
+    expect(screen.getByText("Les enviaremos más información sobre La Bodita muy pronto.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Enviar respuesta" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Vamos todos" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Nadie podrá ir" })).toBeInTheDocument();
@@ -157,42 +155,43 @@ describe("RsvpPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-banner.jpg");
   });
 
-  it("given a household of several, when it opens, then they are asked together to answer by the deadline, in bold", async () => {
+  it("given a household of several, when it opens, then a banner asks them together to answer by the deadline", async () => {
     renderPage();
     await screen.findByRole("heading", { name: "La Bodita" });
 
-    expect(
-      screen.getByText(withText("We'll send you more information about La Bodita very soon. For now, please let us know whether you can come by January 1, 2027.")),
-    ).toBeInTheDocument();
-    expect(screen.getByText("January 1, 2027").tagName).toBe("STRONG");
+    expect(screen.getByText("We'll send you more information about La Bodita very soon.")).toBeInTheDocument();
+    const banner = screen.getByRole("note");
+    expect(banner).toHaveTextContent("Please let us know whether you can come by January 1, 2027.");
+    expect(within(banner).getByText("January 1, 2027").tagName).toBe("STRONG");
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(
-      screen.getByText(withText("Les enviaremos más información sobre La Bodita muy pronto. Por ahora, por favor confírmennos si podrán asistir antes del 1 de Enero de 2027.")),
-    ).toBeInTheDocument();
-    expect(screen.getByText("1 de Enero de 2027").tagName).toBe("STRONG");
+    expect(screen.getByText("Les enviaremos más información sobre La Bodita muy pronto.")).toBeInTheDocument();
+    expect(screen.getByRole("note")).toHaveTextContent(
+      "Por favor confírmennos si podrán asistir antes del 1 de Enero de 2027.",
+    );
   });
 
-  it("given a guest invited alone, when they open their link, then the deadline speaks to them alone", async () => {
+  it("given a guest invited alone, when they open their link, then the note and banner speak to them alone", async () => {
     vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...invitation, guests: [invitation.guests[0]] });
     renderPage();
     await screen.findByRole("heading", { name: "La Bodita" });
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(
-      screen.getByText(withText("Te enviaremos más información sobre La Bodita muy pronto. Por ahora, por favor confírmanos si podrás asistir antes del 1 de Enero de 2027.")),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Te enviaremos más información sobre La Bodita muy pronto.")).toBeInTheDocument();
+    expect(screen.getByRole("note")).toHaveTextContent(
+      "Por favor confírmanos si podrás asistir antes del 1 de Enero de 2027.",
+    );
   });
 
-  it("given a household link, when it opens, then the wedding date sits beside the title in red, and only once", async () => {
+  it("given a household link, when it opens, then the wedding date sits beside the title, and only once", async () => {
     renderPage();
     const title = await screen.findByRole("heading", { name: "La Bodita" });
 
     const date = screen.getByText("August 14, 2027");
     expect(title.parentElement).toContainElement(date);
-    expect(date).toHaveClass("text-secondary-container");
+    expect(date).not.toHaveClass("text-secondary-container");
     expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();
     // The wedding record holds an older date, so guests never see two.
     expect(screen.queryByText("29 October 2026")).not.toBeInTheDocument();
@@ -201,13 +200,6 @@ describe("RsvpPage", () => {
 
     expect(screen.getByText("14 de Agosto de 2027")).toBeInTheDocument();
     expect(screen.queryByText(/se celebrará/)).not.toBeInTheDocument();
-  });
-
-  it("given a household link, when it opens, then the deadline date is in red too", async () => {
-    renderPage();
-    await screen.findByRole("heading", { name: "La Bodita" });
-
-    expect(screen.getByText("January 1, 2027")).toHaveClass("text-secondary-container");
   });
 
   it("given a household link, when it opens, then there is no extra instruction line under the deadline", async () => {

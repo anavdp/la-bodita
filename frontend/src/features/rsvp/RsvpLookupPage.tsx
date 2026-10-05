@@ -111,8 +111,8 @@ export function RsvpLookupPage() {
               onClick={() => navigate(rsvpPath(match.token))}
               className="rounded-lg border border-outline-variant px-4 py-3 text-left transition-colors hover:border-primary hover:bg-primary/5"
             >
-              <span className="block font-label-lg text-label-lg text-on-surface">{match.name}</span>
-              <span className="block font-body-sm text-body-sm text-on-surface-variant">
+              {/* Who is in it, not the household's own name: that is for the couple's planning. */}
+              <span className="block font-label-lg text-label-lg text-on-surface">
                 {match.members.map(fullName).join(", ")}
               </span>
             </button>

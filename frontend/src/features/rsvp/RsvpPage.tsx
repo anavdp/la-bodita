@@ -93,21 +93,30 @@ export function RsvpPage() {
     if (invitation === null) {
       return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("rsvp.loading")}</p>;
     }
+    const isHousehold = invitation.guests.length > 1;
     return (
       <>
         <TitleWithDate title={invitation.weddingName} />
-        <p className="mb-2 font-title-lg text-title-lg text-on-surface">
-          {t("rsvp.invitationFor", { label: invitation.householdName })}
+        {/* Spanish speaks to a household in the plural ("confírmennos") and to a guest alone in the singular. */}
+        <p className="mb-4 font-body-lg text-body-lg text-on-surface">
+          {t(isHousehold ? "rsvp.moreInfo.many" : "rsvp.moreInfo.one")}
         </p>
-        {/* Spanish asks a household in the plural ("confírmennos") and a guest alone in the singular. */}
-        <p className="mb-6 font-body-lg text-body-lg text-on-surface">
-          {emphasize(t(invitation.guests.length > 1 ? "rsvp.deadline.many" : "rsvp.deadline.one"), {
-            date: <strong className="text-secondary-container">{t("rsvp.deadlineDate")}</strong>,
-          })}
-        </p>
+        <div
+          role="note"
+          className="mb-6 flex items-start gap-3 rounded-lg border-2 border-tertiary bg-tertiary-fixed px-4 py-3 text-on-tertiary-fixed"
+        >
+          <span aria-hidden="true" className="material-symbols-outlined icon-filled text-[24px] text-tertiary">
+            info
+          </span>
+          <p className="font-body-lg text-body-lg">
+            {emphasize(t(isHousehold ? "rsvp.deadline.many" : "rsvp.deadline.one"), {
+              date: <strong>{t("rsvp.deadlineDate")}</strong>,
+            })}
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {invitation.guests.length > 1 && (
+          {isHousehold && (
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
