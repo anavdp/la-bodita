@@ -8,7 +8,9 @@ import type { RsvpAnswer, RsvpInvitation, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "../guests/filtering";
+import { emphasize } from "./emphasize";
 import { RsvpFrame } from "./RsvpFrame";
+import { WhenAndWhere } from "./WhenAndWhere";
 
 /** A member's choice on the form: undecided until they pick one. */
 type Choice = "yes" | "no" | null;
@@ -93,14 +95,17 @@ export function RsvpPage() {
     }
     return (
       <>
-        <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{invitation.weddingName}</h1>
-        {/* Written out rather than read from the wedding record, which holds an older date. */}
-        <p className="mb-6 font-body-lg text-body-lg text-on-surface-variant">{t("rsvp.whenAndWhere")}</p>
-        <p className="mb-1 font-title-lg text-title-lg text-on-surface">
+        <h1 className="mb-4 font-headline-lg text-headline-lg text-primary">{invitation.weddingName}</h1>
+        <WhenAndWhere />
+        <p className="mb-2 font-title-lg text-title-lg text-on-surface">
           {t("rsvp.invitationFor", { label: invitation.householdName })}
         </p>
-        <p className="mb-4 font-body-lg text-body-lg text-on-surface">{t("rsvp.deadline")}</p>
-        <p className="mb-6 font-body-sm text-body-sm text-on-surface-variant">{t("rsvp.prompt")}</p>
+        {/* Spanish asks a household in the plural ("confírmennos") and a guest alone in the singular. */}
+        <p className="mb-6 font-body-lg text-body-lg text-on-surface">
+          {emphasize(t(invitation.guests.length > 1 ? "rsvp.deadline.many" : "rsvp.deadline.one"), {
+            date: <strong className="text-primary">{t("rsvp.deadlineDate")}</strong>,
+          })}
+        </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {invitation.guests.length > 1 && (
@@ -122,13 +127,13 @@ export function RsvpPage() {
             </div>
           )}
           {invitation.guests.map((guest) => (
-            <fieldset key={guest.id} className="rounded-lg border border-outline-variant px-4 py-3">
-              <legend className="px-1 font-label-lg text-label-lg text-on-surface">{fullName(guest)}</legend>
+            <fieldset key={guest.id} className="rounded-lg border border-primary-container bg-primary-fixed/50 px-4 py-3">
+              <legend className="rounded-full bg-surface-container-lowest px-2 font-label-lg text-label-lg text-primary">{fullName(guest)}</legend>
               <div className="flex flex-wrap gap-6">
                 {(["yes", "no"] as const).map((choice) => (
                   <label
                     key={choice}
-                    className="flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant"
+                    className="flex items-center gap-2 font-body-sm text-body-sm text-on-surface"
                   >
                     <input
                       type="radio"
