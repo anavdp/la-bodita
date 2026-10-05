@@ -50,6 +50,14 @@ describe("AppRoutes", () => {
     expect(screen.queryByRole("navigation", { name: "Main navigation" })).not.toBeInTheDocument();
   });
 
+  it("given the public RSVP address, when it is visited, then the name lookup shows without the planner shell", async () => {
+    renderAt("/rsvp");
+
+    expect(await screen.findByRole("textbox", { name: "First name" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Last name" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Main navigation" })).not.toBeInTheDocument();
+  });
+
   afterEach(() => {
     vi.resetAllMocks();
   });

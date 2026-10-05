@@ -8,6 +8,7 @@ import type { RsvpAnswer, RsvpInvitation, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "../guests/filtering";
+import { RsvpFrame } from "./RsvpFrame";
 
 /** A member's choice on the form: undecided until they pick one. */
 type Choice = "yes" | "no" | null;
@@ -27,9 +28,6 @@ function formatDate(isoDate: string, language: string): string {
   );
 }
 
-const card =
-  "organic-shape-1 w-full max-w-xl bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]";
-
 /**
  * What a household sees when it opens its private link: everyone invited
  * together, each answering for themselves. Lives outside the planner shell -
@@ -37,7 +35,7 @@ const card =
  */
 export function RsvpPage() {
   const { token = "" } = useParams();
-  const { t, language, toggleLanguage } = useTranslation();
+  const { t, language } = useTranslation();
 
   const [invitation, setInvitation] = useState<RsvpInvitation | null>(null);
   const [loadError, setLoadError] = useState<TranslationKey | null>(null);
@@ -179,18 +177,5 @@ export function RsvpPage() {
     );
   };
 
-  return (
-    <main className="flex min-h-screen flex-col items-center gap-4 bg-background px-4 py-12">
-      <div className="flex w-full max-w-xl justify-end">
-        <button
-          type="button"
-          onClick={toggleLanguage}
-          className="rounded-full border border-primary px-4 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-        >
-          {t("rsvp.otherLanguage")}
-        </button>
-      </div>
-      <div className={card}>{content()}</div>
-    </main>
-  );
+  return <RsvpFrame>{content()}</RsvpFrame>;
 }

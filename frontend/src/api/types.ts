@@ -69,6 +69,13 @@ export interface RsvpGuest {
   rsvpStatus: RsvpStatus;
 }
 
+/** A household found by a guest's name: only who is in it, nothing more until it is opened. */
+export interface RsvpHouseholdMatch {
+  token: string;
+  name: string;
+  members: { firstName: string; lastName: string }[];
+}
+
 export interface RsvpAnswer {
   guestId: number;
   attending: boolean;

@@ -182,6 +182,17 @@ const en = {
 
   "rsvp.everyone": "Everyone is coming",
   "rsvp.noOne": "No one is coming",
+
+  "rsvp.lookup.title": "Find your invitation",
+  "rsvp.lookup.prompt": "Type your first and last name as they appear on your invitation.",
+  "rsvp.lookup.firstName": "First name",
+  "rsvp.lookup.lastName": "Last name",
+  "rsvp.lookup.search": "Find my invitation",
+  "rsvp.lookup.searching": "Searching...",
+  "rsvp.lookup.choose": "We found more than one invitation. Which one is yours?",
+  "rsvp.lookup.notFound": "We couldn't find your invitation. Check the spelling, or contact us.",
+  "rsvp.lookup.tooMany": "Too many searches. Please wait a minute and try again.",
+  "rsvp.lookup.failed": "We could not search for your invitation.",
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -366,6 +377,17 @@ const es: Record<TranslationKey, string> = {
 
   "rsvp.everyone": "Vienen todos",
   "rsvp.noOne": "No viene nadie",
+
+  "rsvp.lookup.title": "Encuentra tu invitación",
+  "rsvp.lookup.prompt": "Escribe tu nombre y apellido tal como aparecen en tu invitación.",
+  "rsvp.lookup.firstName": "Nombre",
+  "rsvp.lookup.lastName": "Apellido",
+  "rsvp.lookup.search": "Buscar mi invitación",
+  "rsvp.lookup.searching": "Buscando...",
+  "rsvp.lookup.choose": "Encontramos más de una invitación. ¿Cuál es la tuya?",
+  "rsvp.lookup.notFound": "No encontramos tu invitación. Revisa cómo lo escribiste o contáctanos.",
+  "rsvp.lookup.tooMany": "Demasiadas búsquedas. Espera un minuto e inténtalo de nuevo.",
+  "rsvp.lookup.failed": "No pudimos buscar tu invitación.",
 };
 
 export const translations: Record<Language, Record<TranslationKey, string>> = { en, es };

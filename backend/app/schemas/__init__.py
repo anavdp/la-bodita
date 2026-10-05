@@ -1,6 +1,17 @@
 from app.schemas.guest import GuestCreate, GuestRead, GuestUpdate
 from app.schemas.guest_import import GuestImportGuest, GuestImportPreview, GuestImportRow, GuestImportRowError
-from app.schemas.household import HouseholdCreate, HouseholdRead, HouseholdUpdate, RsvpGuest, RsvpInvitation, RsvpReply
+from app.schemas.household import (
+    HouseholdCreate,
+    HouseholdRead,
+    HouseholdUpdate,
+    RsvpGuest,
+    RsvpInvitation,
+    RsvpLookup,
+    RsvpLookupHousehold,
+    RsvpLookupMember,
+    RsvpLookupResult,
+    RsvpReply,
+)
 from app.schemas.wedding import WeddingRead
 
 __all__ = [
@@ -16,6 +27,10 @@ __all__ = [
     "HouseholdUpdate",
     "RsvpGuest",
     "RsvpInvitation",
+    "RsvpLookup",
+    "RsvpLookupHousehold",
+    "RsvpLookupMember",
+    "RsvpLookupResult",
     "RsvpReply",
     "WeddingRead",
 ]

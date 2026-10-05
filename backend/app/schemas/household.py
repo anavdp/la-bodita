@@ -58,3 +58,27 @@ class RsvpAnswer(BaseModel):
 
 class RsvpReply(BaseModel):
     answers: list[RsvpAnswer] = Field(min_length=1)
+
+
+class RsvpLookup(BaseModel):
+    """A guest finding their invitation by name: both halves, so a first name alone finds no one."""
+
+    first_name: RequiredText
+    last_name: RequiredText
+
+
+class RsvpLookupMember(BaseModel):
+    """Names only: enough to recognise your own household, nothing a stranger should learn."""
+
+    first_name: str
+    last_name: str
+
+
+class RsvpLookupHousehold(BaseModel):
+    token: str
+    name: str
+    members: list[RsvpLookupMember]
+
+
+class RsvpLookupResult(BaseModel):
+    households: list[RsvpLookupHousehold]

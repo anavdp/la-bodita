@@ -1,18 +1,85 @@
 """The one part of the API a guest reaches: their household's private RSVP link.
 
 The token in the path is the whole credential - long and random, so it cannot
-be guessed - and it only ever opens its own household.
+be guessed - and it only ever opens its own household. A guest without their
+link can find it by name, which is why that lookup is rate limited and answers
+with names only.
 """
 
-from fastapi import APIRouter, HTTPException, status
+import unicodedata
+
+from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.api.guests import SessionDependency
-from app.models import Household, Wedding
+from app.models import Guest, Household, Wedding
 from app.models.guest import RsvpStatus
-from app.schemas import RsvpGuest, RsvpInvitation, RsvpReply
+from app.rate_limit import SlidingWindowRateLimit
+from app.schemas import (
+    RsvpGuest,
+    RsvpInvitation,
+    RsvpLookup,
+    RsvpLookupHousehold,
+    RsvpLookupMember,
+    RsvpLookupResult,
+    RsvpReply,
+)
 
 router = APIRouter(prefix="/api/rsvp", tags=["rsvp"])
+
+LOOKUPS_PER_MINUTE = 10
+lookup_rate_limit = SlidingWindowRateLimit(max_calls=LOOKUPS_PER_MINUTE, window_seconds=60)
+
+
+def comparable(name: str) -> str:
+    """A name as a guest might type it: any case, accents or not, stray spaces."""
+    without_accents = "".join(
+        character
+        for character in unicodedata.normalize("NFKD", name)
+        if not unicodedata.combining(character)
+    )
+    return " ".join(without_accents.casefold().split())
+
+
+def last_name_matches(typed: str, stored: str) -> bool:
+    """The whole last name, or just one of two ("García" for "García López")."""
+    return typed == stored or typed in stored.split(" ")
+
+
+@router.post("/lookup", response_model=RsvpLookupResult)
+def look_up_invitation(lookup: RsvpLookup, request: Request, session: SessionDependency) -> RsvpLookupResult:
+    """The households of every guest with exactly this name - several when two people share it."""
+    client = request.client.host if request.client else "unknown"
+    if not lookup_rate_limit.allow(client):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many lookups, try again in a minute",
+            headers={"Retry-After": "60"},
+        )
+
+    first_name, last_name = comparable(lookup.first_name), comparable(lookup.last_name)
+    # A wedding's guest list is a few hundred rows: matching in Python keeps the
+    # accent folding in one place instead of teaching it to SQLite.
+    guests = session.scalars(select(Guest).options(selectinload(Guest.household).selectinload(Household.guests)))
+    households: dict[int, Household] = {}
+    for guest in guests:
+        if comparable(guest.first_name) == first_name and last_name_matches(last_name, comparable(guest.last_name)):
+            households.setdefault(guest.household_id, guest.household)
+
+    return RsvpLookupResult(
+        households=[
+            RsvpLookupHousehold(
+                token=household.rsvp_token,
+                name=household.name,
+                members=[
+                    RsvpLookupMember(first_name=member.first_name, last_name=member.last_name)
+                    for member in household.guests
+                ],
+            )
+            for household in households.values()
+        ]
+    )
 
 
 def find_by_token(session: SessionDependency, token: str) -> Household:
