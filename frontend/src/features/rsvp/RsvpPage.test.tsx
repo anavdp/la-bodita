@@ -169,9 +169,9 @@ describe("RsvpPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
     expect(
-      screen.getByText(withText("Les enviaremos más información sobre La Bodita muy pronto. Por ahora, por favor confírmennos si podrán asistir antes del 1 de enero de 2027.")),
+      screen.getByText(withText("Les enviaremos más información sobre La Bodita muy pronto. Por ahora, por favor confírmennos si podrán asistir antes del 1 de Enero de 2027.")),
     ).toBeInTheDocument();
-    expect(screen.getByText("1 de enero de 2027").tagName).toBe("STRONG");
+    expect(screen.getByText("1 de Enero de 2027").tagName).toBe("STRONG");
   });
 
   it("given a guest invited alone, when they open their link, then the deadline speaks to them alone", async () => {
@@ -182,23 +182,32 @@ describe("RsvpPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
     expect(
-      screen.getByText(withText("Te enviaremos más información sobre La Bodita muy pronto. Por ahora, por favor confírmanos si podrás asistir antes del 1 de enero de 2027.")),
+      screen.getByText(withText("Te enviaremos más información sobre La Bodita muy pronto. Por ahora, por favor confírmanos si podrás asistir antes del 1 de Enero de 2027.")),
     ).toBeInTheDocument();
   });
 
-  it("given a household link, when it opens, then the date and place stand out, and the record's own date is not shown", async () => {
+  it("given a household link, when it opens, then the wedding date sits beside the title in red, and only once", async () => {
     renderPage();
-    await screen.findByRole("heading", { name: "La Bodita" });
+    const title = await screen.findByRole("heading", { name: "La Bodita" });
 
-    expect(screen.getByText(withText("La Bodita will take place on August 14, 2027, in Araure, Venezuela."))).toBeInTheDocument();
-    expect(screen.getByText("August 14, 2027").tagName).toBe("STRONG");
-    expect(screen.getByText("Araure, Venezuela").tagName).toBe("STRONG");
+    const date = screen.getByText("August 14, 2027");
+    expect(title.parentElement).toContainElement(date);
+    expect(date).toHaveClass("text-secondary-container");
+    expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();
     // The wedding record holds an older date, so guests never see two.
     expect(screen.queryByText("29 October 2026")).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(screen.getByText(withText("La Bodita se celebrará el 14 de agosto de 2027 en Araure, Venezuela."))).toBeInTheDocument();
+    expect(screen.getByText("14 de Agosto de 2027")).toBeInTheDocument();
+    expect(screen.queryByText(/se celebrará/)).not.toBeInTheDocument();
+  });
+
+  it("given a household link, when it opens, then the deadline date is in red too", async () => {
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(screen.getByText("January 1, 2027")).toHaveClass("text-secondary-container");
   });
 
   it("given a household link, when it opens, then there is no extra instruction line under the deadline", async () => {

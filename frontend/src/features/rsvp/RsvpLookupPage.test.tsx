@@ -128,16 +128,13 @@ describe("RsvpLookupPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-lookup.jpg");
   });
 
-  it("given the lookup page, when it opens, then it says when and where the wedding is", () => {
+  it("given the lookup page, when it opens, then the wedding date sits beside the title in red", () => {
     renderPage();
 
-    expect(
-      screen.getByText(
-        (_content, element) =>
-          element?.tagName === "P" &&
-          element.textContent === "La Bodita will take place on August 14, 2027, in Araure, Venezuela.",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByText("August 14, 2027").tagName).toBe("STRONG");
+    const title = screen.getByRole("heading", { name: "Find your invitation" });
+    const date = screen.getByText("August 14, 2027");
+    expect(title.parentElement).toContainElement(date);
+    expect(date).toHaveClass("text-secondary-container");
+    expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();
   });
 });

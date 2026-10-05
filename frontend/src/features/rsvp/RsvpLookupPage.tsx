@@ -9,7 +9,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "../guests/filtering";
 import { RsvpFrame } from "./RsvpFrame";
-import { WhenAndWhere } from "./WhenAndWhere";
+import { TitleWithDate } from "./TitleWithDate";
 
 const field =
   "w-full rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 font-body-sm text-body-sm text-on-surface focus:border-primary focus:outline-none";
@@ -57,8 +57,7 @@ export function RsvpLookupPage() {
 
   return (
     <RsvpFrame picture="/rsvp-lookup.jpg">
-      <h1 className="mb-4 font-headline-lg text-headline-lg text-primary">{t("rsvp.lookup.title")}</h1>
-      <WhenAndWhere />
+      <TitleWithDate title={t("rsvp.lookup.title")} />
       <p className="mb-6 font-body-sm text-body-sm text-on-surface-variant">{t("rsvp.lookup.prompt")}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">

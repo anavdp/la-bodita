@@ -10,7 +10,7 @@ import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "../guests/filtering";
 import { emphasize } from "./emphasize";
 import { RsvpFrame } from "./RsvpFrame";
-import { WhenAndWhere } from "./WhenAndWhere";
+import { TitleWithDate } from "./TitleWithDate";
 
 /** A member's choice on the form: undecided until they pick one. */
 type Choice = "yes" | "no" | null;
@@ -95,15 +95,14 @@ export function RsvpPage() {
     }
     return (
       <>
-        <h1 className="mb-4 font-headline-lg text-headline-lg text-primary">{invitation.weddingName}</h1>
-        <WhenAndWhere />
+        <TitleWithDate title={invitation.weddingName} />
         <p className="mb-2 font-title-lg text-title-lg text-on-surface">
           {t("rsvp.invitationFor", { label: invitation.householdName })}
         </p>
         {/* Spanish asks a household in the plural ("confírmennos") and a guest alone in the singular. */}
         <p className="mb-6 font-body-lg text-body-lg text-on-surface">
           {emphasize(t(invitation.guests.length > 1 ? "rsvp.deadline.many" : "rsvp.deadline.one"), {
-            date: <strong className="text-primary">{t("rsvp.deadlineDate")}</strong>,
+            date: <strong className="text-secondary-container">{t("rsvp.deadlineDate")}</strong>,
           })}
         </p>
 
