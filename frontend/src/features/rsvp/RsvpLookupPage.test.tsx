@@ -121,4 +121,10 @@ describe("RsvpLookupPage", () => {
     expect(screen.getByRole("textbox", { name: "Nombre" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Buscar mi invitación" })).toBeInTheDocument();
   });
+
+  it("given the lookup page, when it opens, then its own picture sits above the search", () => {
+    renderPage();
+
+    expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-lookup.jpg");
+  });
 });

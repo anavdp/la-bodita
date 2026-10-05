@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 
 import { ComingSoon } from "./components/ComingSoon";
 import { AppLayout } from "./components/layout/AppLayout";
@@ -13,12 +13,23 @@ import { WeddingProvider } from "./wedding/WeddingProvider";
  * far; the rest each have their own issue and show a placeholder until then.
  * The RSVP pages are the guests' side, so they stand outside the shell: /rsvp
  * finds a household by name, /rsvp/:token is that household's invitation.
+ * Most guests read Spanish, so those pages open in Spanish - one language
+ * shared by both, so a guest who switches carries it onto their invitation -
+ * while the planner keeps its own default.
  */
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/rsvp" element={<RsvpLookupPage />} />
-      <Route path="/rsvp/:token" element={<RsvpPage />} />
+      <Route
+        element={
+          <LanguageProvider initialLanguage="es">
+            <Outlet />
+          </LanguageProvider>
+        }
+      >
+        <Route path="/rsvp" element={<RsvpLookupPage />} />
+        <Route path="/rsvp/:token" element={<RsvpPage />} />
+      </Route>
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to="/guests" replace />} />
         <Route path="/guests" element={<GuestListPage tab="guests" />} />

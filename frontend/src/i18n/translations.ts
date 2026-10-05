@@ -138,8 +138,8 @@ const en = {
   "rsvp.loadFailed": "We could not load your invitation.",
   "rsvp.invitationFor": "Invitation for {label}",
   "rsvp.prompt": "Let us know who will be there. Each person answers for themselves.",
-  "rsvp.attending": "Attending",
-  "rsvp.notAttending": "Not attending",
+  "rsvp.attending": "I'll be there",
+  "rsvp.notAttending": "I can't make it",
   "rsvp.send": "Send RSVP",
   "rsvp.sending": "Sending...",
   "rsvp.saved": "Thank you! Your answers are saved.",
@@ -180,8 +180,8 @@ const en = {
   "households.delete.keepGuests": "Keep the guests, each on their own",
   "households.delete.failed": "We could not delete this household.",
 
-  "rsvp.everyone": "Everyone is coming",
-  "rsvp.noOne": "No one is coming",
+  "rsvp.everyone": "We're all coming",
+  "rsvp.noOne": "None of us can make it",
 
   "rsvp.lookup.title": "Find your invitation",
   "rsvp.lookup.prompt": "Type your first and last name as they appear on your invitation.",
@@ -333,8 +333,8 @@ const es: Record<TranslationKey, string> = {
   "rsvp.loadFailed": "No pudimos cargar tu invitación.",
   "rsvp.invitationFor": "Invitación para {label}",
   "rsvp.prompt": "Cuéntanos quién vendrá. Cada persona responde por sí misma.",
-  "rsvp.attending": "Asistirá",
-  "rsvp.notAttending": "No asistirá",
+  "rsvp.attending": "Iré",
+  "rsvp.notAttending": "No puedo ir",
   "rsvp.send": "Enviar respuesta",
   "rsvp.sending": "Enviando...",
   "rsvp.saved": "¡Gracias! Tus respuestas están guardadas.",
@@ -375,8 +375,8 @@ const es: Record<TranslationKey, string> = {
   "households.delete.keepGuests": "Mantener a los invitados, cada uno por su cuenta",
   "households.delete.failed": "No pudimos eliminar esta familia.",
 
-  "rsvp.everyone": "Vienen todos",
-  "rsvp.noOne": "No viene nadie",
+  "rsvp.everyone": "Vamos todos",
+  "rsvp.noOne": "Nadie podrá ir",
 
   "rsvp.lookup.title": "Encuentra tu invitación",
   "rsvp.lookup.prompt": "Escribe tu nombre y apellido tal como aparecen en tu invitación.",

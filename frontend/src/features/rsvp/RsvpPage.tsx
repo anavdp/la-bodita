@@ -177,5 +177,5 @@ export function RsvpPage() {
     );
   };
 
-  return <RsvpFrame>{content()}</RsvpFrame>;
+  return <RsvpFrame picture="/rsvp-banner.jpg">{content()}</RsvpFrame>;
 }

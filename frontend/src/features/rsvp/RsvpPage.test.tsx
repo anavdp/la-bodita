@@ -40,10 +40,10 @@ describe("RsvpPage", () => {
     expect(rsvpApi.getInvitation).toHaveBeenCalledWith("abc");
     expect(screen.getByText("Invitation for Famiglia Rossi")).toBeInTheDocument();
     const maria = screen.getByRole("group", { name: "Maria Rossi" });
-    expect(within(maria).getByRole("radio", { name: "Attending" })).not.toBeChecked();
-    expect(within(maria).getByRole("radio", { name: "Not attending" })).not.toBeChecked();
+    expect(within(maria).getByRole("radio", { name: "I'll be there" })).not.toBeChecked();
+    expect(within(maria).getByRole("radio", { name: "I can't make it" })).not.toBeChecked();
     const paolo = screen.getByRole("group", { name: "Paolo Rossi" });
-    expect(within(paolo).getByRole("radio", { name: "Not attending" })).toBeChecked();
+    expect(within(paolo).getByRole("radio", { name: "I can't make it" })).toBeChecked();
   });
 
   it("given members' answers, when they are sent, then each member's own yes or no is saved", async () => {
@@ -57,10 +57,10 @@ describe("RsvpPage", () => {
     renderPage();
 
     await userEvent.click(
-      within(await screen.findByRole("group", { name: "Maria Rossi" })).getByRole("radio", { name: "Attending" }),
+      within(await screen.findByRole("group", { name: "Maria Rossi" })).getByRole("radio", { name: "I'll be there" }),
     );
     await userEvent.click(
-      within(screen.getByRole("group", { name: "Paolo Rossi" })).getByRole("radio", { name: "Attending" }),
+      within(screen.getByRole("group", { name: "Paolo Rossi" })).getByRole("radio", { name: "I'll be there" }),
     );
     await userEvent.click(screen.getByRole("button", { name: "Send RSVP" }));
 
@@ -76,10 +76,10 @@ describe("RsvpPage", () => {
   it("given a whole household coming, when everyone is marked at once, then every member is set to attending", async () => {
     renderPage();
 
-    await userEvent.click(await screen.findByRole("button", { name: "Everyone is coming" }));
+    await userEvent.click(await screen.findByRole("button", { name: "We're all coming" }));
 
     for (const name of ["Maria Rossi", "Paolo Rossi"]) {
-      expect(within(screen.getByRole("group", { name })).getByRole("radio", { name: "Attending" })).toBeChecked();
+      expect(within(screen.getByRole("group", { name })).getByRole("radio", { name: "I'll be there" })).toBeChecked();
     }
     expect(rsvpApi.answerInvitation).not.toHaveBeenCalled();
   });
@@ -87,10 +87,10 @@ describe("RsvpPage", () => {
   it("given a household that cannot come, when no one is marked at once, then every member is set to not attending", async () => {
     renderPage();
 
-    await userEvent.click(await screen.findByRole("button", { name: "No one is coming" }));
+    await userEvent.click(await screen.findByRole("button", { name: "None of us can make it" }));
 
     for (const name of ["Maria Rossi", "Paolo Rossi"]) {
-      expect(within(screen.getByRole("group", { name })).getByRole("radio", { name: "Not attending" })).toBeChecked();
+      expect(within(screen.getByRole("group", { name })).getByRole("radio", { name: "I can't make it" })).toBeChecked();
     }
   });
 
@@ -103,7 +103,7 @@ describe("RsvpPage", () => {
 
     expect(await screen.findByRole("button", { name: "Send RSVP" })).toBeDisabled();
     // One person answers for themselves; the all-at-once buttons would only repeat that.
-    expect(screen.queryByRole("button", { name: "Everyone is coming" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "We're all coming" })).not.toBeInTheDocument();
   });
 
   it("given an answer that fails to save, when it is sent, then the household is told to try again", async () => {
@@ -139,5 +139,17 @@ describe("RsvpPage", () => {
 
     expect(screen.getByText("Invitación para Famiglia Rossi")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Enviar respuesta" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Vamos todos" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nadie podrá ir" })).toBeInTheDocument();
+    const maria = screen.getByRole("group", { name: "Maria Rossi" });
+    expect(within(maria).getByRole("radio", { name: "Iré" })).toBeInTheDocument();
+    expect(within(maria).getByRole("radio", { name: "No puedo ir" })).toBeInTheDocument();
+  });
+
+  it("given a household link, when it opens, then a banner picture crowns the invitation", async () => {
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-banner.jpg");
   });
 });

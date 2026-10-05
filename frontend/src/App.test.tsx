@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
 import { AppRoutes } from "./App";
@@ -50,12 +51,32 @@ describe("AppRoutes", () => {
     expect(screen.queryByRole("navigation", { name: "Main navigation" })).not.toBeInTheDocument();
   });
 
-  it("given the public RSVP address, when it is visited, then the name lookup shows without the planner shell", async () => {
+  it("given the public RSVP address, when it is visited, then the name lookup shows in Spanish without the planner shell", async () => {
     renderAt("/rsvp");
 
-    expect(await screen.findByRole("textbox", { name: "First name" })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Last name" })).toBeInTheDocument();
+    expect(await screen.findByRole("textbox", { name: "Nombre" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Apellido" })).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Main navigation" })).not.toBeInTheDocument();
+  });
+
+  it("given a guest who switched to English on the lookup, when their invitation opens, then it stays in English", async () => {
+    vi.mocked(rsvpApi.lookUpInvitation).mockResolvedValue([
+      { token: "abc", name: "Famiglia Rossi", members: [{ firstName: "Maria", lastName: "Rossi" }] },
+    ]);
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({
+      householdName: "Famiglia Rossi",
+      weddingName: "La Bodita",
+      weddingDate: "2026-10-29",
+      guests: [],
+    });
+    renderAt("/rsvp");
+
+    await userEvent.click(await screen.findByRole("button", { name: "English" }));
+    await userEvent.type(screen.getByRole("textbox", { name: "First name" }), "Maria");
+    await userEvent.type(screen.getByRole("textbox", { name: "Last name" }), "Rossi");
+    await userEvent.click(screen.getByRole("button", { name: "Find my invitation" }));
+
+    expect(await screen.findByText("Invitation for Famiglia Rossi")).toBeInTheDocument();
   });
 
   afterEach(() => {
