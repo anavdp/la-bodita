@@ -152,4 +152,23 @@ describe("RsvpPage", () => {
 
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-banner.jpg");
   });
+
+  it("given a household link, when it opens, then the household is asked to answer before the deadline", async () => {
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(
+      screen.getByText(
+        "We'll send you more information about the wedding soon. For now, please let us know if you can come by January 1, 2027.",
+      ),
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+
+    expect(
+      screen.getByText(
+        "Te enviaremos más información sobre la bodita pronto, de momento por favor confírmanos si puedes asistir antes del 1ero de enero del 2027.",
+      ),
+    ).toBeInTheDocument();
+  });
 });

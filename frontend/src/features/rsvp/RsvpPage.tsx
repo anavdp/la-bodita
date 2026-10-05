@@ -110,6 +110,7 @@ export function RsvpPage() {
         <p className="mb-1 font-title-lg text-title-lg text-on-surface">
           {t("rsvp.invitationFor", { label: invitation.householdName })}
         </p>
+        <p className="mb-4 font-body-lg text-body-lg text-on-surface">{t("rsvp.deadline")}</p>
         <p className="mb-6 font-body-sm text-body-sm text-on-surface-variant">{t("rsvp.prompt")}</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
