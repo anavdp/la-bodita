@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "../../i18n/LanguageProvider";
 
 const card =
-  "organic-shape-1 w-full max-w-xl bg-surface-container-lowest p-8 shadow-[0px_8px_30px_rgba(0,0,0,0.12)]";
+  "organic-shape-1 relative w-full max-w-xl bg-surface-container-lowest p-8 shadow-[0px_8px_30px_rgba(0,0,0,0.12)]";
 
 interface RsvpFrameProps {
   children: ReactNode;
@@ -33,15 +33,14 @@ export function RsvpFrame({ children, picture }: RsvpFrameProps) {
       </div>
       <div className="relative -mt-20 flex justify-center px-4 pb-12">
         <div className={card}>
-          <div className="-mt-2 mb-2 flex justify-end">
-            <button
-              type="button"
-              onClick={toggleLanguage}
-              className="rounded-full border border-primary px-3 py-1 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-            >
-              {t("rsvp.otherLanguage")}
-            </button>
-          </div>
+          {/* In the corner, level with the title, rather than on a row of its own. */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="absolute right-8 top-8 rounded-full border border-primary px-3 py-1 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
+          >
+            {t("rsvp.otherLanguage")}
+          </button>
           {children}
         </div>
       </div>

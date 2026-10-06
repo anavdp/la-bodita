@@ -10,7 +10,8 @@ export function TitleWithDate({ title }: { title: string }) {
 
   return (
     <div className="mb-4 flex flex-col gap-1">
-      <h1 className="font-headline-lg text-headline-lg text-primary">{title}</h1>
+      {/* Room on the right for the language switch in the card's corner. */}
+      <h1 className="pr-24 font-headline-lg text-headline-lg text-primary">{title}</h1>
       <p className="font-headline-md text-headline-md text-on-surface-variant">{t("rsvp.weddingDate")}</p>
     </div>
   );
