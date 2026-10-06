@@ -15,8 +15,8 @@ interface RsvpFrameProps {
 }
 
 /**
- * The guests' side of the app: a full-width photo with the language switch on
- * it, and one card pulled up over its bottom edge.
+ * The guests' side of the app: a full-width photo, and one card pulled up over
+ * its bottom edge with the language switch in its corner.
  */
 export function RsvpFrame({ children, picture }: RsvpFrameProps) {
   const { t, toggleLanguage } = useTranslation();
@@ -30,16 +30,20 @@ export function RsvpFrame({ children, picture }: RsvpFrameProps) {
           aria-hidden="true"
           className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-primary/50 to-transparent"
         />
-        <button
-          type="button"
-          onClick={toggleLanguage}
-          className="absolute right-4 top-4 rounded-full border border-primary bg-surface-container-lowest px-4 py-2 font-label-md text-label-md text-primary shadow-md transition-colors hover:bg-primary-fixed"
-        >
-          {t("rsvp.otherLanguage")}
-        </button>
       </div>
       <div className="relative -mt-20 flex justify-center px-4 pb-12">
-        <div className={card}>{children}</div>
+        <div className={card}>
+          <div className="-mt-2 mb-2 flex justify-end">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="rounded-full border border-primary px-3 py-1 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
+            >
+              {t("rsvp.otherLanguage")}
+            </button>
+          </div>
+          {children}
+        </div>
       </div>
     </main>
   );

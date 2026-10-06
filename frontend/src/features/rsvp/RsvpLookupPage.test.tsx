@@ -130,7 +130,7 @@ describe("RsvpLookupPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-lookup.jpg");
   });
 
-  it("given the lookup page, when it opens, then the wedding date sits beside the title", () => {
+  it("given the lookup page, when it opens, then the wedding date shows with the title", () => {
     renderPage();
 
     const title = screen.getByRole("heading", { name: "Find your invitation" });

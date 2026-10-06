@@ -155,6 +155,21 @@ describe("RsvpPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-banner.jpg");
   });
 
+  it("given a household link, when it opens, then the language switch sits on the card, not on the photo", async () => {
+    renderPage();
+    const title = await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(title.closest(".organic-shape-1")).toContainElement(screen.getByRole("button", { name: "Español" }));
+  });
+
+  it("given a household link, when it opens, then the wedding date sits under the title", async () => {
+    renderPage();
+    const title = await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(title.parentElement).toHaveClass("flex-col");
+    expect(title.nextElementSibling).toHaveTextContent("August 14, 2027");
+  });
+
   it("given a household link, when it opens, then the photo spans the screen and the invitation card overlaps it", async () => {
     renderPage();
     const title = await screen.findByRole("heading", { name: "La Bodita" });
@@ -197,7 +212,7 @@ describe("RsvpPage", () => {
     );
   });
 
-  it("given a household link, when it opens, then the wedding date sits beside the title, and only once", async () => {
+  it("given a household link, when it opens, then the wedding date shows with the title, and only once", async () => {
     renderPage();
     const title = await screen.findByRole("heading", { name: "La Bodita" });
 
