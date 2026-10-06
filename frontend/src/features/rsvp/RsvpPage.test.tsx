@@ -178,8 +178,10 @@ describe("RsvpPage", () => {
     // Edge to edge, framed on its upper part where faces usually sit.
     expect(photo).toHaveClass("w-full", "object-cover", "object-[center_35%]");
     expect(photo).not.toHaveClass("max-w-xl");
-    // The card is pulled up over the bottom of the photo, less on a phone where the photo is shorter.
-    expect(title.closest(".organic-shape-1")?.parentElement).toHaveClass("-mt-12", "sm:-mt-20");
+    // The card is pulled up over the bottom of the photo.
+    const overlap = title.closest(".organic-shape-1")?.parentElement;
+    expect(overlap).toHaveClass("-mt-20");
+    expect(overlap).not.toHaveClass("-mt-12");
   });
 
   it("given a household of several, when it opens, then a banner asks them together to answer by the deadline", async () => {

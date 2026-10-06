@@ -31,7 +31,7 @@ export function RsvpFrame({ children, picture }: RsvpFrameProps) {
           className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-primary/50 to-transparent"
         />
       </div>
-      <div className="relative -mt-12 flex justify-center sm:-mt-20 px-4 pb-12">
+      <div className="relative -mt-20 flex justify-center px-4 pb-12">
         <div className={card}>
           {/* In the corner, level with the title, rather than on a row of its own. */}
           <button
