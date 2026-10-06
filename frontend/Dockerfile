@@ -1,4 +1,6 @@
-FROM node:22-alpine AS build
+# The built files are the same on every CPU, so this stage runs natively on the
+# build machine even when the image is for the Pi's arm64.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -14,3 +16,6 @@ RUN npm run build
 
 FROM caddy:2-alpine
 COPY --from=build /app/dist /srv
+# deploy/Caddyfile, passed in as the "deploy" build context, so the Pi needs no
+# copy of the repository.
+COPY --from=deploy Caddyfile /etc/caddy/Caddyfile

@@ -21,8 +21,38 @@ gets its address. Never add a hostname that points at `web:8080` without it.
 
 - A Raspberry Pi 4 or 5 running **Raspberry Pi OS (64-bit)**, connected to your network
 - A Cloudflare account with `gerardoyvicky.com` on it
+- The Docker Hub account `vitaledepalma`
 
-Run every command below in a terminal on the Pi, either directly or over `ssh`.
+The Pi never builds anything and never needs the code. On every push to `main`,
+GitHub Actions runs the tests and, if they pass, builds the images for the Pi
+(arm64, plus amd64 for laptops) and publishes them to Docker Hub as
+`vitaledepalma/la-bodita-backend` and `vitaledepalma/la-bodita-web`. The Pi only
+pulls them.
+
+## 0. Let GitHub publish to Docker Hub
+
+Do this once, from your laptop's browser.
+
+1. On Docker Hub, open **Account settings → Personal access tokens → Generate new token**.
+   Name it `la-bodita GitHub Actions`, set access to **Read & Write**, and generate it.
+   Copy the token; Docker Hub only shows it once.
+2. On GitHub, open the repository's **Settings → Secrets and variables → Actions →
+   New repository secret**. Name it `DOCKERHUB_TOKEN` and paste the token.
+3. Push to `main` (or re-run the latest **CI** run from the **Actions** tab). When
+   the **Publish images to Docker Hub** job is green, both images show up under
+   your repositories on Docker Hub.
+
+The web image has the guests' address built in, `https://labodita.gerardoyvicky.com`.
+If that ever changes, add a repository **variable** (same page, **Variables** tab)
+named `PUBLIC_URL` with the new address and push again.
+
+Docker Hub makes new repositories public. The images hold the app's code but no
+passwords or guest data, which live only in `.env` and the database on the Pi. If
+you make them private, run `docker login -u vitaledepalma` once on the Pi with a
+**Read-only** token so it can still pull, and give Watchtower that login too by
+adding `- ~/.docker/config.json:/config.json:ro` under its `volumes`.
+
+Run every command from here on in a terminal on the Pi, either directly or over `ssh`.
 
 ## 1. Install Docker
 
@@ -33,14 +63,19 @@ sudo usermod -aG docker $USER
 
 Log out and back in so the second line takes effect.
 
-## 2. Get the code
+## 2. Get the compose file
+
+The Pi needs one file from the repository, `docker-compose.yml`, which lists what
+to run. The repository is private, so fetch it with the GitHub command line:
 
 ```bash
-sudo apt install -y git gh
-gh auth login            # the repository is private
-gh repo clone anavdp/la-bodita
-cd la-bodita
+sudo apt install -y gh
+gh auth login
+mkdir -p ~/la-bodita && cd ~/la-bodita
+gh api repos/anavdp/la-bodita/contents/docker-compose.yml -H "Accept: application/vnd.github.raw" > docker-compose.yml
 ```
+
+Copying it over from your laptop with `scp` works just as well.
 
 ## 3. Create the Cloudflare Tunnel
 
@@ -70,21 +105,25 @@ must ask for your email before showing anything.
 ## 5. Fill in the settings
 
 ```bash
-cp .env.example .env
 nano .env
 ```
 
-Set `PUBLIC_URL=https://labodita.gerardoyvicky.com` (no trailing slash) and paste
-the token into `CLOUDFLARE_TUNNEL_TOKEN`. Save with Ctrl+O, Enter, then exit with Ctrl+X.
+Write this one line, with the token from step 3 after the `=`:
+
+```
+CLOUDFLARE_TUNNEL_TOKEN=
+```
+
+Save with Ctrl+O, Enter, then exit with Ctrl+X.
 
 ## 6. Start it
 
 ```bash
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
 
-The first build takes a while on a Pi. `docker compose ps` should show four
-services running.
+`docker compose ps` should show five services running.
 
 ## 7. Add your data
 
@@ -111,11 +150,28 @@ docker compose restart backend backend-public
 
 ## Updating
 
+Nothing to do on the Pi. Push to `main`, and once the **Publish images to Docker
+Hub** job is green on GitHub, Watchtower notices the new images within the hour
+and restarts the services that changed. The database stays as it is. It keeps
+`cloudflared` up to date the same way.
+
+To update right away instead of waiting:
+
 ```bash
-cd la-bodita
-git pull
-docker compose up -d --build
+cd ~/la-bodita
+docker compose pull
+docker compose up -d
 ```
+
+`docker compose logs watchtower` shows what it updated and when.
+
+To go back to an earlier version, pick its tag on Docker Hub (`sha-` plus the
+commit's first seven characters), add `LA_BODITA_TAG=sha-1a2b3c4` to `.env`, and
+run the two commands above. Watchtower leaves a pinned tag alone. Remove the line
+to follow `latest` again.
+
+If `docker-compose.yml` itself changed in that push, Watchtower can't pick that
+up: fetch it again as in step 2, then run the two commands above.
 
 ## Backups
 

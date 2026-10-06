@@ -45,8 +45,14 @@ cd backend && .venv/bin/alembic upgrade head
 cd ../frontend && npm run dev              # :5173
 ```
 
-Deployment to the Raspberry Pi is `docker compose up -d --build` from the repo
-root; `deploy/README.md` has the full setup. Guests reach only the RSVP pages
+Deployment to the Raspberry Pi is image-based: CI's `publish` job builds
+multi-arch images on every green push to `main` and pushes them to Docker Hub
+(`vitaledepalma/la-bodita-backend`, `vitaledepalma/la-bodita-web`, tags `latest`
+and `sha-<short>`). The Pi holds only `docker-compose.yml` and `.env`, and a
+Watchtower service there polls Docker Hub hourly and restarts whatever changed.
+`deploy/Caddyfile` is baked into the web image, so changing it means a new
+image. To build locally instead, add `-f docker-compose.build.yml`.
+`deploy/README.md` has the full setup. Guests reach only the RSVP pages
 through a Cloudflare Tunnel (Caddy's `:8081` door plus a `GUEST_ONLY=true`
 backend); the planner (`:8080`) goes through the same tunnel on its own
 hostname, behind a Cloudflare Access login for the two users. Any new guest-facing

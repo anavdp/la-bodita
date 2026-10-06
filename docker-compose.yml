@@ -1,8 +1,13 @@
 # La Bodita on the Raspberry Pi. See deploy/README.md for the setup steps.
+#
+# The Pi pulls ready-made images that GitHub Actions publishes to Docker Hub on
+# every push to main, so it never needs the code, and Watchtower swaps in each
+# new version on its own. To build them yourself instead, add
+# docker-compose.build.yml (see that file).
 services:
   # The full API, used by the planner. Runs the database migrations on start.
   backend:
-    build: ./backend
+    image: vitaledepalma/la-bodita-backend:${LA_BODITA_TAG:-latest}
     restart: unless-stopped
     volumes:
       - data:/data
@@ -13,7 +18,7 @@ services:
 
   # The same code with only the guest RSVP routes, for the internet-facing door.
   backend-public:
-    build: ./backend
+    image: vitaledepalma/la-bodita-backend:${LA_BODITA_TAG:-latest}
     restart: unless-stopped
     environment:
       GUEST_ONLY: "true"
@@ -25,14 +30,11 @@ services:
       backend:
         condition: service_healthy
 
+  # The built planner and RSVP pages, served by Caddy with deploy/Caddyfile
+  # baked in.
   web:
-    build:
-      context: ./frontend
-      args:
-        VITE_PUBLIC_URL: ${PUBLIC_URL:?set PUBLIC_URL in .env}
+    image: vitaledepalma/la-bodita-web:${LA_BODITA_TAG:-latest}
     restart: unless-stopped
-    volumes:
-      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
     ports:
       # The planner, also reachable from the Pi itself for a quick check.
       - "127.0.0.1:8080:8080"
@@ -50,6 +52,23 @@ services:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN in .env}
     depends_on:
       - web
+
+  # Checks Docker Hub every hour and restarts any service whose image has a newer
+  # version, so a push to main reaches the Pi without logging in to it.
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_POLL_INTERVAL: "3600"
+      DOCKER_API_VERSION: "1.40"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
 
 volumes:
   data:
