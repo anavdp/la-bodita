@@ -45,6 +45,13 @@ cd backend && .venv/bin/alembic upgrade head
 cd ../frontend && npm run dev              # :5173
 ```
 
+Deployment to the Raspberry Pi is `docker compose up -d --build` from the repo
+root; `deploy/README.md` has the full setup. Guests reach only the RSVP pages
+through a Cloudflare Tunnel (Caddy's `:8081` door plus a `GUEST_ONLY=true`
+backend), and the planner stays on Tailscale (`:8080`). Any new guest-facing
+route must be allowed in `deploy/Caddyfile`'s `:8081` block and live under
+`/api/rsvp`, or guests will get a 404.
+
 The commit gate lives in `.githooks/pre-commit` and is tracked in the repo.
 Each clone must opt in once with `git config core.hooksPath .githooks`.
 
@@ -52,9 +59,10 @@ Each clone must opt in once with `git config core.hooksPath .githooks`.
 
 - Backend: FastAPI + SQLAlchemy + SQLite, Alembic migrations
 - Frontend: React (Vite) + TypeScript
-- Hosting: self-hosted on a Raspberry Pi, fully Dockerized, reached only via
-  Tailscale (no public internet exposure — driven by the sensitivity of
-  stored documents: passports, IDs, certificates)
+- Hosting: self-hosted on a Raspberry Pi, fully Dockerized. The planner is
+  reached only via Tailscale (driven by the sensitivity of stored documents:
+  passports, IDs, certificates); only the guest RSVP pages are public, through
+  a Cloudflare Tunnel
 - Document storage: hybrid — compute/DB stay on the Pi, uploaded files go to
   a private Google Cloud Storage bucket (durable, decouples from the Pi's SD
   card)

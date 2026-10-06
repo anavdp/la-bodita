@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     # The UI is served from its own origin in development (Vite) and from the
     # Pi's Tailscale host in production, so the allowed origins are configuration.
     cors_allow_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    # On for the process the internet reaches: it serves the guest RSVP routes only.
+    guest_only: bool = False
 
 
 settings = Settings()

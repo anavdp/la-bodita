@@ -1,0 +1,57 @@
+# One web server, two doors.
+#
+# :8080 is the whole planner. Docker publishes it on 127.0.0.1 only, and
+# `tailscale serve` puts it on the tailnet, so only your own devices reach it.
+#
+# :8081 is the door the Cloudflare Tunnel opens to the internet. It serves only
+# what a guest's RSVP needs and answers 404 to everything else. Its API calls go
+# to a backend started in guest-only mode, which has no planner routes at all,
+# so a mistake here still could not expose the guest list.
+
+{
+	auto_https off
+	admin off
+}
+
+:8080 {
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+:8081 {
+	# The bare domain opens the "find your invitation" page.
+	redir / /rsvp
+
+	@rsvp_api path /api/rsvp /api/rsvp/*
+	handle @rsvp_api {
+		reverse_proxy backend-public:8000 {
+			# Cloudflare sets CF-Connecting-IP to the guest's real address and
+			# overwrites any value a visitor sends, unlike X-Forwarded-For.
+			header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+		}
+	}
+
+	@rsvp_pages path /rsvp /rsvp/*
+	handle @rsvp_pages {
+		root * /srv
+		rewrite * /index.html
+		file_server
+	}
+
+	# The built JavaScript/CSS, and the photos in frontend/public.
+	@static path_regexp ^/(assets/[^/]+|[^/]+\.(jpg|jpeg|png|webp|svg|ico))$
+	handle @static {
+		root * /srv
+		file_server
+	}
+
+	handle {
+		respond 404
+	}
+}

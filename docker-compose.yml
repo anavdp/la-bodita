@@ -1,0 +1,54 @@
+# La Bodita on the Raspberry Pi. See deploy/README.md for the setup steps.
+services:
+  # The full API, used by the planner. Runs the database migrations on start.
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    volumes:
+      - data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      start_period: 20s
+
+  # The same code with only the guest RSVP routes, for the internet-facing door.
+  backend-public:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      GUEST_ONLY: "true"
+    # The private backend has already migrated the shared database.
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
+    volumes:
+      - data:/data
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_PUBLIC_URL: ${PUBLIC_URL:?set PUBLIC_URL in .env}
+    restart: unless-stopped
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      # The planner, reachable from the Pi itself only; Tailscale serves it on.
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - backend
+      - backend-public
+
+  # Opens :8081 to the internet without opening a port on the router.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN in .env}
+    depends_on:
+      - web
+
+volumes:
+  data:

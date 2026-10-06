@@ -15,4 +15,20 @@ describe("rsvpUrl", () => {
   it("given a token, when the link is built, then it points at this app's RSVP page", () => {
     expect(rsvpUrl("abc")).toBe(`${window.location.origin}/rsvp/abc`);
   });
+
+  it("given a public address is configured, when the link is built, then it points there instead of this app", () => {
+    vi.stubEnv("VITE_PUBLIC_URL", "https://labodita.example");
+
+    expect(rsvpUrl("abc")).toBe("https://labodita.example/rsvp/abc");
+
+    vi.unstubAllEnvs();
+  });
+
+  it("given the public address ends in a slash, when the link is built, then the path has no double slash", () => {
+    vi.stubEnv("VITE_PUBLIC_URL", "https://labodita.example/");
+
+    expect(rsvpUrl("abc")).toBe("https://labodita.example/rsvp/abc");
+
+    vi.unstubAllEnvs();
+  });
 });

@@ -7,9 +7,9 @@
     <!--
       Link preview for the RSVP link shared on WhatsApp. Its crawler reads this
       file without running JavaScript, so these tags must stay static here.
-      og:image and twitter:image must become an absolute https URL on the public
-      host once there is one (e.g. https://<public-host>/invitation-preview.jpg):
-      crawlers ignore relative paths. The image itself is
+      og:image and twitter:image must be absolute https URLs: crawlers ignore
+      relative paths. Vite fills in %VITE_PUBLIC_URL% from the environment at
+      build time (the Docker build passes it). The image itself is
       public/invitation-preview.jpg (1200x630, under 300KB) - replace that file
       with the real invitation.
     -->
@@ -19,11 +19,11 @@
       property="og:description"
       content="Find your invitation and RSVP · Encuentra tu invitación y confirma tu asistencia"
     />
-    <meta property="og:image" content="/invitation-preview.jpg" />
+    <meta property="og:image" content="%VITE_PUBLIC_URL%/invitation-preview.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="/invitation-preview.jpg" />
+    <meta name="twitter:image" content="%VITE_PUBLIC_URL%/invitation-preview.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
