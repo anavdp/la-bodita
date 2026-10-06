@@ -41,11 +41,11 @@ interface RsvpLookupPayload {
   households: { token: string; name: string; members: { first_name: string; last_name: string }[] }[];
 }
 
-/** Every household with a guest of this name: usually one, several when a name is shared. */
-export async function lookUpInvitation(firstName: string, lastName: string): Promise<RsvpHouseholdMatch[]> {
+/** Every household with a guest of this last name: usually one, several when a family name is shared. */
+export async function lookUpInvitation(lastName: string): Promise<RsvpHouseholdMatch[]> {
   const payload = await request<RsvpLookupPayload>("/api/rsvp/lookup", {
     method: "POST",
-    body: { first_name: firstName, last_name: lastName },
+    body: { last_name: lastName },
   });
   return payload.households.map((household) => ({
     token: household.token,

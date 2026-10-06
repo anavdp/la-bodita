@@ -18,21 +18,21 @@ const fieldLabel = "mb-1 block font-label-md text-label-md uppercase text-on-sur
 const rsvpPath = (token: string) => `/rsvp/${encodeURIComponent(token)}`;
 
 /**
- * The one public link the couple shares: a guest types their name and lands on
- * their household's invitation. When a name is shared by several households,
- * the guest picks theirs by who is in it.
+ * The one public link the couple shares: a guest types their last name and
+ * lands on their household's invitation. When a family name is shared by
+ * several households, the guest picks theirs by who is in it.
  */
 export function RsvpLookupPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [matches, setMatches] = useState<RsvpHouseholdMatch[]>([]);
   const [problem, setProblem] = useState<TranslationKey | null>(null);
 
-  const canSearch = firstName.trim() !== "" && lastName.trim() !== "" && !isSearching;
+  // Two letters at least, as the API asks: one letter would list half the guests.
+  const canSearch = lastName.trim().length >= 2 && !isSearching;
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -40,7 +40,7 @@ export function RsvpLookupPage() {
     setMatches([]);
     setIsSearching(true);
     try {
-      const found = await lookUpInvitation(firstName.trim(), lastName.trim());
+      const found = await lookUpInvitation(lastName.trim());
       if (found.length === 1) {
         navigate(rsvpPath(found[0].token));
       } else if (found.length === 0) {
@@ -61,18 +61,6 @@ export function RsvpLookupPage() {
       <p className="mb-6 font-body-sm text-body-sm text-on-surface-variant">{t("rsvp.lookup.prompt")}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <label className={fieldLabel} htmlFor="rsvp-first-name">
-            {t("rsvp.lookup.firstName")}
-          </label>
-          <input
-            id="rsvp-first-name"
-            className={field}
-            autoComplete="given-name"
-            value={firstName}
-            onChange={(event) => setFirstName(event.target.value)}
-          />
-        </div>
         <div>
           <label className={fieldLabel} htmlFor="rsvp-last-name">
             {t("rsvp.lookup.lastName")}

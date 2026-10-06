@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StringConstraints
 
 from app.models.guest import RsvpStatus
 from app.schemas.guest import RequiredText
@@ -61,10 +61,9 @@ class RsvpReply(BaseModel):
 
 
 class RsvpLookup(BaseModel):
-    """A guest finding their invitation by name: both halves, so a first name alone finds no one."""
+    """A guest finding their invitation by last name; two letters at least, so one letter lists no one."""
 
-    first_name: RequiredText
-    last_name: RequiredText
+    last_name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=100)]
 
 
 class RsvpLookupMember(BaseModel):

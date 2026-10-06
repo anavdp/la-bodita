@@ -54,8 +54,7 @@ describe("AppRoutes", () => {
   it("given the public RSVP address, when it is visited, then the name lookup shows in Spanish without the planner shell", async () => {
     renderAt("/rsvp");
 
-    expect(await screen.findByRole("textbox", { name: "Nombre" })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Apellido" })).toBeInTheDocument();
+    expect(await screen.findByRole("textbox", { name: "Apellido(s)" })).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Main navigation" })).not.toBeInTheDocument();
   });
 
@@ -72,9 +71,8 @@ describe("AppRoutes", () => {
     renderAt("/rsvp");
 
     await userEvent.click(await screen.findByRole("button", { name: "English" }));
-    await userEvent.type(screen.getByRole("textbox", { name: "First name" }), "Maria");
-    await userEvent.type(screen.getByRole("textbox", { name: "Last name" }), "Rossi");
-    await userEvent.click(screen.getByRole("button", { name: "Find my invitation" }));
+    await userEvent.type(screen.getByRole("textbox", { name: "Last name(s)" }), "Rossi");
+    await userEvent.click(screen.getByRole("button", { name: "Search" }));
 
     expect(await screen.findByText("We'll send you more information about La Bodita very soon.")).toBeInTheDocument();
   });

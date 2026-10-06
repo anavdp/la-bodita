@@ -187,16 +187,15 @@ const en = {
   "rsvp.everyone": "We're all coming",
   "rsvp.noOne": "None of us can make it",
 
-  "rsvp.lookup.title": "Find your invitation",
-  "rsvp.lookup.prompt": "Type your first and last name as they appear on your invitation.",
-  "rsvp.lookup.firstName": "First name",
-  "rsvp.lookup.lastName": "Last name",
-  "rsvp.lookup.search": "Find my invitation",
+  "rsvp.lookup.title": "Let us know if you're coming",
+  "rsvp.lookup.prompt": "We'd love to have you with us. Enter your last name(s) and let us know if you can join us.",
+  "rsvp.lookup.lastName": "Last name(s)",
+  "rsvp.lookup.search": "Search",
   "rsvp.lookup.searching": "Searching...",
-  "rsvp.lookup.choose": "We found more than one invitation. Which one is yours?",
-  "rsvp.lookup.notFound": "We couldn't find your invitation. Check the spelling, or contact us.",
+  "rsvp.lookup.choose": "We found more than one family with that last name. Which one is yours?",
+  "rsvp.lookup.notFound": "We couldn't find that last name. Check the spelling, or contact us.",
   "rsvp.lookup.tooMany": "Too many searches. Please wait a minute and try again.",
-  "rsvp.lookup.failed": "We could not search for your invitation.",
+  "rsvp.lookup.failed": "We could not run the search.",
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -386,16 +385,15 @@ const es: Record<TranslationKey, string> = {
   "rsvp.everyone": "Vamos todos",
   "rsvp.noOne": "Nadie podrá ir",
 
-  "rsvp.lookup.title": "Encuentra tu invitación",
-  "rsvp.lookup.prompt": "Escribe tu nombre y apellido tal como aparecen en tu invitación.",
-  "rsvp.lookup.firstName": "Nombre",
-  "rsvp.lookup.lastName": "Apellido",
-  "rsvp.lookup.search": "Buscar mi invitación",
+  "rsvp.lookup.title": "Dinos si vienes",
+  "rsvp.lookup.prompt": "Nos gustaría contar con tu presencia. Introduce tu(s) apellido(s) y confírmanos si nos acompañas.",
+  "rsvp.lookup.lastName": "Apellido(s)",
+  "rsvp.lookup.search": "Buscar",
   "rsvp.lookup.searching": "Buscando...",
-  "rsvp.lookup.choose": "Encontramos más de una invitación. ¿Cuál es la tuya?",
-  "rsvp.lookup.notFound": "No encontramos tu invitación. Revisa cómo lo escribiste o contáctanos.",
+  "rsvp.lookup.choose": "Encontramos más de una familia con ese apellido. ¿Cuál es la tuya?",
+  "rsvp.lookup.notFound": "No encontramos ese apellido. Revisa cómo lo escribiste o contáctanos.",
   "rsvp.lookup.tooMany": "Demasiadas búsquedas. Espera un minuto e inténtalo de nuevo.",
-  "rsvp.lookup.failed": "No pudimos buscar tu invitación.",
+  "rsvp.lookup.failed": "No pudimos hacer la búsqueda.",
 };
 
 export const translations: Record<Language, Record<TranslationKey, string>> = { en, es };

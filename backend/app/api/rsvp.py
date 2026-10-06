@@ -42,14 +42,22 @@ def comparable(name: str) -> str:
     return " ".join(without_accents.casefold().split())
 
 
+# Words that join a compound last name: typed alone they would match half the list.
+PARTICLES = {"de", "del", "la", "las", "los", "y", "da", "di", "do", "dos", "van", "von"}
+
+
 def last_name_matches(typed: str, stored: str) -> bool:
-    """The whole last name, or just one of two ("García" for "García López")."""
-    return typed == stored or typed in stored.split(" ")
+    """Whole words either way: "Palma" or "De Palma" for "De Palma", and "De Palma Aponte"
+    (both of someone's last names) for a guest stored as just "De Palma"."""
+    typed_words, stored_words = set(typed.split()), set(stored.split())
+    if not typed_words - PARTICLES:
+        return False
+    return typed_words <= stored_words or stored_words <= typed_words
 
 
 @router.post("/lookup", response_model=RsvpLookupResult)
 def look_up_invitation(lookup: RsvpLookup, request: Request, session: SessionDependency) -> RsvpLookupResult:
-    """The households of every guest with exactly this name - several when two people share it."""
+    """The households of every guest with this last name - several when a family name is shared."""
     client = request.client.host if request.client else "unknown"
     if not lookup_rate_limit.allow(client):
         raise HTTPException(
@@ -58,13 +66,13 @@ def look_up_invitation(lookup: RsvpLookup, request: Request, session: SessionDep
             headers={"Retry-After": "60"},
         )
 
-    first_name, last_name = comparable(lookup.first_name), comparable(lookup.last_name)
+    last_name = comparable(lookup.last_name)
     # A wedding's guest list is a few hundred rows: matching in Python keeps the
     # accent folding in one place instead of teaching it to SQLite.
     guests = session.scalars(select(Guest).options(selectinload(Guest.household).selectinload(Household.guests)))
     households: dict[int, Household] = {}
     for guest in guests:
-        if comparable(guest.first_name) == first_name and last_name_matches(last_name, comparable(guest.last_name)):
+        if last_name_matches(last_name, comparable(guest.last_name)):
             households.setdefault(guest.household_id, guest.household)
 
     return RsvpLookupResult(

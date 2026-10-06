@@ -41,10 +41,9 @@ function renderPage() {
   );
 }
 
-async function searchFor(firstName: string, lastName: string) {
-  await userEvent.type(screen.getByRole("textbox", { name: "First name" }), firstName);
-  await userEvent.type(screen.getByRole("textbox", { name: "Last name" }), lastName);
-  await userEvent.click(screen.getByRole("button", { name: "Find my invitation" }));
+async function searchFor(lastName: string) {
+  await userEvent.type(screen.getByRole("textbox", { name: "Last name(s)" }), lastName);
+  await userEvent.click(screen.getByRole("button", { name: "Search" }));
 }
 
 describe("RsvpLookupPage", () => {
@@ -56,19 +55,19 @@ describe("RsvpLookupPage", () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockResolvedValue([rossi]);
     renderPage();
 
-    await searchFor("Maria", "Rossi");
+    await searchFor("Rossi");
 
     expect(await screen.findByText("Opened invitation rossi-token")).toBeInTheDocument();
-    expect(rsvpApi.lookUpInvitation).toHaveBeenCalledWith("Maria", "Rossi");
+    expect(rsvpApi.lookUpInvitation).toHaveBeenCalledWith("Rossi");
   });
 
   it("given a name shared by several households, when it is looked up, then the guest picks theirs by who is in it", async () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockResolvedValue([rossi, otherMaria]);
     renderPage();
 
-    await searchFor("Maria", "Rossi");
+    await searchFor("Rossi");
 
-    expect(await screen.findByText("We found more than one invitation. Which one is yours?")).toBeInTheDocument();
+    expect(await screen.findByText("We found more than one family with that last name. Which one is yours?")).toBeInTheDocument();
     // Only who is in each household: its own name is for the couple's planning.
     expect(screen.queryByText("Famiglia Rossi")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Maria Rossi, Paolo Rossi" }));
@@ -79,10 +78,10 @@ describe("RsvpLookupPage", () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockResolvedValue([]);
     renderPage();
 
-    await searchFor("Mario", "Bianchi");
+    await searchFor("Bianchi");
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "We couldn't find your invitation. Check the spelling, or contact us.",
+      "We couldn't find that last name. Check the spelling, or contact us.",
     );
   });
 
@@ -90,7 +89,7 @@ describe("RsvpLookupPage", () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockRejectedValue(new ApiError("Too many lookups", 429));
     renderPage();
 
-    await searchFor("Maria", "Rossi");
+    await searchFor("Rossi");
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Too many searches. Please wait a minute and try again.",
@@ -101,18 +100,24 @@ describe("RsvpLookupPage", () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockRejectedValue(new Error("network down"));
     renderPage();
 
-    await searchFor("Maria", "Rossi");
+    await searchFor("Rossi");
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("We could not search for your invitation.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("We could not run the search.");
   });
 
-  it("given only a first name, when the guest tries to search, then the search cannot be sent", async () => {
+  it("given the page, when it opens, then it asks only for a last name", () => {
     renderPage();
 
-    await userEvent.type(screen.getByRole("textbox", { name: "First name" }), "Maria");
-    await userEvent.type(screen.getByRole("textbox", { name: "Last name" }), "   ");
+    expect(screen.getAllByRole("textbox")).toHaveLength(1);
+    expect(screen.getByText("We'd love to have you with us. Enter your last name(s) and let us know if you can join us.")).toBeInTheDocument();
+  });
 
-    expect(screen.getByRole("button", { name: "Find my invitation" })).toBeDisabled();
+  it("given less than two letters, when the guest tries to search, then the search cannot be sent", async () => {
+    renderPage();
+
+    await userEvent.type(screen.getByRole("textbox", { name: "Last name(s)" }), " R ");
+
+    expect(screen.getByRole("button", { name: "Search" })).toBeDisabled();
   });
 
   it("given the page in English, when the language is switched, then it reads in Spanish", async () => {
@@ -120,8 +125,12 @@ describe("RsvpLookupPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(screen.getByRole("textbox", { name: "Nombre" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Buscar mi invitación" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Dinos si vienes" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Nos gustaría contar con tu presencia. Introduce tu(s) apellido(s) y confírmanos si nos acompañas."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Apellido(s)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Buscar" })).toBeInTheDocument();
   });
 
   it("given the lookup page, when it opens, then its own picture sits above the search", () => {
@@ -133,7 +142,7 @@ describe("RsvpLookupPage", () => {
   it("given the lookup page, when it opens, then the wedding date shows with the title", () => {
     renderPage();
 
-    const title = screen.getByRole("heading", { name: "Find your invitation" });
+    const title = screen.getByRole("heading", { name: "Let us know if you're coming" });
     const date = screen.getByText("August 14, 2027");
     expect(title.parentElement).toContainElement(date);
     expect(date).not.toHaveClass("text-secondary-container");
