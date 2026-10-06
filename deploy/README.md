@@ -100,7 +100,10 @@ Do this before the planner gets its address.
    subdomain `planner`, domain `gerardoyvicky.com`, Service type `HTTP`, URL `web:8080`.
 
 Check it from a private browser window: `https://planner.gerardoyvicky.com`
-must ask for your email before showing anything.
+must ask for your email before anything else. After you enter the code, a
+Cloudflare "Error 1033" page is expected for now: the tunnel only connects once
+the app is running in step 6. If it shows the error *without* asking for your
+email first, the login isn't covering that address. Fix it before going on.
 
 ## 5. Fill in the settings
 
