@@ -9,17 +9,27 @@ import type { TranslationKey } from "../../i18n/translations";
 import { RsvpFrame } from "./RsvpFrame";
 import { TitleWithDate } from "./TitleWithDate";
 
-/** What the thank-you says, and the photo it shows, by whether anyone in the household is coming. */
+/** What the thank-you says, and the photo it shows, by how many of the household are coming. */
 const versions = {
-  coming: {
-    picture: "/rsvp-thanks-yes.jpg",
-    message: { one: "rsvp.thanks.yes.one", many: "rsvp.thanks.yes.many" },
+  all: {
+    picture: "/rsvp-thanks-all.jpg",
+    message: { one: "rsvp.thanks.all.one", many: "rsvp.thanks.all.many" },
   },
-  notComing: {
-    picture: "/rsvp-thanks-no.jpg",
-    message: { one: "rsvp.thanks.no.one", many: "rsvp.thanks.no.many" },
+  some: {
+    picture: "/rsvp-thanks-some.jpg",
+    message: { one: "rsvp.thanks.some.one", many: "rsvp.thanks.some.many" },
+  },
+  none: {
+    picture: "/rsvp-thanks-none.jpg",
+    message: { one: "rsvp.thanks.none.one", many: "rsvp.thanks.none.many" },
   },
 } satisfies Record<string, { picture: string; message: Record<"one" | "many", TranslationKey> }>;
+
+function versionFor(invitation: RsvpInvitation) {
+  const coming = invitation.guests.filter((guest) => guest.rsvpStatus === "confirmed").length;
+  if (coming === 0) return versions.none;
+  return coming === invitation.guests.length ? versions.all : versions.some;
+}
 
 /**
  * Where a household lands after answering. It reads the saved answers back
@@ -55,9 +65,7 @@ export function RsvpThanksPage() {
     );
   }
 
-  const version = invitation.guests.some((guest) => guest.rsvpStatus === "confirmed")
-    ? versions.coming
-    : versions.notComing;
+  const version = versionFor(invitation);
   const isHousehold = invitation.guests.length > 1;
 
   return (

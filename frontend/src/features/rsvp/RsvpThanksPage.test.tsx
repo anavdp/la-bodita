@@ -37,36 +37,45 @@ describe("RsvpThanksPage", () => {
     vi.resetAllMocks();
   });
 
-  it("given at least one member is coming, when the page opens, then it celebrates with its own picture", async () => {
-    vi.mocked(rsvpApi.getInvitation).mockResolvedValue(household);
+  it("given everyone in the household is coming, when the page opens, then it cheers with its own picture", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...household, guests: everyone("confirmed") });
     renderPage();
 
     expect(await screen.findByRole("heading", { name: "Thank you!" })).toBeInTheDocument();
     expect(rsvpApi.getInvitation).toHaveBeenCalledWith("abc");
-    expect(screen.getByText("We're so happy you're coming! We'll send you more details very soon.")).toBeInTheDocument();
-    expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-thanks-yes.jpg");
-  });
-
-  it("given nobody in the household is coming, when the page opens, then it says they will be missed, with its own picture", async () => {
-    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...household, guests: everyone("declined") });
-    renderPage();
-
-    expect(await screen.findByText("We'll miss you. Thank you for letting us know.")).toBeInTheDocument();
-    expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-thanks-no.jpg");
-  });
-
-  it("given a household, when the page opens in Spanish, then it speaks to them in the plural", async () => {
-    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...household, guests: everyone("confirmed") });
-    renderPage();
-    await screen.findByRole("heading", { name: "Thank you!" });
+    expect(screen.getByText("Let's gooo! That's the spirit, see you soon 🫶")).toBeInTheDocument();
+    expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-thanks-all.jpg");
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(screen.getByRole("heading", { name: "¡Gracias!" })).toBeInTheDocument();
-    expect(screen.getByText("¡Qué alegría que vengan! Muy pronto les enviaremos más detalles.")).toBeInTheDocument();
+    expect(screen.getByText("¡Vamoooos! Esa es la actitud, nos vemos pronto 🫶")).toBeInTheDocument();
   });
 
-  it("given a guest invited alone who cannot come, when the page opens in Spanish, then it speaks to them alone", async () => {
+  it("given only some of the household are coming, when the page opens, then it is sorry for the rest, with its own picture", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue(household);
+    renderPage();
+
+    expect(await screen.findByText("Well, what a shame that not everyone can enjoy this grand event 🫢")).toBeInTheDocument();
+    expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-thanks-some.jpg");
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+
+    expect(screen.getByText("Bueno, una lástima que no todos puedan disfrutar de este magno evento 🫢")).toBeInTheDocument();
+  });
+
+  it("given nobody in the household is coming, when the page opens, then it jokes goodbye to them all, with its own picture", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...household, guests: everyone("declined") });
+    renderPage();
+
+    expect(await screen.findByText("Fly high, we won't remember you 👀 #justkidding")).toBeInTheDocument();
+    expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-thanks-none.jpg");
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+
+    expect(screen.getByText("Vuelen alto, no los recordaremos 👀 #chistecito")).toBeInTheDocument();
+  });
+
+  it("given a guest invited alone who cannot come, when the page opens in Spanish, then the joke speaks to them alone", async () => {
     vi.mocked(rsvpApi.getInvitation).mockResolvedValue({
       ...household,
       guests: [{ ...household.guests[0], rsvpStatus: "declined" }],
@@ -76,7 +85,7 @@ describe("RsvpThanksPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(screen.getByText("Te vamos a extrañar. Gracias por avisarnos.")).toBeInTheDocument();
+    expect(screen.getByText("Vuela alto, no te recordaremos 👀 #chistecito")).toBeInTheDocument();
   });
 
   it("given a guest who changed their mind, when they follow the link, then they are back on their invitation", async () => {
