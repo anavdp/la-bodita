@@ -5,6 +5,7 @@ import { AppLayout } from "./components/layout/AppLayout";
 import { GuestListPage } from "./features/guests/GuestListPage";
 import { RsvpLookupPage } from "./features/rsvp/RsvpLookupPage";
 import { RsvpPage } from "./features/rsvp/RsvpPage";
+import { RsvpThanksPage } from "./features/rsvp/RsvpThanksPage";
 import { LanguageProvider } from "./i18n/LanguageProvider";
 import { WeddingProvider } from "./wedding/WeddingProvider";
 
@@ -12,7 +13,8 @@ import { WeddingProvider } from "./wedding/WeddingProvider";
  * Every planner screen sits in the shared shell. Only the guest list is built so
  * far; the rest each have their own issue and show a placeholder until then.
  * The RSVP pages are the guests' side, so they stand outside the shell: /rsvp
- * finds a household by name, /rsvp/:token is that household's invitation.
+ * finds a household by name, /rsvp/:token is that household's invitation, and
+ * /rsvp/:token/gracias thanks them once they have answered.
  * Most guests read Spanish, so those pages open in Spanish - one language
  * shared by both, so a guest who switches carries it onto their invitation -
  * while the planner keeps its own default.
@@ -29,6 +31,7 @@ export function AppRoutes() {
       >
         <Route path="/rsvp" element={<RsvpLookupPage />} />
         <Route path="/rsvp/:token" element={<RsvpPage />} />
+        <Route path="/rsvp/:token/gracias" element={<RsvpThanksPage />} />
       </Route>
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to="/guests" replace />} />

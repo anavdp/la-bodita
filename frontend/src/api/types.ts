@@ -55,11 +55,15 @@ export interface HouseholdDraft {
   guestIds: number[];
 }
 
+/** How the invitation speaks to a household: to family, to friends, or to anyone. */
+export type RsvpGreeting = "family" | "friends" | "general";
+
 export interface RsvpInvitation {
   householdName: string;
   weddingName: string;
   weddingDate: string | null;
   guests: RsvpGuest[];
+  greeting: RsvpGreeting;
 }
 
 export interface RsvpGuest {

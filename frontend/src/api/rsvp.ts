@@ -1,11 +1,12 @@
 import { request } from "./client";
-import type { RsvpAnswer, RsvpHouseholdMatch, RsvpInvitation, RsvpStatus } from "./types";
+import type { RsvpAnswer, RsvpGreeting, RsvpHouseholdMatch, RsvpInvitation, RsvpStatus } from "./types";
 
 interface RsvpInvitationPayload {
   household_name: string;
   wedding_name: string;
   wedding_date: string | null;
   guests: { id: number; first_name: string; last_name: string; rsvp_status: RsvpStatus }[];
+  greeting: RsvpGreeting;
 }
 
 function toInvitation(payload: RsvpInvitationPayload): RsvpInvitation {
@@ -19,6 +20,7 @@ function toInvitation(payload: RsvpInvitationPayload): RsvpInvitation {
       lastName: guest.last_name,
       rsvpStatus: guest.rsvp_status,
     })),
+    greeting: payload.greeting,
   };
 }
 

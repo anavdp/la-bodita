@@ -5,6 +5,7 @@ const invitationPayload = {
   wedding_name: "La Bodita",
   wedding_date: "2026-10-29",
   guests: [{ id: 1, first_name: "Maria", last_name: "Rossi", rsvp_status: "pending" }],
+  greeting: "family",
 };
 
 const invitation = {
@@ -12,6 +13,7 @@ const invitation = {
   weddingName: "La Bodita",
   weddingDate: "2026-10-29",
   guests: [{ id: 1, firstName: "Maria", lastName: "Rossi", rsvpStatus: "pending" }],
+  greeting: "family",
 };
 
 const jsonResponse = (body: unknown) =>

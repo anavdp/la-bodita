@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Route, Routes } from "react-router-dom";
 
 import { ApiError } from "../../api/client";
 import * as rsvpApi from "../../api/rsvp";
@@ -18,10 +19,17 @@ const invitation: RsvpInvitation = {
     { id: 1, firstName: "Maria", lastName: "Rossi", rsvpStatus: "pending" },
     { id: 2, firstName: "Paolo", lastName: "Rossi", rsvpStatus: "declined" },
   ],
+  greeting: "general",
 };
 
 function renderPage() {
-  return renderWithProviders(<RsvpPage />, { route: "/rsvp/abc", path: "/rsvp/:token" });
+  return renderWithProviders(
+    <Routes>
+      <Route path="/rsvp/:token" element={<RsvpPage />} />
+      <Route path="/rsvp/:token/gracias" element={<p>Thank-you page</p>} />
+    </Routes>,
+    { route: "/rsvp/abc" },
+  );
 }
 
 describe("RsvpPage", () => {
@@ -48,7 +56,7 @@ describe("RsvpPage", () => {
     expect(within(paolo).getByRole("radio", { name: "I can't make it" })).toBeChecked();
   });
 
-  it("given members' answers, when they are sent, then each member's own yes or no is saved", async () => {
+  it("given members' answers, when they are sent, then each member's own yes or no is saved and the thank-you page opens", async () => {
     vi.mocked(rsvpApi.answerInvitation).mockResolvedValue({
       ...invitation,
       guests: [
@@ -72,7 +80,7 @@ describe("RsvpPage", () => {
         { guestId: 2, attending: true },
       ]),
     );
-    expect(await screen.findByRole("status")).toHaveTextContent("Thank you! Your answers are saved.");
+    expect(await screen.findByText("Thank-you page")).toBeInTheDocument();
   });
 
   it("given a whole household coming, when everyone is marked at once, then every member is set to attending", async () => {
@@ -234,5 +242,74 @@ describe("RsvpPage", () => {
     await screen.findByRole("heading", { name: "La Bodita" });
 
     expect(screen.queryByText(/Each person answers for themselves/)).not.toBeInTheDocument();
+  });
+
+  it("given a household with family in it, when it opens, then it is greeted as family", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...invitation, greeting: "family" });
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(
+      screen.getByText(
+        "Dear family, it would make us so happy to have you with us on this very special day. We'll send you more details about the ceremony and the reception very soon. For now, we need to know if we can count on you.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("We'll send you more information about La Bodita very soon.")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+
+    expect(
+      screen.getByText(
+        "Hola, querida familia: nos haría muy felices contar con su presencia en este día tan especial para nosotros. Muy pronto les enviaremos más información sobre los detalles de la ceremonia y la recepción. De momento, necesitamos saber si contamos con ustedes.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("given a family member invited alone, when they open their link, then the family greeting speaks to them alone", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...invitation, guests: [invitation.guests[0]], greeting: "family" });
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+
+    expect(
+      screen.getByText(
+        "Hola, querida familia: nos haría muy felices contar con tu presencia en este día tan especial para nosotros. Muy pronto te enviaremos más información sobre los detalles de la ceremonia y la recepción. De momento, necesitamos saber si contamos contigo.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("given a household of friends, when it opens, then it is greeted as friends", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...invitation, greeting: "friends" });
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(
+      screen.getByText(
+        "Amiguiss/Friendchiss! The most awaited event of the year has finally arrived: our beautiful union. We hope you'll be there and won't let us down.",
+      ),
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+
+    expect(
+      screen.getByText(
+        "¡Amiguiss/Friendchiss! Finalmente llegó el evento más esperado del año: nuestra hermosa unión. Esperamos contar con ustedes y que no nos fallen.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("given a friend invited alone, when they open their link, then the friends greeting speaks to them alone", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...invitation, guests: [invitation.guests[0]], greeting: "friends" });
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+
+    expect(
+      screen.getByText(
+        "¡Amiguiss/Friendchiss! Finalmente llegó el evento más esperado del año: nuestra hermosa unión. Esperamos contar contigo y que no nos falles.",
+      ),
+    ).toBeInTheDocument();
   });
 });

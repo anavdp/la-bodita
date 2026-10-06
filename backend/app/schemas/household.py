@@ -1,4 +1,5 @@
 from datetime import date
+from enum import Enum
 from typing import Annotated
 
 from pydantic import BaseModel, Field, StringConstraints
@@ -44,11 +45,20 @@ class RsvpGuest(BaseModel):
     rsvp_status: RsvpStatus
 
 
+class RsvpGreeting(str, Enum):
+    """How the invitation speaks to a household: to family, to friends, or to anyone."""
+
+    FAMILY = "family"
+    FRIENDS = "friends"
+    GENERAL = "general"
+
+
 class RsvpInvitation(BaseModel):
     household_name: str
     wedding_name: str
     wedding_date: date | None
     guests: list[RsvpGuest]
+    greeting: RsvpGreeting
 
 
 class RsvpAnswer(BaseModel):

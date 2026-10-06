@@ -42,12 +42,28 @@ describe("AppRoutes", () => {
       weddingName: "La Bodita",
       weddingDate: "2026-10-29",
       guests: [],
+      greeting: "general",
     });
 
     renderAt("/rsvp/abc");
 
     expect(await screen.findByRole("heading", { name: "La Bodita" })).toBeInTheDocument();
     expect(rsvpApi.getInvitation).toHaveBeenCalledWith("abc");
+    expect(screen.queryByRole("navigation", { name: "Main navigation" })).not.toBeInTheDocument();
+  });
+
+  it("given a household's thank-you address, when it is visited, then it shows without the planner shell", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({
+      householdName: "Famiglia Rossi",
+      weddingName: "La Bodita",
+      weddingDate: "2026-10-29",
+      guests: [{ id: 1, firstName: "Maria", lastName: "Rossi", rsvpStatus: "confirmed" }],
+      greeting: "family",
+    });
+
+    renderAt("/rsvp/abc/gracias");
+
+    expect(await screen.findByRole("heading", { name: "¡Gracias!" })).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Main navigation" })).not.toBeInTheDocument();
   });
 
@@ -67,6 +83,7 @@ describe("AppRoutes", () => {
       weddingName: "La Bodita",
       weddingDate: "2026-10-29",
       guests: [],
+      greeting: "general",
     });
     renderAt("/rsvp");
 

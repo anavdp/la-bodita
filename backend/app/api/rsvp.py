@@ -14,9 +14,10 @@ from sqlalchemy.orm import selectinload
 
 from app.api.guests import SessionDependency
 from app.models import Guest, Household, Wedding
-from app.models.guest import RsvpStatus
+from app.models.guest import GuestRelationshipType, RsvpStatus
 from app.rate_limit import SlidingWindowRateLimit
 from app.schemas import (
+    RsvpGreeting,
     RsvpGuest,
     RsvpInvitation,
     RsvpLookup,
@@ -103,6 +104,19 @@ def find_by_token(session: SessionDependency, token: str) -> Household:
     return household
 
 
+FRIENDS = {GuestRelationshipType.FRIENDS, GuestRelationshipType.BRIDE_FRIENDS, GuestRelationshipType.GROOM_FRIENDS}
+
+
+def greeting_for(household: Household) -> RsvpGreeting:
+    """One family member is enough to greet the household as family; failing that, one friend as friends."""
+    relationships = {guest.relationship_type for guest in household.guests}
+    if GuestRelationshipType.FAMILY in relationships:
+        return RsvpGreeting.FAMILY
+    if relationships & FRIENDS:
+        return RsvpGreeting.FRIENDS
+    return RsvpGreeting.GENERAL
+
+
 def invitation_for(session: SessionDependency, household: Household) -> RsvpInvitation:
     wedding = session.get(Wedding, household.wedding_id)
     return RsvpInvitation(
@@ -110,6 +124,7 @@ def invitation_for(session: SessionDependency, household: Household) -> RsvpInvi
         wedding_name=wedding.name,
         wedding_date=wedding.wedding_date,
         guests=[RsvpGuest.model_validate(guest, from_attributes=True) for guest in household.guests],
+        greeting=greeting_for(household),
     )
 
 

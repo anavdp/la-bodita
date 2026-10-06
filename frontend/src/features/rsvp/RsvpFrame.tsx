@@ -11,7 +11,7 @@ interface RsvpFrameProps {
    * The photo across the top of the page, edge to edge; decorative, so screen
    * readers skip it. It is framed on its upper part, where faces usually are.
    */
-  picture: string;
+  picture?: string;
   /** A different crop for phones, when the wide one does not frame well on a narrow screen. */
   phonePicture?: string;
 }
@@ -26,10 +26,15 @@ export function RsvpFrame({ children, picture, phonePicture }: RsvpFrameProps) {
   return (
     <main className="min-h-screen bg-gradient-to-br from-primary-fixed via-background to-tertiary-fixed">
       <div className="relative">
-        <picture>
-          {phonePicture !== undefined && <source media="(max-width: 639px)" srcSet={phonePicture} />}
-          <img src={picture} alt="" className="h-72 w-full object-cover object-[center_35%] sm:h-[26rem]" />
-        </picture>
+        {/* Left empty while a page is still working out which photo it shows. */}
+        {picture === undefined ? (
+          <div className="h-72 w-full sm:h-[26rem]" />
+        ) : (
+          <picture>
+            {phonePicture !== undefined && <source media="(max-width: 639px)" srcSet={phonePicture} />}
+            <img src={picture} alt="" className="h-72 w-full object-cover object-[center_35%] sm:h-[26rem]" />
+          </picture>
+        )}
         {/* A violet wash at the bottom, so the card's top edge sits on color rather than on the photo. */}
         <div
           aria-hidden="true"

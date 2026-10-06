@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { ApiError } from "../../api/client";
 import { answerInvitation, getInvitation } from "../../api/rsvp";
-import type { RsvpAnswer, RsvpInvitation, RsvpStatus } from "../../api/types";
+import type { RsvpAnswer, RsvpGreeting, RsvpInvitation, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "../guests/filtering";
@@ -14,6 +14,13 @@ import { TitleWithDate } from "./TitleWithDate";
 
 /** A member's choice on the form: undecided until they pick one. */
 type Choice = "yes" | "no" | null;
+
+/** The opening line, by who the household is to the couple, and by how many it speaks to. */
+const greetings: Record<RsvpGreeting, Record<"one" | "many", TranslationKey>> = {
+  family: { one: "rsvp.greeting.family.one", many: "rsvp.greeting.family.many" },
+  friends: { one: "rsvp.greeting.friends.one", many: "rsvp.greeting.friends.many" },
+  general: { one: "rsvp.moreInfo.one", many: "rsvp.moreInfo.many" },
+};
 
 const choiceFor = (status: RsvpStatus): Choice =>
   status === "confirmed" ? "yes" : status === "declined" ? "no" : null;
@@ -29,13 +36,13 @@ function choicesFrom(invitation: RsvpInvitation): Record<number, Choice> {
  */
 export function RsvpPage() {
   const { token = "" } = useParams();
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const [invitation, setInvitation] = useState<RsvpInvitation | null>(null);
   const [loadError, setLoadError] = useState<TranslationKey | null>(null);
   const [choices, setChoices] = useState<Record<number, Choice>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [saveError, setSaveError] = useState(false);
 
   useEffect(() => {
@@ -60,13 +67,11 @@ export function RsvpPage() {
   );
 
   const choose = (guestId: number, choice: Choice) => {
-    setIsSaved(false);
     setChoices((current) => ({ ...current, [guestId]: choice }));
   };
 
   /** The usual case is a whole household answering the same way. */
   const chooseForEveryone = (choice: Choice) => {
-    setIsSaved(false);
     setChoices(Object.fromEntries((invitation?.guests ?? []).map((guest) => [guest.id, choice])));
   };
 
@@ -75,13 +80,10 @@ export function RsvpPage() {
     setSaveError(false);
     setIsSaving(true);
     try {
-      const updated = await answerInvitation(token, answers);
-      setInvitation(updated);
-      setChoices(choicesFrom(updated));
-      setIsSaved(true);
+      await answerInvitation(token, answers);
+      navigate(`/rsvp/${encodeURIComponent(token)}/gracias`);
     } catch {
       setSaveError(true);
-    } finally {
       setIsSaving(false);
     }
   };
@@ -99,7 +101,7 @@ export function RsvpPage() {
         <TitleWithDate title={invitation.weddingName} />
         {/* Spanish speaks to a household in the plural ("confírmennos") and to a guest alone in the singular. */}
         <p className="mb-4 font-body-lg text-body-lg text-on-surface">
-          {t(isHousehold ? "rsvp.moreInfo.many" : "rsvp.moreInfo.one")}
+          {t(greetings[invitation.greeting][isHousehold ? "many" : "one"])}
         </p>
         <div
           role="note"
@@ -160,11 +162,6 @@ export function RsvpPage() {
           {saveError && (
             <p role="alert" className="font-body-sm text-body-sm text-error">
               {t("rsvp.saveFailed")}
-            </p>
-          )}
-          {isSaved && (
-            <p role="status" className="font-body-sm text-body-sm text-secondary">
-              {t("rsvp.saved")}
             </p>
           )}
 

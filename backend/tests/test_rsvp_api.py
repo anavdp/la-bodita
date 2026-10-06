@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models import Guest, Household, Wedding
-from app.models.guest import RsvpStatus
+from app.models.guest import GuestRelationshipType, RsvpStatus
 
 RSVP_URL = "/api/rsvp/{token}"
 
@@ -99,3 +99,61 @@ def test_given_an_unknown_link_when_answers_are_sent_then_it_is_not_found(client
     )
 
     assert response.status_code == 404
+
+
+def a_household_of(db_session: Session, wedding: Wedding, *relationships: GuestRelationshipType | None) -> Household:
+    household = Household(wedding_id=wedding.id, name="Mixed")
+    db_session.add_all(
+        Guest(
+            wedding_id=wedding.id,
+            first_name=f"Guest {index}",
+            last_name="Test",
+            household=household,
+            relationship_type=relationship,
+        )
+        for index, relationship in enumerate(relationships)
+    )
+    db_session.commit()
+    return household
+
+
+def greeting_of(client: TestClient, household: Household) -> str:
+    return client.get(RSVP_URL.format(token=household.rsvp_token)).json()["greeting"]
+
+
+def test_given_any_family_member_when_the_invitation_opens_then_it_greets_them_as_family(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    household = a_household_of(db_session, wedding, GuestRelationshipType.PLUS_ONE, GuestRelationshipType.FAMILY)
+
+    assert greeting_of(client, household) == "family"
+
+
+def test_given_family_and_friends_together_when_the_invitation_opens_then_family_wins(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    household = a_household_of(db_session, wedding, GuestRelationshipType.FRIENDS, GuestRelationshipType.FAMILY)
+
+    assert greeting_of(client, household) == "family"
+
+
+def test_given_any_kind_of_friend_when_the_invitation_opens_then_it_greets_them_as_friends(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    friends = (GuestRelationshipType.FRIENDS, GuestRelationshipType.BRIDE_FRIENDS, GuestRelationshipType.GROOM_FRIENDS)
+    for friend in friends:
+        household = a_household_of(db_session, wedding, None, friend)
+
+        assert greeting_of(client, household) == "friends", friend
+
+
+def test_given_neither_family_nor_friends_when_the_invitation_opens_then_the_greeting_is_general(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    household = a_household_of(db_session, wedding, GuestRelationshipType.OTHER, GuestRelationshipType.PLUS_ONE, None)
+
+    response = client.get(RSVP_URL.format(token=household.rsvp_token))
+
+    assert response.json()["greeting"] == "general"
+    # Only the greeting is shared: each guest's relationship stays with the couple.
+    assert all("relationship_type" not in guest for guest in response.json()["guests"])
