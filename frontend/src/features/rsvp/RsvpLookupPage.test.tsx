@@ -150,7 +150,7 @@ describe("RsvpLookupPage", () => {
     renderPage();
 
     const title = screen.getByRole("heading", { name: "Let us know if you're coming" });
-    const date = screen.getByText("August 14, 2027");
+    const date = screen.getByText("14 · 08 · 2027");
     expect(title.parentElement).toContainElement(date);
     expect(date).not.toHaveClass("text-secondary-container");
     expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();

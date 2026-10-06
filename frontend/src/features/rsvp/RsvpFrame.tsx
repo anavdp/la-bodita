@@ -24,7 +24,7 @@ export function RsvpFrame({ children, picture, phonePicture }: RsvpFrameProps) {
   const { t, toggleLanguage } = useTranslation();
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-primary-fixed via-background to-tertiary-fixed">
+    <main className="min-h-screen bg-gradient-to-br font-guest from-primary-fixed via-background to-tertiary-fixed">
       <div className="relative">
         {/* Left empty while a page is still working out which photo it shows. */}
         {picture === undefined ? (
@@ -47,7 +47,7 @@ export function RsvpFrame({ children, picture, phonePicture }: RsvpFrameProps) {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="absolute right-8 top-8 rounded-full border border-primary px-3 py-1 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
+            className="absolute right-8 top-8 rounded-full border-2 border-tertiary px-3 py-1 text-[13px] font-semibold text-on-surface transition-colors hover:bg-tertiary-fixed"
           >
             {t("rsvp.otherLanguage")}
           </button>

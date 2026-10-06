@@ -50,7 +50,7 @@ export function RsvpThanksPage() {
   if (invitation === null) {
     return (
       <RsvpFrame>
-        <p className="font-body-lg text-body-lg text-on-surface-variant">{t(loadError ?? "rsvp.loading")}</p>
+        <p className="text-body-lg text-on-surface-variant">{t(loadError ?? "rsvp.loading")}</p>
       </RsvpFrame>
     );
   }
@@ -63,12 +63,12 @@ export function RsvpThanksPage() {
   return (
     <RsvpFrame picture={version.picture}>
       <TitleWithDate title={t("rsvp.thanks.title")} />
-      <p className="mb-6 font-body-lg text-body-lg text-on-surface">
+      <p className="mb-6 text-body-lg text-on-surface">
         {t(version.message[isHousehold ? "many" : "one"])}
       </p>
       <Link
         to={`/rsvp/${encodeURIComponent(token)}`}
-        className="font-label-md text-label-md text-primary underline underline-offset-4 hover:opacity-80"
+        className="text-label-md text-primary underline underline-offset-4 hover:opacity-80"
       >
         {t("rsvp.thanks.change")}
       </Link>

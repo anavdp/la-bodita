@@ -90,69 +90,57 @@ export function RsvpPage() {
 
   const content = () => {
     if (loadError !== null) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t(loadError)}</p>;
+      return <p className="text-body-lg text-on-surface-variant">{t(loadError)}</p>;
     }
     if (invitation === null) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("rsvp.loading")}</p>;
+      return <p className="text-body-lg text-on-surface-variant">{t("rsvp.loading")}</p>;
     }
     const isHousehold = invitation.guests.length > 1;
     return (
       <>
         <TitleWithDate title={invitation.weddingName} />
         {/* Spanish speaks to a household in the plural ("confírmennos") and to a guest alone in the singular. */}
-        <p className="mb-4 font-body-lg text-body-lg text-on-surface">
+        <p className="mb-4 text-body-lg text-on-surface">
           {t(greetings[invitation.greeting][isHousehold ? "many" : "one"])}
         </p>
-        <div
-          role="note"
-          className="mb-6 flex items-start gap-3 rounded-lg border-2 border-tertiary bg-tertiary-fixed px-4 py-3 text-on-tertiary-fixed"
-        >
-          <span aria-hidden="true" className="material-symbols-outlined icon-filled text-[24px] text-tertiary">
-            info
-          </span>
-          <p className="font-body-lg text-body-lg">
-            {emphasize(t(isHousehold ? "rsvp.deadline.many" : "rsvp.deadline.one"), {
-              date: <strong>{t("rsvp.deadlineDate")}</strong>,
-            })}
-          </p>
-        </div>
+        <p role="note" className="mb-6 border-l-4 border-tertiary py-1 pl-4 text-body-lg text-on-surface">
+          {emphasize(t(isHousehold ? "rsvp.deadline.many" : "rsvp.deadline.one"), {
+            date: <strong>{t("rsvp.deadlineDate")}</strong>,
+          })}
+        </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           {isHousehold && (
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => chooseForEveryone("yes")}
-                className="rounded-full border border-primary px-6 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-              >
-                {t("rsvp.everyone")}
-              </button>
-              <button
-                type="button"
-                onClick={() => chooseForEveryone("no")}
-                className="rounded-full border border-primary px-6 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-              >
-                {t("rsvp.noOne")}
-              </button>
+            <div className="flex gap-3">
+              {(["yes", "no"] as const).map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  onClick={() => chooseForEveryone(choice)}
+                  className="flex-1 rounded-full border-2 border-tertiary px-3 py-2 text-[15px] font-semibold text-on-surface transition-colors hover:bg-tertiary-fixed"
+                >
+                  {t(choice === "yes" ? "rsvp.everyone" : "rsvp.noOne")}
+                </button>
+              ))}
             </div>
           )}
           {invitation.guests.map((guest) => (
-            <fieldset key={guest.id} className="rounded-lg border border-primary-container bg-primary-fixed/50 px-4 py-3">
-              <legend className="rounded-full bg-surface-container-lowest px-2 font-label-lg text-label-lg text-primary">{fullName(guest)}</legend>
-              <div className="flex flex-wrap gap-6">
+            <fieldset key={guest.id}>
+              <legend className="mb-2 text-[20px] font-semibold text-on-surface">{fullName(guest)}</legend>
+              {/* Radios underneath, so it stays one choice per person for keyboards and screen readers. */}
+              <div className="flex rounded-full bg-surface-container-low p-1">
                 {(["yes", "no"] as const).map((choice) => (
-                  <label
-                    key={choice}
-                    className="flex items-center gap-2 font-body-sm text-body-sm text-on-surface"
-                  >
+                  <label key={choice} className="flex-1 cursor-pointer">
                     <input
                       type="radio"
                       name={`guest-${guest.id}`}
                       checked={choices[guest.id] === choice}
                       onChange={() => choose(guest.id, choice)}
-                      className="h-5 w-5 text-primary focus:ring-primary"
+                      className="peer sr-only"
                     />
-                    {t(choice === "yes" ? "rsvp.attending" : "rsvp.notAttending")}
+                    <span className="block rounded-full py-3 text-center text-label-lg text-on-surface-variant transition-colors peer-checked:bg-tertiary peer-checked:text-on-tertiary peer-checked:shadow-md peer-focus-visible:ring-2 peer-focus-visible:ring-tertiary">
+                      {t(choice === "yes" ? "rsvp.attending" : "rsvp.notAttending")}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -160,7 +148,7 @@ export function RsvpPage() {
           ))}
 
           {saveError && (
-            <p role="alert" className="font-body-sm text-body-sm text-error">
+            <p role="alert" className="text-body-sm text-error">
               {t("rsvp.saveFailed")}
             </p>
           )}
@@ -168,7 +156,7 @@ export function RsvpPage() {
           <button
             type="submit"
             disabled={isSaving || answers.length === 0}
-            className="mt-2 self-end rounded-full bg-primary px-8 py-3 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="mt-2 w-full rounded-full bg-tertiary py-4 text-label-lg text-on-tertiary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {t(isSaving ? "rsvp.sending" : "rsvp.send")}
           </button>

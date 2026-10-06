@@ -163,6 +163,13 @@ describe("RsvpPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-banner.jpg");
   });
 
+  it("given a household link, when it opens, then the page uses the guests' own typeface rather than the planner's", async () => {
+    renderPage();
+    const title = await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(title.closest("main")).toHaveClass("font-guest");
+  });
+
   it("given a household link, when it opens, then the language switch sits on the card, not on the photo", async () => {
     renderPage();
     const title = await screen.findByRole("heading", { name: "La Bodita" });
@@ -175,7 +182,7 @@ describe("RsvpPage", () => {
     const title = await screen.findByRole("heading", { name: "La Bodita" });
 
     expect(title.parentElement).toHaveClass("flex-col");
-    expect(title.nextElementSibling).toHaveTextContent("August 14, 2027");
+    expect(title.nextElementSibling).toHaveTextContent("14 · 08 · 2027");
   });
 
   it("given a household link, when it opens, then the photo spans the screen and the invitation card overlaps it", async () => {
@@ -224,7 +231,7 @@ describe("RsvpPage", () => {
     renderPage();
     const title = await screen.findByRole("heading", { name: "La Bodita" });
 
-    const date = screen.getByText("August 14, 2027");
+    const date = screen.getByText("14 · 08 · 2027");
     expect(title.parentElement).toContainElement(date);
     expect(date).not.toHaveClass("text-secondary-container");
     expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();
@@ -233,7 +240,8 @@ describe("RsvpPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(screen.getByText("14 de Agosto de 2027")).toBeInTheDocument();
+    // Written the same way in both languages, like the save-the-date.
+    expect(screen.getByText("14 · 08 · 2027")).toBeInTheDocument();
     expect(screen.queryByText(/se celebrará/)).not.toBeInTheDocument();
   });
 
