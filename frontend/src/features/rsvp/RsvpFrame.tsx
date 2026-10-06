@@ -7,7 +7,11 @@ const card =
 
 interface RsvpFrameProps {
   children: ReactNode;
-  /** A wide photo above the card; decorative, so screen readers skip it. */
+  /**
+   * A photo above the card; decorative, so screen readers skip it. It is
+   * framed on its upper part, where faces usually are, and shown taller on a
+   * phone so they are not cut to a thin strip.
+   */
   picture: string;
 }
 
@@ -29,7 +33,7 @@ export function RsvpFrame({ children, picture }: RsvpFrameProps) {
       <img
         src={picture}
         alt=""
-        className="organic-shape-1 aspect-[8/3] w-full max-w-xl object-cover shadow-[0px_4px_20px_rgba(0,0,0,0.04)]"
+        className="organic-shape-1 aspect-[2/1] w-full max-w-xl object-cover object-[center_35%] sm:aspect-[8/3] shadow-[0px_4px_20px_rgba(0,0,0,0.04)]"
       />
       <div className={card}>{children}</div>
     </main>

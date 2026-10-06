@@ -155,6 +155,14 @@ describe("RsvpPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-banner.jpg");
   });
 
+  it("given a photo that is taller than the banner, when it is shown, then it is framed on the upper part where faces sit", async () => {
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    // Taller on a phone, so faces are not a thin strip; wide on larger screens.
+    expect(screen.getByRole("presentation")).toHaveClass("aspect-[2/1]", "sm:aspect-[8/3]", "object-[center_35%]");
+  });
+
   it("given a household of several, when it opens, then a banner asks them together to answer by the deadline", async () => {
     renderPage();
     await screen.findByRole("heading", { name: "La Bodita" });
