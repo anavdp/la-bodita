@@ -12,26 +12,31 @@ interface RsvpFrameProps {
    * readers skip it. It is framed on its upper part, where faces usually are.
    */
   picture: string;
+  /** A different crop for phones, when the wide one does not frame well on a narrow screen. */
+  phonePicture?: string;
 }
 
 /**
  * The guests' side of the app: a full-width photo, and one card pulled up over
  * its bottom edge with the language switch in its corner.
  */
-export function RsvpFrame({ children, picture }: RsvpFrameProps) {
+export function RsvpFrame({ children, picture, phonePicture }: RsvpFrameProps) {
   const { t, toggleLanguage } = useTranslation();
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-primary-fixed via-background to-tertiary-fixed">
       <div className="relative">
-        <img src={picture} alt="" className="h-72 w-full object-cover object-[center_35%] sm:h-[26rem]" />
+        <picture>
+          {phonePicture !== undefined && <source media="(max-width: 639px)" srcSet={phonePicture} />}
+          <img src={picture} alt="" className="h-72 w-full object-cover object-[center_35%] sm:h-[26rem]" />
+        </picture>
         {/* A violet wash at the bottom, so the card's top edge sits on color rather than on the photo. */}
         <div
           aria-hidden="true"
           className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-primary/50 to-transparent"
         />
       </div>
-      <div className="relative -mt-20 flex justify-center px-4 pb-12">
+      <div className="relative -mt-12 flex justify-center sm:-mt-20 px-4 pb-12">
         <div className={card}>
           {/* In the corner, level with the title, rather than on a row of its own. */}
           <button

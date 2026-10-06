@@ -43,7 +43,7 @@ describe("the RSVP API", () => {
     expect(updated).toEqual(invitation);
   });
 
-  it("given a last name, when it is looked up, then the matching households come back in app terms", async () => {
+  it("given a full name, when it is looked up, then the matching households come back in app terms", async () => {
     const fetchMock = vi.fn((_url: string, _init?: RequestInit) =>
       jsonResponse({
         households: [
@@ -57,12 +57,12 @@ describe("the RSVP API", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
 
-    const matches = await lookUpInvitation("Rossi");
+    const matches = await lookUpInvitation("Maria Rossi");
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe("http://localhost:8000/api/rsvp/lookup");
     expect(init.method).toBe("POST");
-    expect(JSON.parse(init.body as string)).toEqual({ last_name: "Rossi" });
+    expect(JSON.parse(init.body as string)).toEqual({ name: "Maria Rossi" });
     expect(matches).toEqual([
       { token: "abc", name: "Famiglia Rossi", members: [{ firstName: "Maria", lastName: "Rossi" }] },
     ]);

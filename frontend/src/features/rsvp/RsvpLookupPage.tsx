@@ -18,21 +18,21 @@ const fieldLabel = "mb-1 block font-label-md text-label-md uppercase text-on-sur
 const rsvpPath = (token: string) => `/rsvp/${encodeURIComponent(token)}`;
 
 /**
- * The one public link the couple shares: a guest types their last name and
- * lands on their household's invitation. When a family name is shared by
- * several households, the guest picks theirs by who is in it.
+ * The one public link the couple shares: a guest types their full name and
+ * lands on their household's invitation. When a name is shared by several
+ * households, the guest picks theirs by who is in it.
  */
 export function RsvpLookupPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [lastName, setLastName] = useState("");
+  const [name, setName] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [matches, setMatches] = useState<RsvpHouseholdMatch[]>([]);
   const [problem, setProblem] = useState<TranslationKey | null>(null);
 
-  // Two letters at least, as the API asks: one letter would list half the guests.
-  const canSearch = lastName.trim().length >= 2 && !isSearching;
+  // Two letters at least, as the API asks.
+  const canSearch = name.trim().length >= 2 && !isSearching;
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -40,7 +40,7 @@ export function RsvpLookupPage() {
     setMatches([]);
     setIsSearching(true);
     try {
-      const found = await lookUpInvitation(lastName.trim());
+      const found = await lookUpInvitation(name.trim());
       if (found.length === 1) {
         navigate(rsvpPath(found[0].token));
       } else if (found.length === 0) {
@@ -56,21 +56,22 @@ export function RsvpLookupPage() {
   };
 
   return (
-    <RsvpFrame picture="/rsvp-lookup.jpg">
+    <RsvpFrame picture="/rsvp-lookup.jpg" phonePicture="/rsvp-lookup-phone.jpg">
       <TitleWithDate title={t("rsvp.lookup.title")} />
       <p className="mb-6 font-body-sm text-body-sm text-on-surface-variant">{t("rsvp.lookup.prompt")}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className={fieldLabel} htmlFor="rsvp-last-name">
-            {t("rsvp.lookup.lastName")}
+          <label className={fieldLabel} htmlFor="rsvp-name">
+            {t("rsvp.lookup.name")}
           </label>
           <input
-            id="rsvp-last-name"
+            id="rsvp-name"
             className={field}
-            autoComplete="family-name"
-            value={lastName}
-            onChange={(event) => setLastName(event.target.value)}
+            autoComplete="name"
+            placeholder={t("rsvp.lookup.namePlaceholder")}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
           />
         </div>
 
@@ -100,7 +101,7 @@ export function RsvpLookupPage() {
               className="rounded-lg border border-outline-variant px-4 py-3 text-left transition-colors hover:border-primary hover:bg-primary/5"
             >
               {/* Who is in it, not the household's own name: that is for the couple's planning. */}
-              <span className="block font-label-lg text-label-lg text-on-surface">
+              <span className="block font-body-lg text-body-lg text-on-surface">
                 {match.members.map(fullName).join(", ")}
               </span>
             </button>

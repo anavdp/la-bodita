@@ -61,9 +61,9 @@ class RsvpReply(BaseModel):
 
 
 class RsvpLookup(BaseModel):
-    """A guest finding their invitation by last name; two letters at least, so one letter lists no one."""
+    """A guest finding their invitation by their full name, typed in one box."""
 
-    last_name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=100)]
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=200)]
 
 
 class RsvpLookupMember(BaseModel):

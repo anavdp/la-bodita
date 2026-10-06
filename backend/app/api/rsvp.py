@@ -46,18 +46,24 @@ def comparable(name: str) -> str:
 PARTICLES = {"de", "del", "la", "las", "los", "y", "da", "di", "do", "dos", "van", "von"}
 
 
-def last_name_matches(typed: str, stored: str) -> bool:
+def last_name_matches(typed_words: set[str], stored: str) -> bool:
     """Whole words either way: "Palma" or "De Palma" for "De Palma", and "De Palma Aponte"
     (both of someone's last names) for a guest stored as just "De Palma"."""
-    typed_words, stored_words = set(typed.split()), set(stored.split())
+    stored_words = set(stored.split())
     if not typed_words - PARTICLES:
         return False
     return typed_words <= stored_words or stored_words <= typed_words
 
 
+def name_matches(typed: str, first_name: str, last_name: str) -> bool:
+    """At least one of the guest's first names, and the rest of what was typed as their last name."""
+    typed_words, first_names = set(typed.split()), set(first_name.split())
+    return bool(typed_words & first_names) and last_name_matches(typed_words - first_names, last_name)
+
+
 @router.post("/lookup", response_model=RsvpLookupResult)
 def look_up_invitation(lookup: RsvpLookup, request: Request, session: SessionDependency) -> RsvpLookupResult:
-    """The households of every guest with this last name - several when a family name is shared."""
+    """The households of every guest with this name - several when two people share it."""
     client = request.client.host if request.client else "unknown"
     if not lookup_rate_limit.allow(client):
         raise HTTPException(
@@ -66,13 +72,13 @@ def look_up_invitation(lookup: RsvpLookup, request: Request, session: SessionDep
             headers={"Retry-After": "60"},
         )
 
-    last_name = comparable(lookup.last_name)
+    typed = comparable(lookup.name)
     # A wedding's guest list is a few hundred rows: matching in Python keeps the
     # accent folding in one place instead of teaching it to SQLite.
     guests = session.scalars(select(Guest).options(selectinload(Guest.household).selectinload(Household.guests)))
     households: dict[int, Household] = {}
     for guest in guests:
-        if last_name_matches(last_name, comparable(guest.last_name)):
+        if name_matches(typed, comparable(guest.first_name), comparable(guest.last_name)):
             households.setdefault(guest.household_id, guest.household)
 
     return RsvpLookupResult(

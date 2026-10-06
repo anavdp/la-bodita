@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes, useParams } from "react-router-dom";
 
@@ -41,8 +41,8 @@ function renderPage() {
   );
 }
 
-async function searchFor(lastName: string) {
-  await userEvent.type(screen.getByRole("textbox", { name: "Last name(s)" }), lastName);
+async function searchFor(name: string) {
+  await userEvent.type(screen.getByRole("textbox", { name: "Full name" }), name);
   await userEvent.click(screen.getByRole("button", { name: "Search" }));
 }
 
@@ -55,22 +55,25 @@ describe("RsvpLookupPage", () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockResolvedValue([rossi]);
     renderPage();
 
-    await searchFor("Rossi");
+    await searchFor("Maria Rossi");
 
     expect(await screen.findByText("Opened invitation rossi-token")).toBeInTheDocument();
-    expect(rsvpApi.lookUpInvitation).toHaveBeenCalledWith("Rossi");
+    expect(rsvpApi.lookUpInvitation).toHaveBeenCalledWith("Maria Rossi");
   });
 
   it("given a name shared by several households, when it is looked up, then the guest picks theirs by who is in it", async () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockResolvedValue([rossi, otherMaria]);
     renderPage();
 
-    await searchFor("Rossi");
+    await searchFor("Maria Rossi");
 
-    expect(await screen.findByText("We found more than one family with that last name. Which one is yours?")).toBeInTheDocument();
+    expect(await screen.findByText("We found more than one person with that name. Which is your family?")).toBeInTheDocument();
     // Only who is in each household: its own name is for the couple's planning.
     expect(screen.queryByText("Famiglia Rossi")).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Maria Rossi, Paolo Rossi" }));
+    const choice = screen.getByRole("button", { name: "Maria Rossi, Paolo Rossi" });
+    // An option to pick, not a heading: regular weight.
+    expect(within(choice).getByText("Maria Rossi, Paolo Rossi")).not.toHaveClass("font-label-lg");
+    await userEvent.click(choice);
     expect(await screen.findByText("Opened invitation rossi-token")).toBeInTheDocument();
   });
 
@@ -78,10 +81,10 @@ describe("RsvpLookupPage", () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockResolvedValue([]);
     renderPage();
 
-    await searchFor("Bianchi");
+    await searchFor("Mario Bianchi");
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "We couldn't find that last name. Check the spelling, or contact us.",
+      "We couldn't find that name. Check the spelling, or contact us.",
     );
   });
 
@@ -89,7 +92,7 @@ describe("RsvpLookupPage", () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockRejectedValue(new ApiError("Too many lookups", 429));
     renderPage();
 
-    await searchFor("Rossi");
+    await searchFor("Maria Rossi");
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Too many searches. Please wait a minute and try again.",
@@ -100,22 +103,23 @@ describe("RsvpLookupPage", () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockRejectedValue(new Error("network down"));
     renderPage();
 
-    await searchFor("Rossi");
+    await searchFor("Maria Rossi");
 
     expect(await screen.findByRole("alert")).toHaveTextContent("We could not run the search.");
   });
 
-  it("given the page, when it opens, then it asks only for a last name", () => {
+  it("given the page, when it opens, then it asks for the full name in a single box", () => {
     renderPage();
 
     expect(screen.getAllByRole("textbox")).toHaveLength(1);
-    expect(screen.getByText("We'd love to have you with us. Enter your last name(s) and let us know if you can join us.")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Full name" })).toHaveAttribute("placeholder", "e.g. Ana García");
+    expect(screen.getByText("We'd love to have you with us. Enter your full name and let us know if you can join us.")).toBeInTheDocument();
   });
 
   it("given less than two letters, when the guest tries to search, then the search cannot be sent", async () => {
     renderPage();
 
-    await userEvent.type(screen.getByRole("textbox", { name: "Last name(s)" }), " R ");
+    await userEvent.type(screen.getByRole("textbox", { name: "Full name" }), " R ");
 
     expect(screen.getByRole("button", { name: "Search" })).toBeDisabled();
   });
@@ -127,16 +131,19 @@ describe("RsvpLookupPage", () => {
 
     expect(screen.getByRole("heading", { name: "Dinos si vienes" })).toBeInTheDocument();
     expect(
-      screen.getByText("Nos gustaría contar con tu presencia. Introduce tu(s) apellido(s) y confírmanos si nos acompañas."),
+      screen.getByText("Nos gustaría contar con tu presencia. Introduce tu nombre y apellido y confírmanos si nos acompañas."),
     ).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Apellido(s)" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Nombre y apellido" })).toHaveAttribute("placeholder", "Ej.: Ana García");
     expect(screen.getByRole("button", { name: "Buscar" })).toBeInTheDocument();
   });
 
   it("given the lookup page, when it opens, then its own picture sits above the search", () => {
     renderPage();
 
-    expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-lookup.jpg");
+    const picture = screen.getByRole("presentation");
+    expect(picture).toHaveAttribute("src", "/rsvp-lookup.jpg");
+    // Phones get their own crop, with paper under the arches so the card leaves the names in view.
+    expect(picture.parentElement?.querySelector("source")).toHaveAttribute("srcset", "/rsvp-lookup-phone.jpg");
   });
 
   it("given the lookup page, when it opens, then the wedding date shows with the title", () => {
