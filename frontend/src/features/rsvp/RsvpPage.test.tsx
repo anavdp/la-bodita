@@ -155,12 +155,16 @@ describe("RsvpPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-banner.jpg");
   });
 
-  it("given a photo that is taller than the banner, when it is shown, then it is framed on the upper part where faces sit", async () => {
+  it("given a household link, when it opens, then the photo spans the screen and the invitation card overlaps it", async () => {
     renderPage();
-    await screen.findByRole("heading", { name: "La Bodita" });
+    const title = await screen.findByRole("heading", { name: "La Bodita" });
 
-    // Taller on a phone, so faces are not a thin strip; wide on larger screens.
-    expect(screen.getByRole("presentation")).toHaveClass("aspect-[2/1]", "sm:aspect-[8/3]", "object-[center_35%]");
+    const photo = screen.getByRole("presentation");
+    // Edge to edge, framed on its upper part where faces usually sit.
+    expect(photo).toHaveClass("w-full", "object-cover", "object-[center_35%]");
+    expect(photo).not.toHaveClass("max-w-xl");
+    // The card is pulled up over the bottom of the photo.
+    expect(title.closest(".organic-shape-1")?.parentElement).toHaveClass("-mt-20");
   });
 
   it("given a household of several, when it opens, then a banner asks them together to answer by the deadline", async () => {
