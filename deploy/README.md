@@ -94,8 +94,11 @@ Do this before the planner gets its address.
 2. Name it `La Bodita planner`. Choose **Add public hostname** with subdomain `planner` and domain `gerardoyvicky.com`.
 3. Add a policy named `Gerardo and Vicky` with action **Allow**. Under **Include → Emails**,
    enter both of your email addresses. Everyone else is refused.
-4. For the login method, keep **One-time PIN**, which emails you a code each time
-   you sign in. A session lasts as long as you set under **Session duration**.
+4. For the login method, use **One-time PIN**, which emails you a code each time
+   you sign in. If it isn't offered, add it first under **Settings → Authentication
+   → Login methods → Add new → One-time PIN** (newer dashboards: **Integrations →
+   Identity providers**), then select it on the application and turn off
+   **Cloudflare**, which would require a Cloudflare account to sign in.
 5. Save. Then go back to the tunnel from step 3 and add a second **Public hostname**:
    subdomain `planner`, domain `gerardoyvicky.com`, Service type `HTTP`, URL `web:8080`.
 
