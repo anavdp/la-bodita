@@ -1,7 +1,8 @@
 # One web server, two doors.
 #
-# :8080 is the whole planner. Docker publishes it on 127.0.0.1 only, and
-# `tailscale serve` puts it on the tailnet, so only your own devices reach it.
+# :8080 is the whole planner. The tunnel reaches it as planner.<domain>, which
+# Cloudflare Access puts behind a login for the two of you. The app has no login
+# of its own yet, so that hostname must never exist without the Access policy.
 #
 # :8081 is the door the Cloudflare Tunnel opens to the internet. It serves only
 # what a guest's RSVP needs and answers 404 to everything else. Its API calls go

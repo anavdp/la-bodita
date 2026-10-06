@@ -34,13 +34,14 @@ services:
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
     ports:
-      # The planner, reachable from the Pi itself only; Tailscale serves it on.
+      # The planner, also reachable from the Pi itself for a quick check.
       - "127.0.0.1:8080:8080"
     depends_on:
       - backend
       - backend-public
 
-  # Opens :8081 to the internet without opening a port on the router.
+  # Opens :8081 (guests) and, behind Cloudflare Access, :8080 (the planner) to
+  # the internet without opening a port on the router.
   tunnel:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
