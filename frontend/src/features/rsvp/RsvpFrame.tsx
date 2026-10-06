@@ -47,7 +47,7 @@ export function RsvpFrame({ children, picture, phonePicture }: RsvpFrameProps) {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="absolute right-8 top-8 rounded-full border-2 border-tertiary px-3 py-1 text-[13px] font-semibold text-on-surface transition-colors hover:bg-tertiary-fixed"
+            className="absolute right-8 top-8 rounded-full border-2 border-on-secondary-fixed-variant px-3 py-1 text-[13px] font-semibold text-on-secondary-fixed-variant transition-colors hover:bg-primary-fixed"
           >
             {t("rsvp.otherLanguage")}
           </button>

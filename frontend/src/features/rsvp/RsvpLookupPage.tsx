@@ -12,7 +12,7 @@ import { RsvpFrame } from "./RsvpFrame";
 import { TitleWithDate } from "./TitleWithDate";
 
 const field =
-  "w-full rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-lg text-on-surface focus:border-tertiary focus:outline-none";
+  "w-full rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-lg text-on-surface focus:border-on-secondary-fixed-variant focus:outline-none";
 const fieldLabel = "mb-2 block text-[15px] font-semibold text-on-surface";
 
 const rsvpPath = (token: string) => `/rsvp/${encodeURIComponent(token)}`;
@@ -84,7 +84,7 @@ export function RsvpLookupPage() {
         <button
           type="submit"
           disabled={!canSearch}
-          className="mt-2 w-full rounded-full bg-tertiary py-4 text-label-lg text-on-tertiary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="mt-2 w-full rounded-full bg-on-secondary-fixed-variant py-4 text-[17px] font-bold text-on-primary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {t(isSearching ? "rsvp.lookup.searching" : "rsvp.lookup.search")}
         </button>
@@ -98,7 +98,7 @@ export function RsvpLookupPage() {
               key={match.token}
               type="button"
               onClick={() => navigate(rsvpPath(match.token))}
-              className="rounded-lg border border-outline-variant px-4 py-3 text-left transition-colors hover:border-tertiary hover:bg-tertiary-fixed"
+              className="rounded-lg border border-outline-variant px-4 py-3 text-left transition-colors hover:border-on-secondary-fixed-variant hover:bg-primary-fixed"
             >
               {/* Who is in it, not the household's own name: that is for the couple's planning. */}
               <span className="block text-body-lg text-on-surface">

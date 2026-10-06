@@ -163,6 +163,23 @@ describe("RsvpPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-banner.jpg");
   });
 
+  it("given a household link, when it opens, then the title and send button share the muted periwinkle", async () => {
+    renderPage();
+    const title = await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(title).toHaveClass("text-on-secondary-fixed-variant");
+    expect(screen.getByRole("button", { name: "Send RSVP" })).toHaveClass("bg-on-secondary-fixed-variant");
+  });
+
+  it("given a household link, when a member picks an answer, then it lights up in the light periwinkle", async () => {
+    renderPage();
+    const maria = within(await screen.findByRole("group", { name: "Maria Rossi" }));
+
+    await userEvent.click(maria.getByRole("radio", { name: "I'll be there" }));
+
+    expect(maria.getByText("I'll be there")).toHaveClass("peer-checked:bg-primary-container");
+  });
+
   it("given a household link, when it opens, then the page uses the guests' own typeface rather than the planner's", async () => {
     renderPage();
     const title = await screen.findByRole("heading", { name: "La Bodita" });

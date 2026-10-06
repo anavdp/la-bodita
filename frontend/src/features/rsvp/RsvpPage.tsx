@@ -103,7 +103,7 @@ export function RsvpPage() {
         <p className="mb-4 text-body-lg text-on-surface">
           {t(greetings[invitation.greeting][isHousehold ? "many" : "one"])}
         </p>
-        <p role="note" className="mb-6 border-l-4 border-tertiary py-1 pl-4 text-body-lg text-on-surface">
+        <p role="note" className="mb-6 border-l-4 border-primary-container py-1 pl-4 text-body-lg text-on-surface">
           {emphasize(t(isHousehold ? "rsvp.deadline.many" : "rsvp.deadline.one"), {
             date: <strong>{t("rsvp.deadlineDate")}</strong>,
           })}
@@ -117,7 +117,7 @@ export function RsvpPage() {
                   key={choice}
                   type="button"
                   onClick={() => chooseForEveryone(choice)}
-                  className="flex-1 rounded-full border-2 border-tertiary px-3 py-2 text-[15px] font-semibold text-on-surface transition-colors hover:bg-tertiary-fixed"
+                  className="flex-1 rounded-full border-2 border-on-secondary-fixed-variant px-3 py-2 text-[15px] font-semibold text-on-secondary-fixed-variant transition-colors hover:bg-primary-fixed"
                 >
                   {t(choice === "yes" ? "rsvp.everyone" : "rsvp.noOne")}
                 </button>
@@ -138,7 +138,7 @@ export function RsvpPage() {
                       onChange={() => choose(guest.id, choice)}
                       className="peer sr-only"
                     />
-                    <span className="block rounded-full py-3 text-center text-label-lg text-on-surface-variant transition-colors peer-checked:bg-tertiary peer-checked:text-on-tertiary peer-checked:shadow-md peer-focus-visible:ring-2 peer-focus-visible:ring-tertiary">
+                    <span className="block rounded-full py-3 text-center text-[16px] font-bold text-on-surface-variant transition-colors peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-on-secondary-fixed-variant">
                       {t(choice === "yes" ? "rsvp.attending" : "rsvp.notAttending")}
                     </span>
                   </label>
@@ -156,7 +156,7 @@ export function RsvpPage() {
           <button
             type="submit"
             disabled={isSaving || answers.length === 0}
-            className="mt-2 w-full rounded-full bg-tertiary py-4 text-label-lg text-on-tertiary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="mt-2 w-full rounded-full bg-on-secondary-fixed-variant py-4 text-[17px] font-bold text-on-primary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {t(isSaving ? "rsvp.sending" : "rsvp.send")}
           </button>

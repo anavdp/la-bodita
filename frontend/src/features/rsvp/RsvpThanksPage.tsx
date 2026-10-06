@@ -68,7 +68,7 @@ export function RsvpThanksPage() {
       </p>
       <Link
         to={`/rsvp/${encodeURIComponent(token)}`}
-        className="text-label-md text-primary underline underline-offset-4 hover:opacity-80"
+        className="text-label-md text-on-secondary-fixed-variant underline underline-offset-4 hover:opacity-80"
       >
         {t("rsvp.thanks.change")}
       </Link>
