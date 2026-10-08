@@ -130,7 +130,7 @@ describe("RsvpLookupPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(screen.getByRole("heading", { name: "Dinos si vienes" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Bienvenidos a La Bodita" })).toBeInTheDocument();
     expect(
       screen.getByText("¡Hola a todos! Estamos planificando nuestro gran día y queremos que sean parte de él."),
     ).toBeInTheDocument();
@@ -184,9 +184,11 @@ describe("RsvpLookupPage", () => {
   it("given the lookup page, when it opens, then the title stands alone, with the date carried by the last step", () => {
     renderPage();
 
-    const title = screen.getByRole("heading", { name: "Let us know if you're coming" });
+    const title = screen.getByRole("heading", { name: "Welcome to La Bodita" });
     expect(title.parentElement).not.toHaveTextContent("14 · 08 · 2027");
     expect(screen.getAllByText("14 · 08 · 2027")).toHaveLength(1);
+    // "Bienvenidos" alone is wider than the room beside the language switch at 40px on a phone.
+    expect(title).toHaveClass("text-[32px]", "sm:text-[40px]");
     expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();
   });
 });

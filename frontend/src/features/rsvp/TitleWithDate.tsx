@@ -1,9 +1,12 @@
 import { useTranslation } from "../../i18n/LanguageProvider";
 
-/** A guest page's title, with room on the right for the language switch in the card's corner. */
-export function GuestTitle({ title }: { title: string }) {
+/**
+ * A guest page's title, with room on the right for the language switch in the
+ * card's corner. A long first word can ask for a smaller size on phones.
+ */
+export function GuestTitle({ title, size = "text-[40px]" }: { title: string; size?: string }) {
   return (
-    <h1 className="pr-24 text-[40px] font-extrabold leading-[1.05] tracking-tight text-on-secondary-fixed-variant">{title}</h1>
+    <h1 className={`pr-24 ${size} font-extrabold leading-[1.05] tracking-tight text-on-secondary-fixed-variant`}>{title}</h1>
   );
 }
 

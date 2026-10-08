@@ -86,7 +86,7 @@ export function RsvpLookupPage() {
     <RsvpFrame picture={photoUrl("rsvp-lookup.jpg")} phonePicture={photoUrl("rsvp-lookup-phone.jpg")}>
       {/* No date under the title here: the last step carries it. */}
       <div className="mb-4">
-        <GuestTitle title={t("rsvp.lookup.title")} />
+        <GuestTitle title={t("rsvp.lookup.title")} size="text-[32px] sm:text-[40px]" />
       </div>
       <p className="text-body-lg text-on-surface">{t("rsvp.lookup.welcome")}</p>
       <p className="mb-6 mt-2 text-right font-bold text-on-secondary-fixed-variant">{t("rsvp.lookup.signature")}</p>

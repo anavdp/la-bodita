@@ -198,7 +198,7 @@ const en = {
   "rsvp.everyone": "We're all coming",
   "rsvp.noOne": "None of us can make it",
 
-  "rsvp.lookup.title": "Let us know if you're coming",
+  "rsvp.lookup.title": "Welcome to La Bodita",
   "rsvp.lookup.welcome": "Hi everyone! We're planning our big day and we want you to be part of it.",
   "rsvp.lookup.signature": "— Gerardo & Vicky",
   "rsvp.lookup.step.answer": "Let us know here by {date}",
@@ -414,7 +414,7 @@ const es: Record<TranslationKey, string> = {
   "rsvp.everyone": "Vamos todos",
   "rsvp.noOne": "Nadie podrá ir",
 
-  "rsvp.lookup.title": "Dinos si vienes",
+  "rsvp.lookup.title": "Bienvenidos a La Bodita",
   "rsvp.lookup.welcome": "¡Hola a todos! Estamos planificando nuestro gran día y queremos que sean parte de él.",
   "rsvp.lookup.signature": "— Gerardo y Vicky",
   "rsvp.lookup.step.answer": "Confirmen aquí antes del {date}",
