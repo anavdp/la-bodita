@@ -9,6 +9,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "../guests/filtering";
 import { emphasize } from "./emphasize";
+import { photoUrl } from "./photos";
 import { RsvpFrame } from "./RsvpFrame";
 import { TitleWithDate } from "./TitleWithDate";
 
@@ -165,5 +166,5 @@ export function RsvpPage() {
     );
   };
 
-  return <RsvpFrame picture="/rsvp-banner.jpg">{content()}</RsvpFrame>;
+  return <RsvpFrame picture={photoUrl("rsvp-banner.jpg")}>{content()}</RsvpFrame>;
 }

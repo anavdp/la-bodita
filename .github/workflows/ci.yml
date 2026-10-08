@@ -132,8 +132,10 @@ jobs:
         with:
           context: ${{ matrix.context }}
           build-contexts: deploy=deploy
-          # Guests' RSVP links are built into the web image.
-          build-args: VITE_PUBLIC_URL=${{ vars.PUBLIC_URL || 'https://labodita.gerardoyvicky.com' }}
+          # Guests' RSVP links and the photo bucket's address are built into the web image.
+          build-args: |
+            VITE_PUBLIC_URL=${{ vars.PUBLIC_URL || 'https://labodita.gerardoyvicky.com' }}
+            VITE_PHOTOS_URL=${{ vars.PHOTOS_URL || 'https://storage.googleapis.com/gerardoyvicky-rsvp-photos' }}
           platforms: linux/arm64,linux/amd64
           push: ${{ env.PUBLISH == 'true' }}
           tags: ${{ steps.meta.outputs.tags }}

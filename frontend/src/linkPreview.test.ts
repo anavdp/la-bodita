@@ -25,8 +25,8 @@ describe("the shared link preview", () => {
     expect(meta("name", "twitter:image")).toBe(image);
   });
 
-  it("given the static page, when it is built, then the image address is filled in with the public address", () => {
-    // Crawlers ignore relative image paths; Vite replaces %VITE_PUBLIC_URL% at build time.
-    expect(meta("property", "og:image")).toBe("%VITE_PUBLIC_URL%/invitation-preview.jpg");
+  it("given the static page, when it is built, then the image address is filled in with the photo address", () => {
+    // Crawlers ignore relative image paths; Vite replaces %VITE_PHOTOS_URL% at build time.
+    expect(meta("property", "og:image")).toBe("%VITE_PHOTOS_URL%/invitation-preview.jpg");
   });
 });

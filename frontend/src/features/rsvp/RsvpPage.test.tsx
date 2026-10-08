@@ -163,6 +163,15 @@ describe("RsvpPage", () => {
     expect(screen.getByRole("presentation")).toHaveAttribute("src", "/rsvp-banner.jpg");
   });
 
+  it("given a photo address is configured, when the link opens, then the banner comes from there", async () => {
+    vi.stubEnv("VITE_PHOTOS_URL", "https://photos.example");
+    renderPage();
+    await screen.findByRole("heading", { name: "La Bodita" });
+
+    expect(screen.getByRole("presentation")).toHaveAttribute("src", "https://photos.example/rsvp-banner.jpg");
+    vi.unstubAllEnvs();
+  });
+
   it("given a household link, when it opens, then the title and send button share the muted periwinkle", async () => {
     renderPage();
     const title = await screen.findByRole("heading", { name: "La Bodita" });

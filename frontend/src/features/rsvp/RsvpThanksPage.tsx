@@ -6,21 +6,22 @@ import { getInvitation } from "../../api/rsvp";
 import type { RsvpInvitation } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
+import { photoUrl } from "./photos";
 import { RsvpFrame } from "./RsvpFrame";
 import { TitleWithDate } from "./TitleWithDate";
 
 /** What the thank-you says, and the photo it shows, by how many of the household are coming. */
 const versions = {
   all: {
-    picture: "/rsvp-thanks-all.jpg",
+    picture: photoUrl("rsvp-thanks-all.jpg"),
     message: { one: "rsvp.thanks.all.one", many: "rsvp.thanks.all.many" },
   },
   some: {
-    picture: "/rsvp-thanks-some.jpg",
+    picture: photoUrl("rsvp-thanks-some.jpg"),
     message: { one: "rsvp.thanks.some.one", many: "rsvp.thanks.some.many" },
   },
   none: {
-    picture: "/rsvp-thanks-none.jpg",
+    picture: photoUrl("rsvp-thanks-none.jpg"),
     message: { one: "rsvp.thanks.none.one", many: "rsvp.thanks.none.many" },
   },
 } satisfies Record<string, { picture: string; message: Record<"one" | "many", TranslationKey> }>;

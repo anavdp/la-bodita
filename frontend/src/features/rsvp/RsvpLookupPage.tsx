@@ -8,6 +8,7 @@ import type { RsvpHouseholdMatch } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "../guests/filtering";
+import { photoUrl } from "./photos";
 import { RsvpFrame } from "./RsvpFrame";
 import { TitleWithDate } from "./TitleWithDate";
 
@@ -56,7 +57,7 @@ export function RsvpLookupPage() {
   };
 
   return (
-    <RsvpFrame picture="/rsvp-lookup.jpg" phonePicture="/rsvp-lookup-phone.jpg">
+    <RsvpFrame picture={photoUrl("rsvp-lookup.jpg")} phonePicture={photoUrl("rsvp-lookup-phone.jpg")}>
       <TitleWithDate title={t("rsvp.lookup.title")} />
       <p className="mb-6 text-body-sm text-on-surface-variant">{t("rsvp.lookup.prompt")}</p>
 

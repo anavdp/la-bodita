@@ -16,3 +16,4 @@ services:
         deploy: ./deploy
       args:
         VITE_PUBLIC_URL: ${PUBLIC_URL:?set PUBLIC_URL in .env}
+        VITE_PHOTOS_URL: ${PHOTOS_URL:-}
