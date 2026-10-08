@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { ApiError } from "../../api/client";
@@ -8,15 +8,41 @@ import type { RsvpHouseholdMatch } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { fullName } from "../guests/filtering";
+import { emphasize } from "./emphasize";
 import { photoUrl } from "./photos";
 import { RsvpFrame } from "./RsvpFrame";
-import { TitleWithDate } from "./TitleWithDate";
+import { GuestTitle } from "./TitleWithDate";
 
 const field =
   "w-full rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-lg text-on-surface focus:border-on-secondary-fixed-variant focus:outline-none";
 const fieldLabel = "mb-2 block text-[15px] font-semibold text-on-surface";
 
 const rsvpPath = (token: string) => `/rsvp/${encodeURIComponent(token)}`;
+
+/**
+ * What happens from here, in order. Each number sits in a filled circle, with
+ * a thin line down to the next one; the list itself is what reads as numbered.
+ */
+function Steps({ steps }: { steps: ReactNode[] }) {
+  return (
+    <ol className="mb-6 flex flex-col">
+      {steps.map((step, index) => (
+        <li key={index} className="flex gap-4">
+          <div className="flex flex-col items-center">
+            <span
+              aria-hidden="true"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-on-secondary-fixed-variant text-[15px] font-bold text-on-primary"
+            >
+              {index + 1}
+            </span>
+            {index < steps.length - 1 && <span aria-hidden="true" className="w-0.5 flex-1 bg-primary-container" />}
+          </div>
+          <div className={`pt-1 text-body-lg text-on-surface ${index < steps.length - 1 ? "pb-5" : ""}`}>{step}</div>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 /**
  * The one public link the couple shares: a guest types their full name and
@@ -58,8 +84,26 @@ export function RsvpLookupPage() {
 
   return (
     <RsvpFrame picture={photoUrl("rsvp-lookup.jpg")} phonePicture={photoUrl("rsvp-lookup-phone.jpg")}>
-      <TitleWithDate title={t("rsvp.lookup.title")} />
-      <p className="mb-6 text-body-sm text-on-surface-variant">{t("rsvp.lookup.prompt")}</p>
+      {/* No date under the title here: the last step carries it. */}
+      <div className="mb-4">
+        <GuestTitle title={t("rsvp.lookup.title")} />
+      </div>
+      <p className="text-body-lg text-on-surface">{t("rsvp.lookup.welcome")}</p>
+      <p className="mb-6 mt-2 font-bold text-on-secondary-fixed-variant">{t("rsvp.lookup.signature")}</p>
+
+      <Steps
+        steps={[
+          <>
+            {emphasize(t("rsvp.lookup.step.answer"), { date: <strong>{t("rsvp.deadlineDate")}</strong> })}
+            <span className="mt-1 block text-body-sm text-on-surface-variant">{t("rsvp.lookup.step.answerNote")}</span>
+          </>,
+          t("rsvp.lookup.step.invitation"),
+          emphasize(t("rsvp.lookup.step.meet"), {
+            place: <strong>{t("rsvp.lookup.place")}</strong>,
+            date: <strong>{t("rsvp.weddingDate")}</strong>,
+          }),
+        ]}
+      />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>

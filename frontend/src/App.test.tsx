@@ -70,7 +70,7 @@ describe("AppRoutes", () => {
   it("given the public RSVP address, when it is visited, then the name lookup shows in Spanish without the planner shell", async () => {
     renderAt("/rsvp");
 
-    expect(await screen.findByRole("textbox", { name: "Nombre y apellido" })).toBeInTheDocument();
+    expect(await screen.findByRole("textbox", { name: "Escribe tu nombre y apellido" })).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Main navigation" })).not.toBeInTheDocument();
   });
 
@@ -88,7 +88,7 @@ describe("AppRoutes", () => {
     renderAt("/rsvp");
 
     await userEvent.click(await screen.findByRole("button", { name: "English" }));
-    await userEvent.type(screen.getByRole("textbox", { name: "Full name" }), "Maria Rossi");
+    await userEvent.type(screen.getByRole("textbox", { name: "Type your full name" }), "Maria Rossi");
     await userEvent.click(screen.getByRole("button", { name: "Search" }));
 
     expect(await screen.findByText("We'll send you more information about La Bodita very soon.")).toBeInTheDocument();

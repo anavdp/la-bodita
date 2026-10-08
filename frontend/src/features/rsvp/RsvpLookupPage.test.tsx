@@ -42,7 +42,7 @@ function renderPage() {
 }
 
 async function searchFor(name: string) {
-  await userEvent.type(screen.getByRole("textbox", { name: "Full name" }), name);
+  await userEvent.type(screen.getByRole("textbox", { name: "Type your full name" }), name);
   await userEvent.click(screen.getByRole("button", { name: "Search" }));
 }
 
@@ -112,14 +112,15 @@ describe("RsvpLookupPage", () => {
     renderPage();
 
     expect(screen.getAllByRole("textbox")).toHaveLength(1);
-    expect(screen.getByRole("textbox", { name: "Full name" })).toHaveAttribute("placeholder", "e.g. Ana García");
-    expect(screen.getByText("We'd love to have you with us. Enter your full name and let us know if you can join us.")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Type your full name" })).toHaveAttribute("placeholder", "e.g. Ana García");
+    // The steps say what to do now; no separate prompt line above the box.
+    expect(screen.queryByText(/We'd love to have you with us/)).not.toBeInTheDocument();
   });
 
   it("given less than two letters, when the guest tries to search, then the search cannot be sent", async () => {
     renderPage();
 
-    await userEvent.type(screen.getByRole("textbox", { name: "Full name" }), " R ");
+    await userEvent.type(screen.getByRole("textbox", { name: "Type your full name" }), " R ");
 
     expect(screen.getByRole("button", { name: "Search" })).toBeDisabled();
   });
@@ -131,9 +132,15 @@ describe("RsvpLookupPage", () => {
 
     expect(screen.getByRole("heading", { name: "Dinos si vienes" })).toBeInTheDocument();
     expect(
-      screen.getByText("Nos gustaría contar con tu presencia. Introduce tu nombre y apellido y confírmanos si nos acompañas."),
+      screen.getByText("¡Hola a todos! Estamos planificando nuestro gran día y queremos que sean parte de él."),
     ).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Nombre y apellido" })).toHaveAttribute("placeholder", "Ej.: Ana García");
+    expect(screen.getByText("— Gerardo y Vicky")).toBeInTheDocument();
+    const steps = within(screen.getByRole("list")).getAllByRole("listitem");
+    expect(steps[0]).toHaveTextContent("Confirmen aquí antes del 1 de Enero de 2027");
+    expect(steps[0]).toHaveTextContent("…o asumiremos que no vienen 😄");
+    expect(steps[1]).toHaveTextContent("Les enviaremos la invitación completa con todos los detalles");
+    expect(steps[2]).toHaveTextContent("Nos vemos en Araure, Venezuela, el 14 · 08 · 2027");
+    expect(screen.getByRole("textbox", { name: "Escribe tu nombre y apellido" })).toHaveAttribute("placeholder", "Ej.: Ana García");
     expect(screen.getByRole("button", { name: "Buscar" })).toBeInTheDocument();
   });
 
@@ -146,13 +153,39 @@ describe("RsvpLookupPage", () => {
     expect(picture.parentElement?.querySelector("source")).toHaveAttribute("srcset", "/rsvp-lookup-phone.jpg");
   });
 
-  it("given the lookup page, when it opens, then the wedding date shows with the title", () => {
+  it("given the lookup page, when it opens, then the couple welcomes everyone and signs it", () => {
+    renderPage();
+
+    expect(
+      screen.getByText("Hi everyone! We're planning our big day and we want you to be part of it."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("— Gerardo & Vicky")).toHaveClass("font-bold", "text-on-secondary-fixed-variant");
+  });
+
+  it("given the lookup page, when it opens, then three numbered steps lead from answering to the wedding", () => {
+    renderPage();
+
+    const steps = within(screen.getByRole("list")).getAllByRole("listitem");
+    expect(steps).toHaveLength(3);
+    expect(steps[0]).toHaveTextContent("Let us know here by January 1, 2027");
+    expect(within(steps[0]).getByText("January 1, 2027").tagName).toBe("STRONG");
+    expect(within(steps[0]).getByText("…or we'll assume you're not coming 😄")).toHaveClass("text-on-surface-variant");
+    expect(steps[1]).toHaveTextContent("We'll send you the full invitation with all the details");
+    expect(steps[2]).toHaveTextContent("See you in Araure, Venezuela, on 14 · 08 · 2027");
+    expect(within(steps[2]).getByText("Araure, Venezuela").tagName).toBe("STRONG");
+    expect(within(steps[2]).getByText("14 · 08 · 2027").tagName).toBe("STRONG");
+    // Each step's number sits in its own circle; the list itself already reads as numbered.
+    steps.forEach((step, index) => {
+      expect(within(step).getByText(String(index + 1))).toHaveAttribute("aria-hidden", "true");
+    });
+  });
+
+  it("given the lookup page, when it opens, then the title stands alone, with the date carried by the last step", () => {
     renderPage();
 
     const title = screen.getByRole("heading", { name: "Let us know if you're coming" });
-    const date = screen.getByText("14 · 08 · 2027");
-    expect(title.parentElement).toContainElement(date);
-    expect(date).not.toHaveClass("text-secondary-container");
+    expect(title.parentElement).not.toHaveTextContent("14 · 08 · 2027");
+    expect(screen.getAllByText("14 · 08 · 2027")).toHaveLength(1);
     expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();
   });
 });

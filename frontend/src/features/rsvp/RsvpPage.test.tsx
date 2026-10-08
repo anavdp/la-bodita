@@ -285,7 +285,7 @@ describe("RsvpPage", () => {
 
     expect(
       screen.getByText(
-        "Dear family, it would make us so happy to have you with us on this very special day. We'll send you more details about the ceremony and the reception very soon. For now, we need to know if we can count on you.",
+        "Dear family, it would make us so happy to have you with us on this very special day. We need to know if we can count on you.",
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText("We'll send you more information about La Bodita very soon.")).not.toBeInTheDocument();
@@ -294,7 +294,7 @@ describe("RsvpPage", () => {
 
     expect(
       screen.getByText(
-        "Hola, querida familia: nos haría muy felices contar con su presencia en este día tan especial para nosotros. Muy pronto les enviaremos más información sobre los detalles de la ceremonia y la recepción. De momento, necesitamos saber si contamos con ustedes.",
+        "Hola, querida familia: nos haría muy felices contar con su presencia en este día tan especial para nosotros. Necesitamos saber si contamos con ustedes.",
       ),
     ).toBeInTheDocument();
   });
@@ -308,7 +308,7 @@ describe("RsvpPage", () => {
 
     expect(
       screen.getByText(
-        "Hola, querida familia: nos haría muy felices contar con tu presencia en este día tan especial para nosotros. Muy pronto te enviaremos más información sobre los detalles de la ceremonia y la recepción. De momento, necesitamos saber si contamos contigo.",
+        "Hola, querida familia: nos haría muy felices contar con tu presencia en este día tan especial para nosotros. Necesitamos saber si contamos contigo.",
       ),
     ).toBeInTheDocument();
   });
