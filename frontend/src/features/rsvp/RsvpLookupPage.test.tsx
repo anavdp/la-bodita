@@ -159,7 +159,8 @@ describe("RsvpLookupPage", () => {
     expect(
       screen.getByText("Hi everyone! We're planning our big day and we want you to be part of it."),
     ).toBeInTheDocument();
-    expect(screen.getByText("— Gerardo & Vicky")).toHaveClass("font-bold", "text-on-secondary-fixed-variant");
+    // Signed like a letter: on the right, under the message.
+    expect(screen.getByText("— Gerardo & Vicky")).toHaveClass("font-bold", "text-on-secondary-fixed-variant", "text-right");
   });
 
   it("given the lookup page, when it opens, then three numbered steps lead from answering to the wedding", () => {
