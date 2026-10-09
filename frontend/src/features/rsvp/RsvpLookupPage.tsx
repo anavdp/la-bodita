@@ -91,6 +91,7 @@ export function RsvpLookupPage() {
       <p className="text-body-lg text-on-surface">{t("rsvp.lookup.welcome")}</p>
       <p className="mb-6 mt-2 text-right font-bold text-on-secondary-fixed-variant">{t("rsvp.lookup.signature")}</p>
 
+      <p className="mb-3 text-[18px] font-semibold text-on-surface">{t("rsvp.lookup.nextSteps")}</p>
       <Steps
         steps={[
           <>

@@ -16,10 +16,14 @@ import { TitleWithDate } from "./TitleWithDate";
 /** A member's choice on the form: undecided until they pick one. */
 type Choice = "yes" | "no" | null;
 
-/** The opening line, by who the household is to the couple, and by how many it speaks to. */
+/**
+ * The opening line, by who the household is to the couple, and by how many it
+ * speaks to. The family and friends lines are written to the whole group, so
+ * a guest invited alone reads the same words.
+ */
 const greetings: Record<RsvpGreeting, Record<"one" | "many", TranslationKey>> = {
-  family: { one: "rsvp.greeting.family.one", many: "rsvp.greeting.family.many" },
-  friends: { one: "rsvp.greeting.friends.one", many: "rsvp.greeting.friends.many" },
+  family: { one: "rsvp.greeting.family", many: "rsvp.greeting.family" },
+  friends: { one: "rsvp.greeting.friends", many: "rsvp.greeting.friends" },
   general: { one: "rsvp.moreInfo.one", many: "rsvp.moreInfo.many" },
 };
 

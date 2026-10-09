@@ -190,5 +190,16 @@ describe("RsvpLookupPage", () => {
     // "Bienvenidos" alone is wider than the room beside the language switch at 40px on a phone.
     expect(title).toHaveClass("text-[32px]", "sm:text-[40px]");
     expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Each person answers for themselves/)).not.toBeInTheDocument();
+  });
+
+  it("given the lookup page, when it opens, then the steps are introduced as what comes next", async () => {
+    renderPage();
+
+    expect(screen.getByRole("list").previousElementSibling).toHaveTextContent("Next steps:");
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+
+    expect(screen.getByRole("list").previousElementSibling).toHaveTextContent("Siguientes pasos:");
   });
 });

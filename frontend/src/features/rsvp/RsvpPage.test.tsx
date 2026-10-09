@@ -285,21 +285,22 @@ describe("RsvpPage", () => {
 
     expect(
       screen.getByText(
-        "Dear family, it would make us so happy to have you with us on this very special day. We need to know if we can count on you.",
+        "For us, this day is the formal union of our families, and it means so much to have everyone who is part of it there. We hope you can come 🤍",
       ),
     ).toBeInTheDocument();
-    expect(screen.queryByText("We'll send you more information about La Bodita very soon.")).not.toBeInTheDocument();
+    // Only the search page is signed.
+    expect(screen.queryByText("— Gerardo & Vicky")).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
     expect(
       screen.getByText(
-        "Hola, querida familia: nos haría muy felices contar con su presencia en este día tan especial para nosotros. Necesitamos saber si contamos con ustedes.",
+        "Para nosotros, este día representa una unión formal de nuestras familias. Es muy importante contar con todos los que son parte de ella. Esperamos que puedan asistir 🤍",
       ),
     ).toBeInTheDocument();
   });
 
-  it("given a family member invited alone, when they open their link, then the family greeting speaks to them alone", async () => {
+  it("given a family member invited alone, when they open their link, then they get the same family greeting as everyone", async () => {
     vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...invitation, guests: [invitation.guests[0]], greeting: "family" });
     renderPage();
     await screen.findByRole("heading", { name: "La Bodita" });
@@ -308,7 +309,7 @@ describe("RsvpPage", () => {
 
     expect(
       screen.getByText(
-        "Hola, querida familia: nos haría muy felices contar con tu presencia en este día tan especial para nosotros. Necesitamos saber si contamos contigo.",
+        "Para nosotros, este día representa una unión formal de nuestras familias. Es muy importante contar con todos los que son parte de ella. Esperamos que puedan asistir 🤍",
       ),
     ).toBeInTheDocument();
   });
@@ -319,21 +320,17 @@ describe("RsvpPage", () => {
     await screen.findByRole("heading", { name: "La Bodita" });
 
     expect(
-      screen.getByText(
-        "Amiguiss/Friendchiss! The most awaited event of the year has finally arrived: our beautiful union. We hope you'll be there and won't let us down.",
-      ),
+      screen.getByText("Amiguis and friendchis, the most awaited day is here. We want you all there, don't let us down 🫶"),
     ).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
     expect(
-      screen.getByText(
-        "¡Amiguiss/Friendchiss! Finalmente llegó el evento más esperado del año: nuestra hermosa unión. Esperamos contar con ustedes y que no nos fallen.",
-      ),
+      screen.getByText("Amiguis y friendchis, llegó el día más esperado. Los queremos a todos ahí, no nos fallen 🫶"),
     ).toBeInTheDocument();
   });
 
-  it("given a friend invited alone, when they open their link, then the friends greeting speaks to them alone", async () => {
+  it("given a friend invited alone, when they open their link, then they get the same friends greeting as everyone", async () => {
     vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...invitation, guests: [invitation.guests[0]], greeting: "friends" });
     renderPage();
     await screen.findByRole("heading", { name: "La Bodita" });
@@ -341,9 +338,7 @@ describe("RsvpPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
     expect(
-      screen.getByText(
-        "¡Amiguiss/Friendchiss! Finalmente llegó el evento más esperado del año: nuestra hermosa unión. Esperamos contar contigo y que no nos falles.",
-      ),
+      screen.getByText("Amiguis y friendchis, llegó el día más esperado. Los queremos a todos ahí, no nos fallen 🫶"),
     ).toBeInTheDocument();
   });
 });
