@@ -126,8 +126,14 @@ export function RsvpPage() {
             </div>
           )}
           {invitation.guests.map((guest) => (
-            <fieldset key={guest.id}>
-              <legend className="mb-2 text-[20px] font-semibold text-on-surface">{fullName(guest)}</legend>
+            /*
+             * A labelled group rather than a fieldset: Safari on iPhone sizes a fieldset with a
+             * legend too tall on first paint, leaving a blank gap under the toggle until it re-renders.
+             */
+            <div key={guest.id} role="group" aria-labelledby={`guest-${guest.id}-name`}>
+              <p id={`guest-${guest.id}-name`} className="mb-2 text-[20px] font-semibold text-on-surface">
+                {fullName(guest)}
+              </p>
               {/* Radios underneath, so it stays one choice per person for keyboards and screen readers. */}
               <div className="flex rounded-full bg-surface-container-low p-1">
                 {(["yes", "no"] as const).map((choice) => (
@@ -145,7 +151,7 @@ export function RsvpPage() {
                   </label>
                 ))}
               </div>
-            </fieldset>
+            </div>
           ))}
 
           {saveError && (
