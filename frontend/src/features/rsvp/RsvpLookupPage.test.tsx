@@ -193,10 +193,13 @@ describe("RsvpLookupPage", () => {
     expect(screen.queryByText(/Each person answers for themselves/)).not.toBeInTheDocument();
   });
 
-  it("given the lookup page, when it opens, then the steps are introduced as what comes next", async () => {
+  it("given the lookup page, when it opens, then the steps are introduced as what comes next, in the page's body text", async () => {
     renderPage();
 
-    expect(screen.getByRole("list").previousElementSibling).toHaveTextContent("Next steps:");
+    const introduction = screen.getByRole("list").previousElementSibling;
+    expect(introduction).toHaveTextContent("Next steps:");
+    expect(introduction).toHaveClass("text-body-lg");
+    expect(introduction).not.toHaveClass("font-semibold");
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
