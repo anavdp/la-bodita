@@ -15,7 +15,7 @@ interface HouseholdsPanelProps {
 type OpenMenu = { householdId: number; kind: "broadcast" | "actions" } | null;
 
 const broadcastLists: BroadcastList[] = ["bride", "groom"];
-const broadcastEmoji: Record<BroadcastList, string> = { bride: "👰🏼‍♀️", groom: "🤵🏼‍♂️" };
+const broadcastEmoji: Record<BroadcastList, string> = { bride: "💐", groom: "🎩" };
 const broadcastLabelKey = (list: BroadcastList | null): TranslationKey => `households.broadcast.${list ?? "none"}`;
 
 const menuItem =

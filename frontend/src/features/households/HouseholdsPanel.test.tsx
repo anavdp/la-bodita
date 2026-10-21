@@ -87,15 +87,15 @@ describe("HouseholdsPanel", () => {
     renderPanel();
 
     const button = screen.getByRole("button", { name: "Mendoza — Not on a list. Change broadcast list" });
-    expect(button).not.toHaveTextContent("👰🏼‍♀️");
-    expect(button).not.toHaveTextContent("🤵🏼‍♂️");
+    expect(button).not.toHaveTextContent("💐");
+    expect(button).not.toHaveTextContent("🎩");
   });
 
   it("given a household on the bride's list, when the table shows, then its emoji is the cell", () => {
     renderPanel([bianchi]);
 
     expect(screen.getByRole("button", { name: "Bianchi — Bride's list. Change broadcast list" })).toHaveTextContent(
-      "👰🏼‍♀️",
+      "💐",
     );
   });
 
