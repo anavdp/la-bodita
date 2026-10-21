@@ -9,6 +9,7 @@ from app.schemas.category import (
 from app.schemas.guest import GuestCreate, GuestRead, GuestUpdate
 from app.schemas.guest_import import GuestImportGuest, GuestImportPreview, GuestImportRow, GuestImportRowError
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate, NextTask
+from app.schemas.requirement import RequirementCreate, RequirementRead, RequirementUpdate
 from app.schemas.household import (
     HouseholdCreate,
     HouseholdRead,
@@ -42,6 +43,9 @@ __all__ = [
     "ItemRead",
     "ItemUpdate",
     "NextTask",
+    "RequirementCreate",
+    "RequirementRead",
+    "RequirementUpdate",
     "RsvpGreeting",
     "RsvpGuest",
     "RsvpInvitation",
