@@ -126,10 +126,27 @@ export function useGuests(weddingId: number | null): GuestsState {
     [changeThenReload],
   );
 
+  /** A broadcast list moves nobody, so only that row changes, at once, with no reload.
+   * If the API refuses, the row goes back to what it was. */
   const setBroadcastList = useCallback(
-    (householdId: number, broadcastList: BroadcastList | null) =>
-      changeThenReload((id) => updateHousehold(id, householdId, { broadcastList })),
-    [changeThenReload],
+    async (householdId: number, broadcastList: BroadcastList | null) => {
+      if (weddingId === null) return;
+      const withList = (list: BroadcastList | null) =>
+        setHouseholds((current) =>
+          current.map((household) =>
+            household.id === householdId ? { ...household, broadcastList: list } : household,
+          ),
+        );
+      const previous = households.find((household) => household.id === householdId)?.broadcastList ?? null;
+      withList(broadcastList);
+      try {
+        await updateHousehold(weddingId, householdId, { broadcastList });
+      } catch (error) {
+        withList(previous);
+        throw error;
+      }
+    },
+    [weddingId, households],
   );
 
   return {

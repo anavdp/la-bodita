@@ -395,20 +395,23 @@ describe("the Households tab", () => {
     expect(householdsApi.deleteHousehold).not.toHaveBeenCalled();
   });
 
-  it("given a family, when it is put on the bride's broadcast list, then only that is saved and the list reloads", async () => {
+  it("given a family, when it is put on the bride's broadcast list, then that row changes in place without reloading", async () => {
     vi.mocked(householdsApi.updateHousehold).mockResolvedValue({ ...rossi, broadcastList: "bride" });
     renderHouseholds();
 
     await userEvent.click(await screen.findByRole("button", { name: /Famiglia Rossi — Not on a list/ }));
     await userEvent.click(screen.getByRole("button", { name: /Bride's list/ }));
 
+    expect(screen.getByRole("button", { name: /Famiglia Rossi — Bride's list/ })).toBeInTheDocument();
+    expect(screen.queryByText("Loading guests...")).not.toBeInTheDocument();
     await waitFor(() =>
       expect(householdsApi.updateHousehold).toHaveBeenCalledWith(1, rossi.id, { broadcastList: "bride" }),
     );
-    await waitFor(() => expect(householdsApi.listHouseholds).toHaveBeenCalledTimes(2));
+    expect(householdsApi.listHouseholds).toHaveBeenCalledTimes(1);
+    expect(guestsApi.listGuests).toHaveBeenCalledTimes(1);
   });
 
-  it("given the API rejects it, when the broadcast list is changed, then the failure is reported", async () => {
+  it("given the API rejects it, when the broadcast list is changed, then the row goes back and the failure is reported", async () => {
     vi.mocked(householdsApi.updateHousehold).mockRejectedValue(new Error("Household not found"));
     renderHouseholds();
 
@@ -416,6 +419,7 @@ describe("the Households tab", () => {
     await userEvent.click(screen.getByRole("button", { name: /Groom's list/ }));
 
     expect(await screen.findByText("We could not update this broadcast list.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Famiglia Rossi — Not on a list/ })).toBeInTheDocument();
   });
 });
 
