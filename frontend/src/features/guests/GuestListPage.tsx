@@ -10,7 +10,9 @@ import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
 import { HouseholdFormDialog } from "../households/HouseholdFormDialog";
 import { HouseholdsPanel } from "../households/HouseholdsPanel";
-import { filterGuestsByName } from "./filtering";
+import type { GuestFilters } from "./filtering";
+import { filterGuests, filterGuestsByName, noGuestFilters } from "./filtering";
+import { GuestFilterBar } from "./GuestFilterBar";
 import { GuestFormDialog } from "./GuestFormDialog";
 import { GuestImportDialog } from "./GuestImportDialog";
 import { GuestStats } from "./GuestStats";
@@ -65,7 +67,10 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   /** Which row action failed, if any: the dialog reports its own failures. */
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
 
-  const visibleGuests = useMemo(() => filterGuestsByName(guests, term), [guests, term]);
+  const [filters, setFilters] = useState<GuestFilters>(noGuestFilters);
+
+  const searchedGuests = useMemo(() => filterGuestsByName(guests, term), [guests, term]);
+  const visibleGuests = useMemo(() => filterGuests(searchedGuests, filters), [searchedGuests, filters]);
   const visibleHouseholds = useMemo(() => {
     const needle = term.trim().toLowerCase();
     return households.filter((household) => household.name.toLowerCase().includes(needle));
@@ -166,7 +171,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
         />
       );
     }
-    if (visibleGuests.length === 0) {
+    if (searchedGuests.length === 0) {
       return (
         <p className="font-body-lg text-body-lg text-on-surface-variant">
           {t("guests.noMatches", { term })}
@@ -174,63 +179,89 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
       );
     }
     return (
-      <GuestTable
-        guests={visibleGuests}
-        households={households}
-        onEdit={(guest) => setDialogTarget({ guest })}
-        onDelete={handleDelete}
-        onChangeRsvp={handleChangeRsvp}
-      />
+      <>
+        <GuestFilterBar
+          filters={filters}
+          onChange={setFilters}
+          shown={visibleGuests.length}
+          total={searchedGuests.length}
+        />
+        {visibleGuests.length === 0 ? (
+          <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.filter.noMatches")}</p>
+        ) : (
+          <GuestTable
+            guests={visibleGuests}
+            households={households}
+            onEdit={(guest) => setDialogTarget({ guest })}
+            onDelete={handleDelete}
+            onChangeRsvp={handleChangeRsvp}
+          />
+        )}
+      </>
     );
   };
 
   return (
     <>
-      <div className="organic-shape-1 mb-8 flex flex-wrap items-start justify-between gap-4 bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
-        <div>
-          <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("guests.title")}</h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.subtitle")}</p>
-          {guests.length > 0 && (
-            <p className="mt-2 font-label-md text-label-md text-on-surface-variant">
-              {t("guests.householdSummary", {
-                guests: guests.length,
-                households: householdCount,
-              })}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {tab === "households" ? (
-            <button
-              type="button"
-              onClick={() => setHouseholdDialog({ kind: "form", household: null })}
-              className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
-            >
-              {t("households.add")}
-            </button>
-          ) : (
-            <>
+      <div className="organic-shape-1 mb-8 flex flex-col gap-6 bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("guests.title")}</h1>
+            <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.subtitle")}</p>
+            {guests.length > 0 && (
+              <p className="mt-2 font-label-md text-label-md text-on-surface-variant">
+                {t("guests.householdSummary", {
+                  guests: guests.length,
+                  households: householdCount,
+                })}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {tab === "households" ? (
               <button
                 type="button"
-                onClick={() => setIsImportOpen(true)}
-                disabled={weddingId === null}
-                className="rounded-full border border-primary px-8 py-4 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
-              >
-                {t("guests.import.open")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setDialogTarget({ guest: null })}
+                onClick={() => setHouseholdDialog({ kind: "form", household: null })}
                 className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
               >
-                {t("guests.add")}
+                {t("households.add")}
               </button>
-            </>
-          )}
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsImportOpen(true)}
+                  disabled={weddingId === null}
+                  className="rounded-full border border-primary px-8 py-4 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
+                >
+                  {t("guests.import.open")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDialogTarget({ guest: null })}
+                  className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
+                >
+                  {t("guests.add")}
+                </button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
 
-      <GuestStats guests={guests} />
+        <GuestStats
+          guests={guests}
+          activeStatus={filters.rsvpStatus}
+          onToggleStatus={
+            tab === "guests"
+              ? (status) =>
+                  setFilters((current) => ({
+                    ...current,
+                    rsvpStatus: current.rsvpStatus === status ? null : status,
+                  }))
+              : undefined
+          }
+        />
+      </div>
 
       <div className="rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
         <nav aria-label={t("guests.tabs.label")} className="mb-6 flex gap-2 border-b border-surface-variant">

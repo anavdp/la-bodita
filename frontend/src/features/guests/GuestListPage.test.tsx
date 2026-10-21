@@ -75,7 +75,7 @@ describe("GuestListPage", () => {
 
     expect(screen.getByRole("heading", { name: "Guest List" })).toBeInTheDocument();
     expect(screen.getByText("Manage your wedding guests and RSVPs")).toBeInTheDocument();
-    expect(await screen.findByRole("group", { name: "Confirmed" })).toHaveTextContent("1");
+    expect(await screen.findByRole("button", { name: /^\d+ Confirmed/ })).toHaveTextContent("1 Confirmed 50%");
   });
 
   it("given a wedding with no guests, when the list loads, then the screen invites adding one", async () => {
@@ -392,5 +392,89 @@ describe("the Households tab", () => {
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(householdsApi.deleteHousehold).not.toHaveBeenCalled();
+  });
+});
+
+describe("GuestListPage filtering", () => {
+  const sofia = aGuest({
+    firstName: "Sofia",
+    lastName: "Mendoza",
+    isChild: true,
+    rsvpStatus: "declined",
+    side: "venezuela",
+  });
+
+  beforeEach(() => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria, sofia]);
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
+  });
+
+  it("given the RSVP summary, when a status is clicked, then the table shows only guests with that status", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+
+    expect(screen.getByText("Carlos Mendoza")).toBeInTheDocument();
+    expect(screen.queryByText("Maria Rossi")).not.toBeInTheDocument();
+    expect(screen.queryByText("Sofia Mendoza")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("RSVP Status")).toHaveDisplayValue("Pending");
+  });
+
+  it("given a status being filtered, when it is clicked again, then every guest is back", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+
+    expect(screen.getByText("Maria Rossi")).toBeInTheDocument();
+    expect(screen.getByText("Sofia Mendoza")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^\d+ Pending/ })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("given a column filter, when a value is picked, then the table and the summary's pressed status follow it", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.selectOptions(screen.getByLabelText("RSVP Status"), "Declined");
+
+    expect(screen.getByText("Sofia Mendoza")).toBeInTheDocument();
+    expect(screen.queryByText("Carlos Mendoza")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^\d+ Declined/ })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("given several column filters, when picked, then a guest must match every one", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.selectOptions(screen.getByLabelText("Side"), "Venezuela");
+    await userEvent.selectOptions(screen.getByLabelText("Type"), "Adult");
+
+    expect(screen.getByText("Carlos Mendoza")).toBeInTheDocument();
+    expect(screen.queryByText("Sofia Mendoza")).not.toBeInTheDocument();
+    expect(screen.queryByText("Maria Rossi")).not.toBeInTheDocument();
+    expect(screen.getByText("Showing 1 of 3 guests")).toBeInTheDocument();
+  });
+
+  it("given filters that match nobody, when applied, then the table says so and they can be cleared", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.selectOptions(screen.getByLabelText("Side"), "Spain");
+
+    expect(screen.getByText("No guests match these filters.")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+
+    expect(screen.getByText("Maria Rossi")).toBeInTheDocument();
+  });
+
+  it("given the households tab, when it opens, then the summary has no filter to apply", async () => {
+    renderWithProviders(<GuestListPage tab="households" />, { route: "/guests/households" });
+    await screen.findByText("Confirmed");
+
+    expect(screen.queryByRole("button", { name: /^\d+ Confirmed/ })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Side")).not.toBeInTheDocument();
   });
 });
