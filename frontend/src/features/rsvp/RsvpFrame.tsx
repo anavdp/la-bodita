@@ -1,8 +1,6 @@
-import { useEffect } from "react";
 import type { ReactNode } from "react";
 
 import { useTranslation } from "../../i18n/LanguageProvider";
-import { addGuestFonts } from "./guestFonts";
 
 const card =
   "organic-shape-1 relative w-full max-w-xl bg-surface-container-lowest p-8 shadow-[0px_8px_30px_rgba(0,0,0,0.12)]";
@@ -24,8 +22,6 @@ interface RsvpFrameProps {
  */
 export function RsvpFrame({ children, picture, phonePicture }: RsvpFrameProps) {
   const { t, toggleLanguage } = useTranslation();
-
-  useEffect(addGuestFonts, []);
 
   return (
     <main className="min-h-screen bg-gradient-to-br font-guest [&_strong]:font-semibold from-primary-fixed via-background to-tertiary-fixed">

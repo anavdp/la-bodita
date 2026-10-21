@@ -86,10 +86,11 @@ export default {
         "label-md": ["Be Vietnam Pro", "sans-serif"],
         // The guests' RSVP pages only: a quiet sans for the text, a display serif
         // for the titles (Cormorant stands in for The Seasons, which we can't
-        // licence), and a script for the couple's signature.
+        // licence), and a script for the couple's signature (Allura, a free
+        // look-alike for Brigovin, which reads too thin on a phone).
         guest: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         "guest-display": ["Cormorant", "Times New Roman", "serif"],
-        "guest-script": ["Brigovin", "cursive"],
+        "guest-script": ["Allura", "cursive"],
       },
       fontSize: {
         "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],

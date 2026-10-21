@@ -5,6 +5,7 @@ import { Route, Routes, useParams } from "react-router-dom";
 import { ApiError } from "../../api/client";
 import * as rsvpApi from "../../api/rsvp";
 import type { RsvpHouseholdMatch } from "../../api/types";
+import html from "../../../index.html?raw";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { RsvpLookupPage } from "./RsvpLookupPage";
 
@@ -164,8 +165,9 @@ describe("RsvpLookupPage", () => {
     ).toBeInTheDocument();
     // Signed like a letter, by hand: on the right, under the message, in the script face.
     expect(screen.getByText("Gerardo & Vicky")).toHaveClass("font-guest-script", "text-on-secondary-fixed-variant", "text-right");
-    // The script itself is fetched by the guest pages, not bundled with the planner.
-    expect(document.head).toHaveTextContent(/Brigovin/);
+    // The script is Allura, a free web font, loaded with the others in index.html.
+    const fonts = new DOMParser().parseFromString(html, "text/html").querySelector('link[href*="fonts.googleapis.com/css2"]');
+    expect(fonts?.getAttribute("href")).toContain("family=Allura");
   });
 
   it("given the lookup page, when it opens, then three numbered steps lead from answering to the wedding", () => {
