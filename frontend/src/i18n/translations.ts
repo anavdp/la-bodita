@@ -205,9 +205,9 @@ const en = {
   "rsvp.everyone": "We're all coming",
   "rsvp.noOne": "None of us can make it",
 
-  "rsvp.lookup.title": "Welcome to La Bodita",
+  "rsvp.lookup.titleLead": "Welcome to",
   "rsvp.lookup.welcome": "Hi everyone! We're planning our big day and we want you to be part of it.",
-  "rsvp.lookup.signature": "— Gerardo & Vicky",
+  "rsvp.lookup.signature": "Gerardo & Vicky",
   "rsvp.lookup.nextSteps": "Next steps:",
   "rsvp.lookup.step.answer": "Let us know here by {date}",
   "rsvp.lookup.step.answerNote": "…or we'll assume you're not coming 😄",
@@ -429,9 +429,9 @@ const es: Record<TranslationKey, string> = {
   "rsvp.everyone": "Vamos todos",
   "rsvp.noOne": "Nadie podrá ir",
 
-  "rsvp.lookup.title": "Bienvenidos a La Bodita",
+  "rsvp.lookup.titleLead": "Bienvenidos a",
   "rsvp.lookup.welcome": "¡Hola a todos! Estamos planificando nuestro gran día y queremos que sean parte de él.",
-  "rsvp.lookup.signature": "— Gerardo y Vicky",
+  "rsvp.lookup.signature": "Gerardo y Vicky",
   "rsvp.lookup.nextSteps": "Siguientes pasos:",
   "rsvp.lookup.step.answer": "Confirmen aquí antes del {date}",
   "rsvp.lookup.step.answerNote": "…o asumiremos que no vienen 😄",

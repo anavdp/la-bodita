@@ -105,10 +105,10 @@ export function RsvpPage() {
       <>
         <TitleWithDate title={invitation.weddingName} />
         {/* Spanish speaks to a household in the plural ("confírmennos") and to a guest alone in the singular. */}
-        <p className="mb-4 text-body-lg text-on-surface">
+        <p className="mb-4 text-body-lg font-light text-on-surface">
           {t(greetings[invitation.greeting][isHousehold ? "many" : "one"])}
         </p>
-        <p role="note" className="mb-6 border-l-4 border-primary-container py-1 pl-4 text-body-lg text-on-surface">
+        <p role="note" className="mb-6 border-l-4 border-primary-container py-1 pl-4 text-body-lg font-light text-on-surface">
           {emphasize(t(isHousehold ? "rsvp.deadline.many" : "rsvp.deadline.one"), {
             date: <strong>{t("rsvp.deadlineDate")}</strong>,
           })}

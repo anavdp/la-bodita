@@ -11,7 +11,6 @@ import { fullName } from "../guests/filtering";
 import { emphasize } from "./emphasize";
 import { photoUrl } from "./photos";
 import { RsvpFrame } from "./RsvpFrame";
-import { GuestTitle } from "./TitleWithDate";
 
 const field =
   "w-full rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-lg text-on-surface focus:border-on-secondary-fixed-variant focus:outline-none";
@@ -31,13 +30,13 @@ function Steps({ steps }: { steps: ReactNode[] }) {
           <div className="flex flex-col items-center">
             <span
               aria-hidden="true"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-on-secondary-fixed-variant text-[15px] font-bold text-on-primary"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-on-secondary-fixed-variant font-guest-display text-[17px] font-semibold text-on-primary"
             >
               {index + 1}
             </span>
             {index < steps.length - 1 && <span aria-hidden="true" className="w-0.5 flex-1 bg-primary-container" />}
           </div>
-          <div className={`pt-1 text-body-lg text-on-surface ${index < steps.length - 1 ? "pb-5" : ""}`}>{step}</div>
+          <div className={`pt-1 text-body-lg font-light text-on-surface ${index < steps.length - 1 ? "pb-5" : ""}`}>{step}</div>
         </li>
       ))}
     </ol>
@@ -85,18 +84,22 @@ export function RsvpLookupPage() {
   return (
     <RsvpFrame picture={photoUrl("rsvp-lookup.jpg")} phonePicture={photoUrl("rsvp-lookup-phone.jpg")}>
       {/* No date under the title here: the last step carries it. */}
-      <div className="mb-4">
-        <GuestTitle title={t("rsvp.lookup.title")} size="text-[32px] sm:text-[40px]" />
-      </div>
-      <p className="text-body-lg text-on-surface">{t("rsvp.lookup.welcome")}</p>
-      <p className="mb-6 mt-2 text-right font-bold text-on-secondary-fixed-variant">{t("rsvp.lookup.signature")}</p>
+      {/* A small lead-in over the name; "La Bodita" is a name, so only the lead-in is translated. */}
+      <h1 className="mb-4 flex flex-col gap-1 pr-24 font-guest-display">
+        <span className="text-[13px] font-normal uppercase tracking-[0.32em] text-on-surface-variant">
+          {t("rsvp.lookup.titleLead")}
+        </span>{" "}
+        <span className="text-[46px] font-semibold leading-[0.95] text-on-secondary-fixed-variant">La Bodita</span>
+      </h1>
+      <p className="text-body-lg font-light text-on-surface">{t("rsvp.lookup.welcome")}</p>
+      <p className="mb-6 mt-2 text-right font-guest-script text-[27px] font-normal text-on-secondary-fixed-variant">{t("rsvp.lookup.signature")}</p>
 
-      <p className="mb-3 text-body-lg text-on-surface">{t("rsvp.lookup.nextSteps")}</p>
+      <p className="mb-3 text-body-lg font-light text-on-surface">{t("rsvp.lookup.nextSteps")}</p>
       <Steps
         steps={[
           <>
             {emphasize(t("rsvp.lookup.step.answer"), { date: <strong>{t("rsvp.deadlineDate")}</strong> })}
-            <span className="mt-1 block text-body-sm text-on-surface-variant">{t("rsvp.lookup.step.answerNote")}</span>
+            <span className="mt-1 block text-body-sm font-light text-on-surface-variant">{t("rsvp.lookup.step.answerNote")}</span>
           </>,
           t("rsvp.lookup.step.invitation"),
           emphasize(t("rsvp.lookup.step.meet"), {

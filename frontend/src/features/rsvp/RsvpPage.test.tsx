@@ -194,6 +194,8 @@ describe("RsvpPage", () => {
     const title = await screen.findByRole("heading", { name: "La Bodita" });
 
     expect(title.closest("main")).toHaveClass("font-guest");
+    // The titles are set in the display serif, not the body's sans.
+    expect(title).toHaveClass("font-guest-display", "font-semibold");
   });
 
   it("given a household link, when it opens, then the language switch sits on the card, not on the photo", async () => {
@@ -289,7 +291,7 @@ describe("RsvpPage", () => {
       ),
     ).toBeInTheDocument();
     // Only the search page is signed.
-    expect(screen.queryByText("— Gerardo & Vicky")).not.toBeInTheDocument();
+    expect(screen.queryByText("Gerardo & Vicky")).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 

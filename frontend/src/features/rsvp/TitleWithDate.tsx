@@ -6,7 +6,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
  */
 export function GuestTitle({ title, size = "text-[40px]" }: { title: string; size?: string }) {
   return (
-    <h1 className={`pr-24 ${size} font-extrabold leading-[1.05] tracking-tight text-on-secondary-fixed-variant`}>{title}</h1>
+    <h1 className={`pr-24 ${size} font-guest-display font-semibold leading-[1.05] text-on-secondary-fixed-variant`}>{title}</h1>
   );
 }
 

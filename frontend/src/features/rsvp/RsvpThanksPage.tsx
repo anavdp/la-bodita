@@ -72,7 +72,7 @@ export function RsvpThanksPage() {
   return (
     <RsvpFrame picture={version.picture}>
       <TitleWithDate title={t("rsvp.thanks.title")} />
-      <p className="mb-6 text-body-lg text-on-surface">
+      <p className="mb-6 text-body-lg font-light text-on-surface">
         {t(version.message[isHousehold ? "many" : "one"])}
       </p>
       <Link

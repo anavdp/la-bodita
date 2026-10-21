@@ -130,11 +130,14 @@ describe("RsvpLookupPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Español" }));
 
-    expect(screen.getByRole("heading", { name: "Bienvenidos a La Bodita" })).toBeInTheDocument();
+    const title = screen.getByRole("heading", { name: "Bienvenidos a La Bodita" });
+    // The name is a name: only the lead-in changes language.
+    expect(within(title).getByText("Bienvenidos a")).toBeInTheDocument();
+    expect(within(title).getByText("La Bodita")).toBeInTheDocument();
     expect(
       screen.getByText("¡Hola a todos! Estamos planificando nuestro gran día y queremos que sean parte de él."),
     ).toBeInTheDocument();
-    expect(screen.getByText("— Gerardo y Vicky")).toBeInTheDocument();
+    expect(screen.getByText("Gerardo y Vicky")).toBeInTheDocument();
     const steps = within(screen.getByRole("list")).getAllByRole("listitem");
     expect(steps[0]).toHaveTextContent("Confirmen aquí antes del 1 de Enero de 2027");
     expect(steps[0]).toHaveTextContent("…o asumiremos que no vienen 😄");
@@ -159,8 +162,10 @@ describe("RsvpLookupPage", () => {
     expect(
       screen.getByText("Hi everyone! We're planning our big day and we want you to be part of it."),
     ).toBeInTheDocument();
-    // Signed like a letter: on the right, under the message.
-    expect(screen.getByText("— Gerardo & Vicky")).toHaveClass("font-bold", "text-on-secondary-fixed-variant", "text-right");
+    // Signed like a letter, by hand: on the right, under the message, in the script face.
+    expect(screen.getByText("Gerardo & Vicky")).toHaveClass("font-guest-script", "text-on-secondary-fixed-variant", "text-right");
+    // The script itself is fetched by the guest pages, not bundled with the planner.
+    expect(document.head).toHaveTextContent(/Brigovin/);
   });
 
   it("given the lookup page, when it opens, then three numbered steps lead from answering to the wedding", () => {
@@ -185,10 +190,13 @@ describe("RsvpLookupPage", () => {
     renderPage();
 
     const title = screen.getByRole("heading", { name: "Welcome to La Bodita" });
-    expect(title.parentElement).not.toHaveTextContent("14 · 08 · 2027");
+    expect(title).not.toHaveTextContent("14 · 08 · 2027");
     expect(screen.getAllByText("14 · 08 · 2027")).toHaveLength(1);
-    // "Bienvenidos" alone is wider than the room beside the language switch at 40px on a phone.
-    expect(title).toHaveClass("text-[32px]", "sm:text-[40px]");
+    // A small lead-in over the name, which carries the title on its own line.
+    expect(within(title).getByText("Welcome to")).toHaveClass("uppercase");
+    expect(within(title).getByText("La Bodita")).toHaveClass("text-on-secondary-fixed-variant");
+    // Both lines in the display serif, with room on the right for the language switch in the card's corner.
+    expect(title).toHaveClass("font-guest-display", "pr-24");
     expect(screen.queryByText(/will take place/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Each person answers for themselves/)).not.toBeInTheDocument();
   });

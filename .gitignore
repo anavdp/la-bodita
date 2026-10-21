@@ -28,3 +28,6 @@ dist/
 
 # Vite build output / coverage
 frontend/coverage/
+
+# Licensed fonts: served from the photos bucket, kept locally only
+frontend/public/fonts/
