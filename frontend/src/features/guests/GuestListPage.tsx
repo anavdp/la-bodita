@@ -65,7 +65,14 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   /** Which row action failed, if any: the dialog reports its own failures. */
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
 
-  const visibleGuests = useMemo(() => filterGuestsByName(guests, term), [guests, term]);
+  /** The RSVP status picked in the header summary, if any: the table shows only those guests. */
+  const [rsvpFilter, setRsvpFilter] = useState<RsvpStatus | null>(null);
+
+  const searchedGuests = useMemo(() => filterGuestsByName(guests, term), [guests, term]);
+  const visibleGuests = useMemo(
+    () => (rsvpFilter === null ? searchedGuests : searchedGuests.filter((guest) => guest.rsvpStatus === rsvpFilter)),
+    [searchedGuests, rsvpFilter],
+  );
   const visibleHouseholds = useMemo(() => {
     const needle = term.trim().toLowerCase();
     return households.filter((household) => household.name.toLowerCase().includes(needle));
@@ -166,12 +173,15 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
         />
       );
     }
-    if (visibleGuests.length === 0) {
+    if (searchedGuests.length === 0) {
       return (
         <p className="font-body-lg text-body-lg text-on-surface-variant">
           {t("guests.noMatches", { term })}
         </p>
       );
+    }
+    if (visibleGuests.length === 0) {
+      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.statusNoMatches")}</p>;
     }
     return (
       <GuestTable
@@ -186,51 +196,61 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
 
   return (
     <>
-      <div className="organic-shape-1 mb-8 flex flex-wrap items-start justify-between gap-4 bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
-        <div>
-          <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("guests.title")}</h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.subtitle")}</p>
-          {guests.length > 0 && (
-            <p className="mt-2 font-label-md text-label-md text-on-surface-variant">
-              {t("guests.householdSummary", {
-                guests: guests.length,
-                households: householdCount,
-              })}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {tab === "households" ? (
-            <button
-              type="button"
-              onClick={() => setHouseholdDialog({ kind: "form", household: null })}
-              className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
-            >
-              {t("households.add")}
-            </button>
-          ) : (
-            <>
+      <div className="organic-shape-1 mb-8 flex flex-col gap-6 bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("guests.title")}</h1>
+            <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.subtitle")}</p>
+            {guests.length > 0 && (
+              <p className="mt-2 font-label-md text-label-md text-on-surface-variant">
+                {t("guests.householdSummary", {
+                  guests: guests.length,
+                  households: householdCount,
+                })}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {tab === "households" ? (
               <button
                 type="button"
-                onClick={() => setIsImportOpen(true)}
-                disabled={weddingId === null}
-                className="rounded-full border border-primary px-8 py-4 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
-              >
-                {t("guests.import.open")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setDialogTarget({ guest: null })}
+                onClick={() => setHouseholdDialog({ kind: "form", household: null })}
                 className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
               >
-                {t("guests.add")}
+                {t("households.add")}
               </button>
-            </>
-          )}
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsImportOpen(true)}
+                  disabled={weddingId === null}
+                  className="rounded-full border border-primary px-8 py-4 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
+                >
+                  {t("guests.import.open")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDialogTarget({ guest: null })}
+                  className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
+                >
+                  {t("guests.add")}
+                </button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
 
-      <GuestStats guests={guests} />
+        <GuestStats
+          guests={guests}
+          activeStatus={rsvpFilter}
+          onToggleStatus={
+            tab === "guests"
+              ? (status) => setRsvpFilter((current) => (current === status ? null : status))
+              : undefined
+          }
+        />
+      </div>
 
       <div className="rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
         <nav aria-label={t("guests.tabs.label")} className="mb-6 flex gap-2 border-b border-surface-variant">

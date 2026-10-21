@@ -1,85 +1,108 @@
-import type { Guest } from "../../api/types";
+import type { Guest, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
+import type { TranslationKey } from "../../i18n/translations";
 import { summariseRsvps } from "./guestSummary";
-import { rsvpIcon } from "./vocabulary";
 
-interface StatCardProps {
-  label: string;
-  count: number;
-  share: number;
-  icon: string;
-  /** The design system's asymmetric squircle, varied per card. */
-  shapeClass: string;
-  toneClass: string;
-  barClass: string;
+/** The summary reads in the order an RSVP is chased: yes, still waiting, no. */
+const summaryStatuses: RsvpStatus[] = ["confirmed", "pending", "declined"];
+
+const statusLabelKey: Record<RsvpStatus, TranslationKey> = {
+  confirmed: "guests.confirmed",
+  pending: "guests.pending",
+  declined: "guests.declined",
+};
+
+const segmentClass: Record<RsvpStatus, string> = {
+  confirmed: "bg-secondary",
+  pending: "bg-tertiary",
+  declined: "bg-secondary-container",
+};
+
+/** Periwinkle text on white misses the contrast bar, so the selected status rings in its color instead. */
+const ringClass: Record<RsvpStatus, string> = {
+  confirmed: "ring-secondary",
+  pending: "ring-tertiary",
+  declined: "ring-secondary-container",
+};
+
+interface GuestStatsProps {
+  guests: Guest[];
+  /** The status the guest table is filtered by, if any. */
+  activeStatus: RsvpStatus | null;
+  /** Left out where there is no table to filter: the statuses are then plain text. */
+  onToggleStatus?: (status: RsvpStatus) => void;
 }
 
-function StatCard({ label, count, share, icon, shapeClass, toneClass, barClass }: StatCardProps) {
-  return (
-    <div role="group" aria-label={label} className={`p-6 shadow-md ${shapeClass} ${toneClass}`}>
-      <div className="mb-4 flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
-          <span className="material-symbols-outlined" aria-hidden="true">
-            {icon}
-          </span>
-        </div>
-        <div>
-          <p className="font-headline-md text-headline-md">{count}</p>
-          {/* 19px bold, at full opacity: that is what puts the label over the 3:1
-              large-text bar on every card. `opacity-80` alone dropped pending to
-              2.55:1, below even that. */}
-          <p className="font-label-lg text-label-lg uppercase">{label}</p>
-        </div>
-      </div>
-      <div
-        role="progressbar"
-        aria-label={label}
-        aria-valuenow={share}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        className="h-2 w-full overflow-hidden rounded-full bg-white/20"
-      >
-        <div className={`h-full ${barClass}`} style={{ width: `${share}%` }} />
-      </div>
-    </div>
-  );
-}
-
-export function GuestStats({ guests }: { guests: Guest[] }) {
+/**
+ * The RSVP summary in the page header: one bar split by status, and a legend
+ * of counts underneath. Clicking a status filters the guest table by it.
+ */
+export function GuestStats({ guests, activeStatus, onToggleStatus }: GuestStatsProps) {
   const { t } = useTranslation();
   const summary = summariseRsvps(guests);
+  const countOf: Record<RsvpStatus, number> = {
+    confirmed: summary.confirmed,
+    pending: summary.pending,
+    declined: summary.declined,
+  };
+  const shareOf: Record<RsvpStatus, number> = {
+    confirmed: summary.shareConfirmed,
+    pending: summary.sharePending,
+    declined: summary.shareDeclined,
+  };
+  const isFiltering = activeStatus !== null;
 
-  // DESIGN.md's breakpoints: one column on a phone, two on a tablet, three from
-  // desktop up. Three across a tablet clips the card labels.
   return (
-    <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <StatCard
-        label={t("guests.confirmed")}
-        count={summary.confirmed}
-        share={summary.shareConfirmed}
-        icon={rsvpIcon.confirmed}
-        shapeClass="organic-shape-2"
-        toneClass="bg-secondary text-on-secondary"
-        barClass="bg-on-secondary"
-      />
-      <StatCard
-        label={t("guests.pending")}
-        count={summary.pending}
-        share={summary.sharePending}
-        icon={rsvpIcon.pending}
-        shapeClass="organic-shape-3"
-        toneClass="bg-tertiary text-on-tertiary"
-        barClass="bg-on-tertiary"
-      />
-      <StatCard
-        label={t("guests.declined")}
-        count={summary.declined}
-        share={summary.shareDeclined}
-        icon={rsvpIcon.declined}
-        shapeClass="organic-shape-1"
-        toneClass="bg-secondary-container text-on-secondary-container"
-        barClass="bg-on-secondary-container"
-      />
+    <div className="w-full">
+      {/* The legend below says the same in words, so the bar is for the eye only. */}
+      <div aria-hidden="true" className="flex h-2.5 gap-0.5 overflow-hidden rounded-full bg-surface-container-low">
+        {summaryStatuses.map((status) => (
+          <span
+            key={status}
+            data-status={status}
+            className={`h-full transition-opacity ${segmentClass[status]} ${
+              isFiltering && status !== activeStatus ? "opacity-25" : ""
+            }`}
+            style={{ flexGrow: countOf[status] }}
+          />
+        ))}
+      </div>
+
+      <div role="group" aria-label={t("guests.summary.label")} className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        {summaryStatuses.map((status) => {
+          const content = (
+            <>
+              <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${segmentClass[status]}`} />
+              <span className="font-headline-md text-title-lg">{countOf[status]}</span>{" "}
+              <span>{t(statusLabelKey[status])}</span>{" "}
+              <span className="tabular-nums text-on-surface-variant">{shareOf[status]}%</span>
+            </>
+          );
+          const itemClass = "-ml-2 flex items-center gap-2 rounded-full px-2 py-1 font-body-sm text-body-sm";
+
+          if (onToggleStatus === undefined) {
+            return (
+              <span key={status} className={`${itemClass} text-on-surface`}>
+                {content}
+              </span>
+            );
+          }
+          const isActive = status === activeStatus;
+          return (
+            <button
+              key={status}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => onToggleStatus(status)}
+              className={`${itemClass} transition-colors hover:bg-surface-container-low ${
+                isActive ? `bg-surface-container-low ring-2 ring-inset ${ringClass[status]}` : ""
+              } text-on-surface`}
+            >
+              {content}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

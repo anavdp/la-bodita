@@ -75,7 +75,7 @@ describe("GuestListPage", () => {
 
     expect(screen.getByRole("heading", { name: "Guest List" })).toBeInTheDocument();
     expect(screen.getByText("Manage your wedding guests and RSVPs")).toBeInTheDocument();
-    expect(await screen.findByRole("group", { name: "Confirmed" })).toHaveTextContent("1");
+    expect(await screen.findByRole("button", { name: /^\d+ Confirmed/ })).toHaveTextContent("1 Confirmed 50%");
   });
 
   it("given a wedding with no guests, when the list loads, then the screen invites adding one", async () => {
@@ -392,5 +392,59 @@ describe("the Households tab", () => {
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(householdsApi.deleteHousehold).not.toHaveBeenCalled();
+  });
+});
+
+describe("GuestListPage filtering by RSVP", () => {
+  const sofia = aGuest({ firstName: "Sofia", lastName: "Mendoza", rsvpStatus: "declined" });
+
+  beforeEach(() => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria, sofia]);
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("given the RSVP summary, when a status is clicked, then the table shows only guests with that status", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+
+    expect(screen.getByText("Carlos Mendoza")).toBeInTheDocument();
+    expect(screen.queryByText("Maria Rossi")).not.toBeInTheDocument();
+    expect(screen.queryByText("Sofia Mendoza")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^\d+ Pending/ })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("given a status being filtered, when it is clicked again, then every guest is back", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+
+    expect(screen.getByText("Maria Rossi")).toBeInTheDocument();
+    expect(screen.getByText("Sofia Mendoza")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^\d+ Pending/ })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("given a status nobody has, when it is clicked, then the table says so", async () => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria]);
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Declined/ }));
+
+    expect(screen.getByText("No guests have this RSVP status.")).toBeInTheDocument();
+  });
+
+  it("given the households tab, when it opens, then the summary has no filter to apply", async () => {
+    renderWithProviders(<GuestListPage tab="households" />, { route: "/guests/households" });
+    await screen.findByText("Confirmed");
+
+    expect(screen.queryByRole("button", { name: /^\d+ Confirmed/ })).not.toBeInTheDocument();
   });
 });
