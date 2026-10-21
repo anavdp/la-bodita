@@ -385,3 +385,43 @@ def test_given_the_category_migration_when_it_is_downgraded_then_both_tables_are
     assert "category" not in tables
     assert "subcategory" not in tables
     assert "household" in tables
+
+
+def test_given_an_empty_database_when_migrations_run_then_the_item_table_holds_vendor_details(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'item_schema_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    inspector = inspect(create_engine(database_url))
+    columns = {column["name"] for column in inspector.get_columns("item")}
+    assert columns == {
+        "id",
+        "wedding_id",
+        "name",
+        "category_id",
+        "subcategory_id",
+        "status",
+        "contact_name",
+        "phone",
+        "email",
+        "instagram_url",
+        "website_url",
+        "notes",
+        "created_at",
+        "updated_at",
+    }
+    foreign_keys = {key["name"]: key for key in inspector.get_foreign_keys("item")}
+    assert foreign_keys["fk_item_category_id_category"]["options"]["ondelete"] == "SET NULL"
+    assert foreign_keys["fk_item_subcategory_id_subcategory"]["options"]["ondelete"] == "SET NULL"
+
+
+def test_given_the_item_migration_when_it_is_downgraded_then_only_the_item_table_is_dropped(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'item_downgrade_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "head")
+
+    command.downgrade(config, "976d6f292be0")
+
+    tables = inspect(create_engine(database_url)).get_table_names()
+    assert "item" not in tables
+    assert "category" in tables
