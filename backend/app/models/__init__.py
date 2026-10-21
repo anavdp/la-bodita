@@ -1,3 +1,4 @@
+from app.models.category import Category, Subcategory
 from app.models.guest import (
     Guest,
     GuestGender,
@@ -10,6 +11,7 @@ from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixi
 from app.models.wedding import Wedding
 
 __all__ = [
+    "Category",
     "Guest",
     "GuestGender",
     "GuestRelationshipType",
@@ -17,6 +19,7 @@ __all__ = [
     "Household",
     "PrimaryKeyMixin",
     "RsvpStatus",
+    "Subcategory",
     "TimestampMixin",
     "Wedding",
     "WeddingScopedMixin",

@@ -358,3 +358,30 @@ def test_given_the_broadcast_migration_when_it_is_downgraded_then_the_column_is_
 
     household_columns = {column["name"] for column in inspect(create_engine(database_url)).get_columns("household")}
     assert "broadcast_list" not in household_columns
+
+
+def test_given_an_empty_database_when_migrations_run_then_the_category_tables_exist(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'category_schema_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    inspector = inspect(create_engine(database_url))
+    category_columns = {column["name"] for column in inspector.get_columns("category")}
+    assert category_columns == {"id", "wedding_id", "name", "emoji", "color", "created_at", "updated_at"}
+    subcategory_columns = {column["name"] for column in inspector.get_columns("subcategory")}
+    assert subcategory_columns == {"id", "wedding_id", "category_id", "name", "emoji", "created_at", "updated_at"}
+    subcategory_foreign_keys = {key["name"]: key["referred_table"] for key in inspector.get_foreign_keys("subcategory")}
+    assert subcategory_foreign_keys["fk_subcategory_category_id_category"] == "category"
+
+
+def test_given_the_category_migration_when_it_is_downgraded_then_both_tables_are_gone(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'category_downgrade_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "head")
+
+    command.downgrade(config, "6c2f8e4b7a19")
+
+    tables = inspect(create_engine(database_url)).get_table_names()
+    assert "category" not in tables
+    assert "subcategory" not in tables
+    assert "household" in tables
