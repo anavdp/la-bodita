@@ -218,7 +218,7 @@ def test_given_an_empty_database_when_migrations_run_then_the_household_table_ex
 
     inspector = inspect(create_engine(database_url))
     columns = {column["name"] for column in inspector.get_columns("household")}
-    assert columns == {"id", "wedding_id", "name", "rsvp_token", "created_at", "updated_at"}
+    assert columns == {"id", "wedding_id", "name", "rsvp_token", "broadcast_list", "created_at", "updated_at"}
     guest_foreign_keys = {key["name"]: key["referred_table"] for key in inspector.get_foreign_keys("guest")}
     assert guest_foreign_keys["fk_guest_household_id_household"] == "household"
     assert guest_column_nullability(database_url)["household_id"] is False
@@ -331,3 +331,30 @@ def test_given_guests_before_households_when_upgraded_to_head_in_one_go_then_eve
             " order by guest.id"
         ).all()
     assert [tuple(row) for row in rows] == [("Maria", "Maria Rossi"), ("Carlos", "Carlos Mendoza")]
+
+
+def test_given_existing_households_when_the_broadcast_migration_runs_then_each_is_on_no_list(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'household_broadcast_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "3a7e9b1d5c62")
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("insert into wedding (id, name) values (1, 'La Bodita')")
+        connection.exec_driver_sql("insert into household (wedding_id, name, rsvp_token) values (1, 'Rossi', 'abc')")
+
+    command.upgrade(config, "head")
+
+    with engine.connect() as connection:
+        broadcast_lists = connection.exec_driver_sql("select broadcast_list from household").scalars().all()
+    assert broadcast_lists == [None]
+
+
+def test_given_the_broadcast_migration_when_it_is_downgraded_then_the_column_is_gone(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'household_broadcast_downgrade_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "head")
+
+    command.downgrade(config, "3a7e9b1d5c62")
+
+    household_columns = {column["name"] for column in inspect(create_engine(database_url)).get_columns("household")}
+    assert "broadcast_list" not in household_columns

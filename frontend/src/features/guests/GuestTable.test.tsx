@@ -229,8 +229,8 @@ describe("GuestTable households", () => {
       <GuestTable
         guests={[maria, carlos]}
         households={[
-          { id: 10, name: "Famiglia Rossi", rsvpToken: "a", guestIds: [maria.id, 99] },
-          { id: 20, name: "Carlos Mendoza", rsvpToken: "b", guestIds: [carlos.id] },
+          { id: 10, name: "Famiglia Rossi", rsvpToken: "a", broadcastList: null, guestIds: [maria.id, 99] },
+          { id: 20, name: "Carlos Mendoza", rsvpToken: "b", broadcastList: null, guestIds: [carlos.id] },
         ]}
         onEdit={noop}
         onDelete={noop}
@@ -250,7 +250,7 @@ describe("GuestTable one-person households", () => {
     renderWithProviders(
       <GuestTable
         guests={[carlos]}
-        households={[{ id: 20, name: "Carlos Mendoza", rsvpToken: "b", guestIds: [carlos.id] }]}
+        households={[{ id: 20, name: "Carlos Mendoza", rsvpToken: "b", broadcastList: null, guestIds: [carlos.id] }]}
         onEdit={noop}
         onDelete={noop}
         onChangeRsvp={noop}

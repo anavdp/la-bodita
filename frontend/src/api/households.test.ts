@@ -8,8 +8,8 @@ const jsonResponse = (body: unknown, status = 200) =>
     }),
   );
 
-const payload = { id: 4, name: "Rossi", rsvp_token: "secret-token", guest_ids: [1, 2] };
-const household = { id: 4, name: "Rossi", rsvpToken: "secret-token", guestIds: [1, 2] };
+const payload = { id: 4, name: "Rossi", rsvp_token: "secret-token", broadcast_list: "bride", guest_ids: [1, 2] };
+const household = { id: 4, name: "Rossi", rsvpToken: "secret-token", broadcastList: "bride", guestIds: [1, 2] };
 
 describe("the household API", () => {
   afterEach(() => {
@@ -58,6 +58,26 @@ describe("the household API", () => {
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(JSON.parse(init.body as string)).toEqual({ name: "Rossi", guest_ids: [1, 5] });
+  });
+
+  it("given a broadcast list, when a household is put on it, then only the list is sent in API terms", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse(payload));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await updateHousehold(3, 4, { broadcastList: "groom" });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toEqual({ broadcast_list: "groom" });
+  });
+
+  it("given a household on a list, when the list is cleared, then null is sent so it comes off", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse(payload));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await updateHousehold(3, 4, { broadcastList: null });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toEqual({ broadcast_list: null });
   });
 
   it("given a household, when it is deleted with its guests, then the API is told to delete them too", async () => {

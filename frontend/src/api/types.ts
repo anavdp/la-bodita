@@ -39,12 +39,17 @@ export type GuestDraft = Omit<Guest, "id" | "weddingId" | "householdId"> & {
 /** A spreadsheet guest: rows of one file sharing a `household` are invited together. */
 export type GuestImportDraft = Omit<GuestDraft, "householdId"> & { household: string | null };
 
+/** The WhatsApp broadcast list a household's invitation goes out on. */
+export type BroadcastList = "bride" | "groom";
+
 export interface Household {
   id: number;
   /** Someone added on their own gets a household named after them. */
   name: string;
   /** The private part of the household's RSVP link. */
   rsvpToken: string;
+  /** Null until the household is added to one of the couple's lists. */
+  broadcastList: BroadcastList | null;
   guestIds: number[];
 }
 
@@ -54,6 +59,9 @@ export interface HouseholdDraft {
   name: string;
   guestIds: number[];
 }
+
+/** A PATCH changes only what it names; a null broadcast list takes the household off every list. */
+export type HouseholdChanges = Partial<HouseholdDraft> & { broadcastList?: BroadcastList | null };
 
 /** How the invitation speaks to a household: to family, to friends, or to anyone. */
 export type RsvpGreeting = "family" | "friends" | "general";

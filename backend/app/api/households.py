@@ -15,6 +15,7 @@ def to_read(household: Household) -> HouseholdRead:
         id=household.id,
         name=household.name,
         rsvp_token=household.rsvp_token,
+        broadcast_list=household.broadcast_list,
         guest_ids=[guest.id for guest in household.guests],
     )
 
@@ -74,6 +75,9 @@ def update_household(
     household = get_scoped_household(household_id, wedding, session)
     if payload.name is not None:
         household.name = payload.name
+    # Null is a real answer here ("on no list"), so only a field left out is ignored.
+    if "broadcast_list" in payload.model_fields_set:
+        household.broadcast_list = payload.broadcast_list
     if payload.guest_ids is not None:
         members = find_guests(session, wedding, payload.guest_ids)
         for guest in household.guests:

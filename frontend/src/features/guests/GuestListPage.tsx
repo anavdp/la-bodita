@@ -1,7 +1,15 @@
 import { useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 
-import type { Guest, GuestDraft, GuestImportDraft, Household, HouseholdDraft, RsvpStatus } from "../../api/types";
+import type {
+  BroadcastList,
+  Guest,
+  GuestDraft,
+  GuestImportDraft,
+  Household,
+  HouseholdDraft,
+  RsvpStatus,
+} from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -57,6 +65,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     addHousehold,
     editHousehold,
     removeHousehold,
+    setBroadcastList,
   } = useGuests(weddingId);
 
   const [dialogTarget, setDialogTarget] = useState<DialogTarget>(null);
@@ -121,6 +130,15 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     }
   };
 
+  const handleChangeBroadcastList = async (household: Household, broadcastList: BroadcastList | null) => {
+    setActionError(null);
+    try {
+      await setBroadcastList(household.id, broadcastList);
+    } catch {
+      setActionError("households.broadcastFailed");
+    }
+  };
+
   const handleSaveHousehold = async (draft: HouseholdDraft) => {
     if (householdDialog?.kind === "form" && householdDialog.household !== null) {
       await editHousehold(householdDialog.household.id, draft);
@@ -170,6 +188,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
           onDetails={(household) => setHouseholdDialog({ kind: "details", household })}
           onEdit={(household) => setHouseholdDialog({ kind: "form", household })}
           onDelete={(household) => setHouseholdDialog({ kind: "delete", household })}
+          onChangeBroadcastList={handleChangeBroadcastList}
         />
       );
     }

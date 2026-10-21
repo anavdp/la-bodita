@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Guest, Household, Wedding
+from app.models.household import BroadcastList
 
 HOUSEHOLDS_URL = "/api/weddings/{wedding_id}/households"
 
@@ -232,3 +233,61 @@ def test_given_an_unknown_household_when_it_is_deleted_then_it_is_not_found(clie
     response = client.delete(household_url(wedding, 404))
 
     assert response.status_code == 404
+
+
+def test_given_a_new_household_when_it_is_listed_then_it_is_on_no_broadcast_list(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    a_guest(db_session, wedding, "Maria")
+
+    response = client.get(HOUSEHOLDS_URL.format(wedding_id=wedding.id))
+
+    assert response.json()[0]["broadcast_list"] is None
+
+
+def test_given_a_household_when_it_is_put_on_the_brides_broadcast_list_then_only_that_changes(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+
+    response = client.patch(household_url(wedding, maria.household_id), json={"broadcast_list": "bride"})
+
+    assert response.status_code == 200
+    assert response.json()["broadcast_list"] == "bride"
+    assert response.json()["name"] == "Maria Rossi"
+    assert response.json()["guest_ids"] == [maria.id]
+
+
+def test_given_a_household_on_a_broadcast_list_when_it_is_renamed_then_it_stays_on_that_list(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+    maria.household.broadcast_list = BroadcastList.GROOM
+    db_session.commit()
+
+    response = client.patch(household_url(wedding, maria.household_id), json={"name": "Famiglia Rossi"})
+
+    assert response.json()["broadcast_list"] == "groom"
+
+
+def test_given_a_household_on_a_broadcast_list_when_the_list_is_cleared_then_it_is_on_none(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+    maria.household.broadcast_list = BroadcastList.BRIDE
+    db_session.commit()
+
+    response = client.patch(household_url(wedding, maria.household_id), json={"broadcast_list": None})
+
+    assert response.status_code == 200
+    assert response.json()["broadcast_list"] is None
+
+
+def test_given_an_unknown_broadcast_list_when_a_household_is_put_on_it_then_it_is_rejected(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+
+    response = client.patch(household_url(wedding, maria.household_id), json={"broadcast_list": "aunt"})
+
+    assert response.status_code == 422

@@ -1,10 +1,11 @@
 import { request } from "./client";
-import type { Household, HouseholdDraft } from "./types";
+import type { BroadcastList, Household, HouseholdChanges, HouseholdDraft } from "./types";
 
 interface HouseholdPayload {
   id: number;
   name: string;
   rsvp_token: string;
+  broadcast_list: BroadcastList | null;
   guest_ids: number[];
 }
 
@@ -13,15 +14,17 @@ function toHousehold(payload: HouseholdPayload): Household {
     id: payload.id,
     name: payload.name,
     rsvpToken: payload.rsvp_token,
+    broadcastList: payload.broadcast_list,
     guestIds: payload.guest_ids,
   };
 }
 
 /** Only the fields being changed, so a rename leaves the members alone. */
-function toPayload(changes: Partial<HouseholdDraft>): Record<string, unknown> {
+function toPayload(changes: HouseholdChanges): Record<string, unknown> {
   return {
     ...(changes.name === undefined ? {} : { name: changes.name }),
     ...(changes.guestIds === undefined ? {} : { guest_ids: changes.guestIds }),
+    ...(changes.broadcastList === undefined ? {} : { broadcast_list: changes.broadcastList }),
   };
 }
 
@@ -45,7 +48,7 @@ export async function createHousehold(weddingId: number, draft: HouseholdDraft):
 export async function updateHousehold(
   weddingId: number,
   householdId: number,
-  changes: Partial<HouseholdDraft>,
+  changes: HouseholdChanges,
 ): Promise<Household> {
   const payload = await request<HouseholdPayload>(`${householdsUrl(weddingId)}/${householdId}`, {
     method: "PATCH",

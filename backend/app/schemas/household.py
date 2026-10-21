@@ -5,6 +5,7 @@ from typing import Annotated
 from pydantic import BaseModel, Field, StringConstraints
 
 from app.models.guest import RsvpStatus
+from app.models.household import BroadcastList
 from app.schemas.guest import RequiredText
 
 # A household exists for its guests: it is created with at least one, and to
@@ -18,6 +19,7 @@ class HouseholdRead(BaseModel):
     id: int
     name: str
     rsvp_token: str
+    broadcast_list: BroadcastList | None
     guest_ids: list[int]
 
 
@@ -29,11 +31,13 @@ class HouseholdCreate(BaseModel):
 
 
 class HouseholdUpdate(BaseModel):
-    """A rename, a new membership, or both. `guest_ids` is the full list of members:
-    newcomers move in, and anyone left out splits off into a household of their own."""
+    """A rename, a new membership, a broadcast list, or any mix. `guest_ids` is the full
+    list of members: newcomers move in, and anyone left out splits off into a household
+    of their own. `broadcast_list` sent as null takes the household off every list."""
 
     name: RequiredText | None = None
     guest_ids: Members | None = None
+    broadcast_list: BroadcastList | None = None
 
 
 class RsvpGuest(BaseModel):

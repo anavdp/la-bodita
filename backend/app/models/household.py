@@ -1,10 +1,11 @@
 import secrets
+from enum import Enum
 from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin
+from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin, stored_as_text
 
 if TYPE_CHECKING:
     from app.models.guest import Guest
@@ -13,6 +14,13 @@ if TYPE_CHECKING:
 def new_rsvp_token() -> str:
     """32 url-safe characters: the household's private link, so it must not be guessable."""
     return secrets.token_urlsafe(24)
+
+
+class BroadcastList(str, Enum):
+    """The WhatsApp broadcast list a household's invitation goes out on: the bride's or the groom's."""
+
+    BRIDE = "bride"
+    GROOM = "groom"
 
 
 class Household(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
@@ -29,6 +37,11 @@ class Household(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     # by the couple (or by the CSV's household column).
     name: Mapped[str]
     rsvp_token: Mapped[str] = mapped_column(unique=True, default=new_rsvp_token)
+    # Invitations go out through WhatsApp broadcast lists; this tracks which one,
+    # if any, the household has been added to.
+    broadcast_list: Mapped[BroadcastList | None] = mapped_column(
+        stored_as_text(BroadcastList, "broadcast_list"), default=None
+    )
 
     guests: Mapped[list["Guest"]] = relationship(
         back_populates="household",

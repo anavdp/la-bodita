@@ -1,12 +1,11 @@
 from enum import Enum
 
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import ForeignKey, event, false
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database import Base
 from app.models.household import Household
-from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin
+from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin, stored_as_text
 
 
 class GuestGender(str, Enum):
@@ -36,28 +35,6 @@ class RsvpStatus(str, Enum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
     DECLINED = "declined"
-
-
-def stored_as_text(enum_type: type[Enum], name: str) -> SQLEnum:
-    """A Python enum stored as its own lowercase value in a plain text column.
-
-    `values_callable` writes the value ("venezuela") rather than the member name
-    ("VENEZUELA"), which is what the API and the UI exchange. `validate_strings`
-    makes the ORM reject a value outside the enum, and the request schemas reject
-    it earlier still, so no database-level CHECK constraint is used: SQLite cannot
-    alter one in place, which would turn "add another side" into a table rebuild,
-    and Alembic's autogenerate reports type-generated CHECK constraints as drift
-    on every run.
-    """
-    return SQLEnum(
-        enum_type,
-        name=name,
-        native_enum=False,
-        length=20,
-        create_constraint=False,
-        validate_strings=True,
-        values_callable=lambda members: [member.value for member in members],
-    )
 
 
 class Guest(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):

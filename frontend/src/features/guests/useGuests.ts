@@ -2,7 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 
 import { createGuest, deleteGuest, importGuests, listGuests, updateGuest } from "../../api/guests";
 import { createHousehold, deleteHousehold, listHouseholds, updateHousehold } from "../../api/households";
-import type { Guest, GuestDraft, GuestImportDraft, Household, HouseholdDraft } from "../../api/types";
+import type {
+  BroadcastList,
+  Guest,
+  GuestDraft,
+  GuestImportDraft,
+  Household,
+  HouseholdDraft,
+} from "../../api/types";
 
 export interface GuestsState {
   guests: Guest[];
@@ -17,6 +24,7 @@ export interface GuestsState {
   addHousehold: (draft: HouseholdDraft) => Promise<void>;
   editHousehold: (householdId: number, draft: HouseholdDraft) => Promise<void>;
   removeHousehold: (householdId: number, deleteGuests: boolean) => Promise<void>;
+  setBroadcastList: (householdId: number, broadcastList: BroadcastList | null) => Promise<void>;
 }
 
 /**
@@ -118,6 +126,12 @@ export function useGuests(weddingId: number | null): GuestsState {
     [changeThenReload],
   );
 
+  const setBroadcastList = useCallback(
+    (householdId: number, broadcastList: BroadcastList | null) =>
+      changeThenReload((id) => updateHousehold(id, householdId, { broadcastList })),
+    [changeThenReload],
+  );
+
   return {
     guests,
     households,
@@ -131,5 +145,6 @@ export function useGuests(weddingId: number | null): GuestsState {
     addHousehold,
     editHousehold,
     removeHousehold,
+    setBroadcastList,
   };
 }
