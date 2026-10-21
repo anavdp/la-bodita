@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import guests, households, rsvp, weddings
+from app.api import categories, guests, households, rsvp, weddings
 from app.config import settings
 
 
@@ -24,6 +24,7 @@ def create_app(guest_only: bool = False) -> FastAPI:
         app.include_router(weddings.router)
         app.include_router(guests.router)
         app.include_router(households.router)
+        app.include_router(categories.router)
     app.include_router(rsvp.router)
 
     @app.get("/")

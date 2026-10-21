@@ -1,3 +1,11 @@
+from app.schemas.category import (
+    CategoryCreate,
+    CategoryRead,
+    CategoryUpdate,
+    SubcategoryCreate,
+    SubcategoryRead,
+    SubcategoryUpdate,
+)
 from app.schemas.guest import GuestCreate, GuestRead, GuestUpdate
 from app.schemas.guest_import import GuestImportGuest, GuestImportPreview, GuestImportRow, GuestImportRowError
 from app.schemas.household import (
@@ -16,6 +24,9 @@ from app.schemas.household import (
 from app.schemas.wedding import WeddingRead
 
 __all__ = [
+    "CategoryCreate",
+    "CategoryRead",
+    "CategoryUpdate",
     "GuestCreate",
     "GuestImportGuest",
     "GuestImportPreview",
@@ -34,5 +45,8 @@ __all__ = [
     "RsvpLookupMember",
     "RsvpLookupResult",
     "RsvpReply",
+    "SubcategoryCreate",
+    "SubcategoryRead",
+    "SubcategoryUpdate",
     "WeddingRead",
 ]
