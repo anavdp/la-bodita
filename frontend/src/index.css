@@ -3,6 +3,114 @@
 @tailwind utilities;
 
 @layer base {
+  /* The colour tokens tailwind.config.js points at, as RGB channels. Light is
+     the default everywhere; the RSVP pages only ever use it. */
+  :root {
+    --color-background: 247 249 255; /* #f7f9ff */
+    --color-on-background: 26 27 46; /* #1a1b2e */
+    --color-surface: 247 249 255; /* #f7f9ff */
+    --color-surface-dim: 217 223 240; /* #d9dff0 */
+    --color-surface-bright: 255 255 255; /* #ffffff */
+    --color-surface-container-lowest: 255 255 255; /* #ffffff */
+    --color-surface-container-low: 239 243 253; /* #eff3fd */
+    --color-surface-container: 232 237 250; /* #e8edfa */
+    --color-surface-container-high: 225 232 247; /* #e1e8f7 */
+    --color-surface-container-highest: 217 225 242; /* #d9e1f2 */
+    --color-surface-variant: 217 225 242; /* #d9e1f2 */
+    --color-surface-tint: 98 76 171; /* #624cab */
+    --color-on-surface: 26 27 46; /* #1a1b2e */
+    --color-on-surface-variant: 68 72 95; /* #44485f */
+    --color-inverse-surface: 46 48 72; /* #2e3048 */
+    --color-inverse-on-surface: 239 241 251; /* #eff1fb */
+    --color-outline: 115 120 146; /* #737892 */
+    --color-outline-variant: 195 200 220; /* #c3c8dc */
+    --color-primary: 98 76 171; /* #624cab */
+    --color-on-primary: 255 255 255; /* #ffffff */
+    --color-primary-container: 193 206 254; /* #c1cefe */
+    --color-on-primary-container: 26 27 46; /* #1a1b2e */
+    --color-inverse-primary: 160 221 255; /* #a0ddff */
+    --color-primary-fixed: 226 230 255; /* #e2e6ff */
+    --color-primary-fixed-dim: 193 206 254; /* #c1cefe */
+    --color-on-primary-fixed: 23 2 63; /* #17023f */
+    --color-on-primary-fixed-variant: 74 53 127; /* #4a357f */
+    --color-secondary: 98 76 171; /* #624cab */
+    --color-on-secondary: 255 255 255; /* #ffffff */
+    --color-secondary-container: 239 35 60; /* #ef233c */
+    --color-on-secondary-container: 255 255 255; /* #ffffff */
+    --color-secondary-fixed: 223 228 255; /* #dfe4ff */
+    --color-secondary-fixed-dim: 193 206 254; /* #c1cefe */
+    --color-on-secondary-fixed: 16 22 67; /* #101643 */
+    --color-on-secondary-fixed-variant: 79 95 168; /* #4f5fa8 */
+    --color-tertiary: 113 137 255; /* #7189ff */
+    --color-on-tertiary: 255 255 255; /* #ffffff */
+    --color-tertiary-container: 113 137 255; /* #7189ff */
+    --color-on-tertiary-container: 255 255 255; /* #ffffff */
+    --color-tertiary-fixed: 212 240 255; /* #d4f0ff */
+    --color-tertiary-fixed-dim: 160 221 255; /* #a0ddff */
+    --color-on-tertiary-fixed: 5 32 44; /* #05202c */
+    --color-on-tertiary-fixed-variant: 26 94 122; /* #1a5e7a */
+    --color-error: 179 38 30; /* #b3261e */
+    --color-on-error: 255 255 255; /* #ffffff */
+    --color-error-container: 249 222 220; /* #f9dedc */
+    --color-on-error-container: 140 29 24; /* #8c1d18 */
+    --grid-dot: rgba(160, 221, 255, 0.55);
+  }
+
+  /* The planner's dark theme. Statuses keep their hues but are lifted so they
+     read on a dark card (all above 4.5:1), and the brand violet becomes the
+     light periwinkle, carrying dark ink, so primary text and buttons both pass. */
+  .dark {
+    color-scheme: dark;
+    --color-surface-tint: 185 172 255; /* #b9acff */
+    --color-inverse-surface: 228 230 245; /* #e4e6f5 */
+    --color-inverse-on-surface: 46 48 72; /* #2e3048 */
+    --color-inverse-primary: 98 76 171; /* #624cab */
+    --color-primary-fixed: 226 230 255; /* #e2e6ff */
+    --color-primary-fixed-dim: 193 206 254; /* #c1cefe */
+    --color-on-primary-fixed: 23 2 63; /* #17023f */
+    --color-on-primary-fixed-variant: 74 53 127; /* #4a357f */
+    --color-secondary-fixed: 223 228 255; /* #dfe4ff */
+    --color-secondary-fixed-dim: 193 206 254; /* #c1cefe */
+    --color-on-secondary-fixed: 16 22 67; /* #101643 */
+    --color-on-secondary-fixed-variant: 193 206 254; /* #c1cefe */
+    --color-tertiary-fixed: 212 240 255; /* #d4f0ff */
+    --color-tertiary-fixed-dim: 160 221 255; /* #a0ddff */
+    --color-on-tertiary-fixed: 5 32 44; /* #05202c */
+    --color-on-tertiary-fixed-variant: 160 221 255; /* #a0ddff */
+    --color-error: 255 180 171; /* #ffb4ab */
+    --color-on-error: 105 0 5; /* #690005 */
+    --color-error-container: 77 20 24; /* #4d1418 */
+    --color-on-error-container: 255 218 214; /* #ffdad6 */
+    --color-background: 17 19 31; /* #11131f */
+    --color-on-background: 228 230 245; /* #e4e6f5 */
+    --color-surface: 17 19 31; /* #11131f */
+    --color-surface-dim: 17 19 31; /* #11131f */
+    --color-surface-bright: 45 48 69; /* #2d3045 */
+    --color-surface-container-lowest: 24 27 43; /* #181b2b */
+    --color-surface-container-low: 30 33 51; /* #1e2133 */
+    --color-surface-container: 35 38 57; /* #232639 */
+    --color-surface-container-high: 41 44 64; /* #292c40 */
+    --color-surface-container-highest: 48 51 73; /* #303349 */
+    --color-surface-variant: 48 51 73; /* #303349 */
+    --color-on-surface: 228 230 245; /* #e4e6f5 */
+    --color-on-surface-variant: 179 183 207; /* #b3b7cf */
+    --color-outline: 138 143 168; /* #8a8fa8 */
+    --color-outline-variant: 59 63 87; /* #3b3f57 */
+    --color-primary: 185 172 255; /* #b9acff */
+    --color-on-primary: 30 20 82; /* #1e1452 */
+    --color-primary-container: 27 30 51; /* #1b1e33 */
+    --color-on-primary-container: 214 221 255; /* #d6ddff */
+    --color-secondary: 185 172 255; /* #b9acff */
+    --color-on-secondary: 30 20 82; /* #1e1452 */
+    --color-secondary-container: 255 92 108; /* #ff5c6c */
+    --color-on-secondary-container: 43 0 8; /* #2b0008 */
+    --color-tertiary: 110 134 255; /* #6e86ff */
+    --color-on-tertiary: 11 22 89; /* #0b1659 */
+    --color-tertiary-container: 110 134 255; /* #6e86ff */
+    --color-on-tertiary-container: 11 22 89; /* #0b1659 */
+    --grid-dot: rgba(160, 221, 255, 0.10);
+  }
+
   body {
     @apply bg-background text-on-background font-body-sm;
   }
@@ -13,7 +121,7 @@
      every component aligns its margins to. Sky at full strength turns the page
      into a cyan wash at this density, so the dots are held back to 45%. */
   .dotted-grid {
-    background-image: radial-gradient(circle at center, rgba(160, 221, 255, 0.55) 1px, transparent 1px);
+    background-image: radial-gradient(circle at center, var(--grid-dot) 1px, transparent 1px);
     background-size: 8px 8px;
   }
 
@@ -35,6 +143,6 @@
   }
 
   .table-row-hover:hover {
-    background-color: rgba(0, 106, 105, 0.05);
+    background-color: rgb(var(--color-primary) / 0.05);
   }
 }

@@ -6,6 +6,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import type { Wedding } from "../api/types";
 import { LanguageProvider } from "../i18n/LanguageProvider";
 import { SearchProvider } from "../search/SearchProvider";
+import { ThemeProvider } from "../theme/ThemeProvider";
 import { WeddingContext } from "../wedding/WeddingProvider";
 import type { WeddingContextValue } from "../wedding/WeddingProvider";
 
@@ -45,7 +46,9 @@ export function renderWithProviders(ui: ReactElement, options: Options = {}): Re
     <MemoryRouter initialEntries={[route]}>
       <LanguageProvider>
         <WeddingContext.Provider value={weddingValue}>
-          <SearchProvider initialTerm={searchTerm}>{wrapped}</SearchProvider>
+          <ThemeProvider>
+            <SearchProvider initialTerm={searchTerm}>{wrapped}</SearchProvider>
+          </ThemeProvider>
         </WeddingContext.Provider>
       </LanguageProvider>
     </MemoryRouter>,

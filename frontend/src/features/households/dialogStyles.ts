@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
 /** The guest dialogs' look, shared by every household dialog. */
-export const backdrop = "fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4";
+export const backdrop = "fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 dark:bg-black/60";
 export const panel =
-  "max-h-full w-full max-w-lg overflow-y-auto rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-lg";
+  "max-h-full w-full max-w-lg overflow-y-auto rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-lg dark:bg-surface-container";
 export const dialogTitle = "mb-6 font-headline-md text-headline-md text-primary";
 export const primaryButton =
   "rounded-full bg-primary px-8 py-3 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50";

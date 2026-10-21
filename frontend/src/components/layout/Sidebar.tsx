@@ -6,7 +6,7 @@ import { daysUntil } from "./countdown";
 import { navigationItems } from "./navigationItems";
 
 const activeItem = "bg-primary text-on-primary scale-95 shadow-sm";
-const restingItem = "text-on-primary-container hover:bg-white/40";
+const restingItem = "text-on-primary-container hover:bg-surface-container-lowest/40";
 
 export function Sidebar() {
   const { t, language, toggleLanguage } = useTranslation();

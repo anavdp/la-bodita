@@ -1,5 +1,6 @@
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useSearch } from "../../search/SearchProvider";
+import { useTheme } from "../../theme/ThemeProvider";
 
 const iconButton =
   "flex h-10 w-10 items-center justify-center rounded-full border border-surface-variant bg-surface-container-lowest text-on-surface-variant shadow-sm transition-colors hover:bg-surface-container-highest disabled:cursor-not-allowed disabled:opacity-50";
@@ -7,6 +8,8 @@ const iconButton =
 export function TopBar() {
   const { t } = useTranslation();
   const { term, setTerm } = useSearch();
+  const { theme, toggleTheme } = useTheme();
+  const themeLabel = t(theme === "dark" ? "layout.lightMode" : "layout.darkMode");
 
   return (
     <header className="fixed top-0 right-0 left-0 z-10 flex h-20 items-center justify-between gap-4 bg-transparent px-margin-mobile md:left-[260px] md:px-margin-desktop">
@@ -41,6 +44,11 @@ export function TopBar() {
           </span>
           {/* The label would wrap to two lines in a phone's top bar. */}
           <span className="hidden sm:inline">{t("layout.addTask")}</span>
+        </button>
+        <button type="button" onClick={toggleTheme} aria-label={themeLabel} title={themeLabel} className={iconButton}>
+          <span className="material-symbols-outlined" aria-hidden="true">
+            {theme === "dark" ? "light_mode" : "dark_mode"}
+          </span>
         </button>
         <button type="button" disabled aria-label={t("layout.notifications")} title={t("layout.unavailable")} className={iconButton}>
           <span className="material-symbols-outlined" aria-hidden="true">

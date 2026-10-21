@@ -27,6 +27,15 @@ describe("TopBar", () => {
     expect(screen.getByRole("button", { name: "Settings" })).toBeDisabled();
   });
 
+  it("given a light planner, when the theme toggle is pressed, then it turns dark and offers light back", async () => {
+    renderWithProviders(<TopBar />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Switch to dark mode" }));
+
+    expect(document.documentElement).toHaveClass("dark");
+    expect(screen.getByRole("button", { name: "Switch to light mode" })).toBeInTheDocument();
+  });
+
   it("given a search term, when it is typed, then the screens below can read it", async () => {
     renderWithProviders(
       <>

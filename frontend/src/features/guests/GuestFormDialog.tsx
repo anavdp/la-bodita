@@ -111,12 +111,12 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 dark:bg-black/60">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="max-h-full w-full max-w-lg overflow-y-auto rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-lg"
+        className="max-h-full w-full max-w-lg overflow-y-auto rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-lg dark:bg-surface-container"
       >
         <h2 id={titleId} className="mb-6 font-headline-md text-headline-md text-primary">
           {t(guest ? "guests.form.editTitle" : "guests.form.createTitle")}
