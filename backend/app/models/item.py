@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -6,6 +7,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from app.models.category import Category, Subcategory
 from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin, stored_as_text
+
+if TYPE_CHECKING:
+    from app.models.requirement import Requirement
 
 
 class ItemStatus(str, Enum):
@@ -46,3 +50,9 @@ class Item(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
 
     category: Mapped[Category | None] = relationship()
     subcategory: Mapped[Subcategory | None] = relationship()
+    requirements: Mapped[list["Requirement"]] = relationship(
+        back_populates="item",
+        order_by="(Requirement.due_date.is_(None), Requirement.due_date, Requirement.due_time, Requirement.id)",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

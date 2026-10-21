@@ -425,3 +425,38 @@ def test_given_the_item_migration_when_it_is_downgraded_then_only_the_item_table
     tables = inspect(create_engine(database_url)).get_table_names()
     assert "item" not in tables
     assert "category" in tables
+
+
+def test_given_an_empty_database_when_migrations_run_then_the_requirement_table_holds_dated_tasks(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'requirement_schema_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    inspector = inspect(create_engine(database_url))
+    columns = {column["name"] for column in inspector.get_columns("requirement")}
+    assert columns == {
+        "id",
+        "wedding_id",
+        "item_id",
+        "title",
+        "is_done",
+        "due_date",
+        "due_time",
+        "notes",
+        "created_at",
+        "updated_at",
+    }
+    foreign_keys = {key["name"]: key for key in inspector.get_foreign_keys("requirement")}
+    assert foreign_keys["fk_requirement_item_id_item"]["options"]["ondelete"] == "CASCADE"
+
+
+def test_given_the_requirement_migration_when_it_is_downgraded_then_only_the_requirement_table_is_dropped(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'requirement_downgrade_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "head")
+
+    command.downgrade(config, "219b2ddb3557")
+
+    tables = inspect(create_engine(database_url)).get_table_names()
+    assert "requirement" not in tables
+    assert "item" in tables
