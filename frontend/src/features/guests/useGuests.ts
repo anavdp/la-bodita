@@ -9,6 +9,7 @@ import type {
   GuestImportDraft,
   Household,
   HouseholdDraft,
+  RsvpStatus,
 } from "../../api/types";
 
 export interface GuestsState {
@@ -21,6 +22,7 @@ export interface GuestsState {
   addGuests: (drafts: GuestImportDraft[]) => Promise<void>;
   editGuest: (guestId: number, changes: Partial<GuestDraft>) => Promise<void>;
   removeGuest: (guestId: number) => Promise<void>;
+  setRsvpStatus: (guestId: number, rsvpStatus: RsvpStatus) => Promise<void>;
   addHousehold: (draft: HouseholdDraft) => Promise<void>;
   editHousehold: (householdId: number, draft: HouseholdDraft) => Promise<void>;
   removeHousehold: (householdId: number, deleteGuests: boolean) => Promise<void>;
@@ -29,7 +31,8 @@ export interface GuestsState {
 
 /**
  * The guest list for one wedding, with the households its guests are grouped
- * into. Mutations re-read both afterwards, so the order on screen stays the
+ * into. Mutations re-read both afterwards (except an RSVP or broadcast list,
+ * which change one row in place), so the order on screen stays the
  * order the API sorts by and a moved guest lands in the right household.
  */
 export function useGuests(weddingId: number | null): GuestsState {
@@ -99,6 +102,28 @@ export function useGuests(weddingId: number | null): GuestsState {
     [weddingId, load],
   );
 
+  /** An RSVP moves nobody, so only that row changes, at once, with no reload; the
+   * summary bar and status filter read the same list, so they follow. If the API
+   * refuses, the row goes back to what it was. */
+  const setRsvpStatus = useCallback(
+    async (guestId: number, rsvpStatus: RsvpStatus) => {
+      if (weddingId === null) return;
+      const withStatus = (status: RsvpStatus) =>
+        setGuests((current) =>
+          current.map((guest) => (guest.id === guestId ? { ...guest, rsvpStatus: status } : guest)),
+        );
+      const previous = guests.find((guest) => guest.id === guestId)?.rsvpStatus;
+      withStatus(rsvpStatus);
+      try {
+        await updateGuest(weddingId, guestId, { rsvpStatus });
+      } catch (error) {
+        if (previous !== undefined) withStatus(previous);
+        throw error;
+      }
+    },
+    [weddingId, guests],
+  );
+
   /** Every household change can move guests too, so both lists are re-read. */
   const changeThenReload = useCallback(
     async (change: (weddingId: number) => Promise<unknown>) => {
@@ -159,6 +184,7 @@ export function useGuests(weddingId: number | null): GuestsState {
     addGuests,
     editGuest,
     removeGuest,
+    setRsvpStatus,
     addHousehold,
     editHousehold,
     removeHousehold,

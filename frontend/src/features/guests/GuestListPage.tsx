@@ -62,6 +62,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     addGuests,
     editGuest,
     removeGuest,
+    setRsvpStatus,
     addHousehold,
     editHousehold,
     removeHousehold,
@@ -124,7 +125,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   const handleChangeRsvp = async (guest: Guest, rsvpStatus: RsvpStatus) => {
     setActionError(null);
     try {
-      await editGuest(guest.id, { rsvpStatus });
+      await setRsvpStatus(guest.id, rsvpStatus);
     } catch {
       setActionError("guests.rsvpFailed");
     }

@@ -205,7 +205,7 @@ describe("changing an RSVP from the table", () => {
     vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
   });
 
-  it("given a pending guest, when a new status is chosen, then only the RSVP is patched", async () => {
+  it("given a pending guest, when a new status is chosen, then only the RSVP is patched and that row changes in place without reloading", async () => {
     vi.mocked(guestsApi.updateGuest).mockResolvedValue({ ...carlos, rsvpStatus: "confirmed" });
     renderWithProviders(<GuestListPage />);
     await screen.findByText("Carlos Mendoza");
@@ -213,14 +213,49 @@ describe("changing an RSVP from the table", () => {
     await userEvent.click(screen.getByRole("button", { name: /Carlos Mendoza — Pending/ }));
     await userEvent.click(screen.getByRole("button", { name: "Mark as Confirmed" }));
 
+    expect(screen.getByRole("button", { name: /Carlos Mendoza — Confirmed/ })).toBeInTheDocument();
+    expect(screen.queryByText("Loading guests...")).not.toBeInTheDocument();
     await waitFor(() =>
       expect(guestsApi.updateGuest).toHaveBeenCalledWith(1, carlos.id, {
         rsvpStatus: "confirmed",
       }),
     );
+    expect(guestsApi.listGuests).toHaveBeenCalledTimes(1);
+    expect(householdsApi.listHouseholds).toHaveBeenCalledTimes(1);
   });
 
-  it("given the API rejects it, when the RSVP is changed, then the failure is reported", async () => {
+  it("given the summary bar, when a guest's RSVP is changed in place, then its counts follow at once", async () => {
+    vi.mocked(guestsApi.updateGuest).mockResolvedValue({ ...carlos, rsvpStatus: "confirmed" });
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Carlos Mendoza");
+    expect(screen.getByRole("button", { name: /^1 Confirmed/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^1 Pending/ })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: /Carlos Mendoza — Pending/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark as Confirmed" }));
+
+    expect(screen.getByRole("button", { name: /^2 Confirmed/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^0 Pending/ })).toBeInTheDocument();
+  });
+
+  it("given the table filtered to pending, when a pending guest is confirmed, then the row leaves the filtered table", async () => {
+    vi.mocked(guestsApi.updateGuest).mockResolvedValue({ ...carlos, rsvpStatus: "confirmed" });
+    const lucia = aGuest({ firstName: "Lucia", lastName: "Perez", rsvpStatus: "pending" });
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, lucia, maria]);
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Carlos Mendoza");
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+
+    await userEvent.click(screen.getByRole("button", { name: /Carlos Mendoza — Pending/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark as Confirmed" }));
+
+    expect(screen.queryByText("Carlos Mendoza")).not.toBeInTheDocument();
+    expect(screen.getByText("Lucia Perez")).toBeInTheDocument();
+    expect(screen.queryByText("Maria Rossi")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^1 Pending/ })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("given the API rejects it, when the RSVP is changed, then the row and counts go back and the failure is reported", async () => {
     vi.mocked(guestsApi.updateGuest).mockRejectedValue(new Error("Guest not found"));
     renderWithProviders(<GuestListPage />);
     await screen.findByText("Carlos Mendoza");
@@ -229,6 +264,9 @@ describe("changing an RSVP from the table", () => {
     await userEvent.click(screen.getByRole("button", { name: "Mark as Declined" }));
 
     expect(await screen.findByText("We could not update this RSVP.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Carlos Mendoza — Pending/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^1 Pending/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^0 Declined/ })).toBeInTheDocument();
   });
 
   it("given a filled-in CSV, when it is imported, then the guests are created and the list reloads", async () => {
