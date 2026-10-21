@@ -3,16 +3,22 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
 import { AppRoutes } from "./App";
+import * as categoriesApi from "./api/categories";
 import * as guestsApi from "./api/guests";
 import * as householdsApi from "./api/households";
+import * as itemsApi from "./api/items";
 import * as rsvpApi from "./api/rsvp";
+import * as tasksApi from "./api/tasks";
 import * as weddingsApi from "./api/weddings";
 import { LanguageProvider } from "./i18n/LanguageProvider";
 import { WeddingProvider } from "./wedding/WeddingProvider";
 
+vi.mock("./api/categories");
 vi.mock("./api/guests");
 vi.mock("./api/households");
+vi.mock("./api/items");
 vi.mock("./api/rsvp");
+vi.mock("./api/tasks");
 vi.mock("./api/weddings");
 
 function renderAt(route: string) {
@@ -34,6 +40,9 @@ describe("AppRoutes", () => {
     ]);
     vi.mocked(guestsApi.listGuests).mockResolvedValue([]);
     vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
+    vi.mocked(categoriesApi.listCategories).mockResolvedValue([]);
+    vi.mocked(itemsApi.listItems).mockResolvedValue([]);
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([]);
   });
 
   it("given a household's RSVP link, when it is visited, then the RSVP page shows without the planner shell", async () => {
@@ -116,6 +125,20 @@ describe("AppRoutes", () => {
     renderAt("/");
 
     expect(await screen.findByRole("heading", { name: "Guest List" })).toBeInTheDocument();
+  });
+
+  it("given the items route, when it is visited, then the items screen is shown inside the shell", async () => {
+    renderAt("/items");
+
+    expect(await screen.findByRole("heading", { name: "Items", level: 1 })).toBeInTheDocument();
+    expect(await screen.findByText(/No items yet/)).toBeInTheDocument();
+  });
+
+  it("given the checklist route, when it is visited, then the checklist is shown inside the shell", async () => {
+    renderAt("/checklist");
+
+    expect(await screen.findByRole("heading", { name: "Checklist", level: 1 })).toBeInTheDocument();
+    expect(await screen.findByText(/Nothing to do here/)).toBeInTheDocument();
   });
 
   it("given a screen that is not built yet, when it is visited, then it says it is coming", async () => {

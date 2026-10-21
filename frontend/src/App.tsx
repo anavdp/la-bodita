@@ -2,7 +2,9 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom
 
 import { ComingSoon } from "./components/ComingSoon";
 import { AppLayout } from "./components/layout/AppLayout";
+import { ChecklistPage } from "./features/checklist/ChecklistPage";
 import { GuestListPage } from "./features/guests/GuestListPage";
+import { ItemsPage } from "./features/items/ItemsPage";
 import { RsvpLookupPage } from "./features/rsvp/RsvpLookupPage";
 import { RsvpPage } from "./features/rsvp/RsvpPage";
 import { RsvpThanksPage } from "./features/rsvp/RsvpThanksPage";
@@ -10,8 +12,9 @@ import { LanguageProvider } from "./i18n/LanguageProvider";
 import { WeddingProvider } from "./wedding/WeddingProvider";
 
 /**
- * Every planner screen sits in the shared shell. Only the guest list is built so
- * far; the rest each have their own issue and show a placeholder until then.
+ * Every planner screen sits in the shared shell. The guest list, items and
+ * checklist are built; the rest each have their own issue and show a
+ * placeholder until then.
  * The RSVP pages are the guests' side, so they stand outside the shell: /rsvp
  * finds a household by name, /rsvp/:token is that household's invitation, and
  * /rsvp/:token/gracias thanks them once they have answered.
@@ -38,8 +41,8 @@ export function AppRoutes() {
         <Route path="/guests" element={<GuestListPage tab="guests" />} />
         <Route path="/guests/households" element={<GuestListPage tab="households" />} />
         <Route path="/dashboard" element={<ComingSoon titleKey="nav.dashboard" />} />
-        <Route path="/items" element={<ComingSoon titleKey="nav.items" />} />
-        <Route path="/checklist" element={<ComingSoon titleKey="nav.checklist" />} />
+        <Route path="/items" element={<ItemsPage />} />
+        <Route path="/checklist" element={<ChecklistPage />} />
         <Route path="/calendar" element={<ComingSoon titleKey="nav.calendar" />} />
         <Route path="/budget" element={<ComingSoon titleKey="nav.budget" />} />
         <Route path="/documents" element={<ComingSoon titleKey="nav.documents" />} />

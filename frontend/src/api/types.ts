@@ -124,3 +124,85 @@ export interface Wedding {
   /** ISO date, or null while the couple has not settled on one. */
   wedding_date: string | null;
 }
+
+/** A couple's own tag (Church, Photographer...): its color marks items everywhere. */
+export interface Category {
+  id: number;
+  name: string;
+  emoji: string | null;
+  /** "#rrggbb", lowercase. */
+  color: string;
+  subcategories: Subcategory[];
+}
+
+/** A finer tag inside a category: its own emoji, always its category's color. */
+export interface Subcategory {
+  id: number;
+  categoryId: number;
+  name: string;
+  emoji: string | null;
+  color: string;
+}
+
+export interface CategoryDraft {
+  name: string;
+  emoji: string | null;
+  color: string;
+}
+
+/** Where things stand with a vendor or place, mirrored from `app/models/item.py`. */
+export type ItemStatus = "idea" | "contacted" | "meeting_set" | "booked" | "discarded";
+
+/** An item's earliest open task with a date: usually its next appointment. */
+export interface NextTask {
+  id: number;
+  title: string;
+  dueDate: string;
+  dueTime: string | null;
+}
+
+/** The planning hub: a vendor, the church, a venue... */
+export interface Item {
+  id: number;
+  name: string;
+  categoryId: number | null;
+  subcategoryId: number | null;
+  status: ItemStatus;
+  contactName: string | null;
+  phone: string | null;
+  email: string | null;
+  instagramUrl: string | null;
+  websiteUrl: string | null;
+  notes: string | null;
+  taskCount: number;
+  doneTaskCount: number;
+  nextTask: NextTask | null;
+}
+
+export type ItemDraft = Omit<Item, "id" | "taskCount" | "doneTaskCount" | "nextTask">;
+
+/** A checklist task; with a date and a time it is an appointment. */
+export interface Task {
+  id: number;
+  title: string;
+  isDone: boolean;
+  /** ISO date. */
+  dueDate: string | null;
+  /** "HH:MM:SS", only ever set alongside a date. */
+  dueTime: string | null;
+  notes: string | null;
+  /** Null for a general task that belongs to no item. */
+  itemId: number | null;
+  itemName: string | null;
+  categoryId: number | null;
+}
+
+export interface TaskDraft {
+  title: string;
+  itemId: number | null;
+  dueDate: string | null;
+  dueTime: string | null;
+}
+
+/** A PATCH changes only what it names. */
+export type TaskChanges = Partial<TaskDraft> & { isDone?: boolean };
