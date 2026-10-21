@@ -148,6 +148,9 @@ const en = {
   "rsvp.deadlineDate": "January 1, 2027",
   "rsvp.attending": "I'll be there",
   "rsvp.notAttending": "I can't make it",
+  "rsvp.plusOne": "Your plus-one",
+  "rsvp.plusOne.attending": "Coming",
+  "rsvp.plusOne.notAttending": "Not coming",
   "rsvp.send": "Send RSVP",
   "rsvp.sending": "Sending...",
   "rsvp.thanks.title": "Thank you!",
@@ -222,6 +225,7 @@ const en = {
   "rsvp.lookup.notFound": "We couldn't find that name. Check the spelling, or contact us.",
   "rsvp.lookup.tooMany": "Too many searches. Please wait a minute and try again.",
   "rsvp.lookup.failed": "We could not run the search.",
+  "rsvp.lookup.plusOne": "Plus-one",
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -372,6 +376,9 @@ const es: Record<TranslationKey, string> = {
   "rsvp.deadlineDate": "1 de Enero de 2027",
   "rsvp.attending": "Iré",
   "rsvp.notAttending": "No puedo ir",
+  "rsvp.plusOne": "Tu acompañante",
+  "rsvp.plusOne.attending": "Viene",
+  "rsvp.plusOne.notAttending": "No viene",
   "rsvp.send": "Enviar respuesta",
   "rsvp.sending": "Enviando...",
   "rsvp.thanks.title": "¡Gracias!",
@@ -446,6 +453,7 @@ const es: Record<TranslationKey, string> = {
   "rsvp.lookup.notFound": "No encontramos ese nombre. Revisa cómo lo escribiste o contáctanos.",
   "rsvp.lookup.tooMany": "Demasiadas búsquedas. Espera un minuto e inténtalo de nuevo.",
   "rsvp.lookup.failed": "No pudimos hacer la búsqueda.",
+  "rsvp.lookup.plusOne": "Acompañante",
 };
 
 export const translations: Record<Language, Record<TranslationKey, string>> = { en, es };

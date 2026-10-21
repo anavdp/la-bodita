@@ -7,8 +7,8 @@ import { lookUpInvitation } from "../../api/rsvp";
 import type { RsvpHouseholdMatch } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
-import { fullName } from "../guests/filtering";
 import { emphasize } from "./emphasize";
+import { guestName } from "./guestNames";
 import { photoUrl } from "./photos";
 import { RsvpFrame } from "./RsvpFrame";
 
@@ -151,7 +151,7 @@ export function RsvpLookupPage() {
             >
               {/* Who is in it, not the household's own name: that is for the couple's planning. */}
               <span className="block text-body-lg text-on-surface">
-                {match.members.map(fullName).join(", ")}
+                {match.members.map((member) => guestName(member, t, "rsvp.lookup.plusOne")).join(", ")}
               </span>
             </button>
           ))}

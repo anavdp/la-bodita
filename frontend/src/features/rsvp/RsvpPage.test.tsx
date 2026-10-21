@@ -280,6 +280,31 @@ describe("RsvpPage", () => {
     expect(screen.queryByText(/Each person answers for themselves/)).not.toBeInTheDocument();
   });
 
+  it("given a plus-one whose name is not known yet, when the household opens its link, then they read as the guest's plus-one", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({
+      ...invitation,
+      guests: [
+        { id: 1, firstName: "Manuel", lastName: "Cordero", rsvpStatus: "pending" },
+        { id: 2, firstName: "Novia de Manuel", lastName: "Cordero", rsvpStatus: "confirmed" },
+      ],
+    });
+    renderPage();
+
+    // "Novia de Manuel" is the couple's own note in the planner, not something to show the guest.
+    const plusOne = await screen.findByRole("group", { name: "Your plus-one" });
+    expect(screen.queryByText(/Novia de/)).not.toBeInTheDocument();
+    // Their host answers for them, so the choices speak about them rather than in their voice.
+    expect(within(plusOne).getByRole("radio", { name: "Coming" })).toBeChecked();
+    expect(within(plusOne).getByRole("radio", { name: "Not coming" })).not.toBeChecked();
+    const manuel = screen.getByRole("group", { name: "Manuel Cordero" });
+    expect(within(manuel).getByRole("radio", { name: "I'll be there" })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Español" }));
+    const acompanante = screen.getByRole("group", { name: "Tu acompañante" });
+    expect(within(acompanante).getByRole("radio", { name: "Viene" })).toBeChecked();
+    expect(within(acompanante).getByRole("radio", { name: "No viene" })).toBeInTheDocument();
+  });
+
   it("given a household with family in it, when it opens, then it is greeted as family", async () => {
     vi.mocked(rsvpApi.getInvitation).mockResolvedValue({ ...invitation, greeting: "family" });
     renderPage();

@@ -7,8 +7,8 @@ import { answerInvitation, getInvitation } from "../../api/rsvp";
 import type { RsvpAnswer, RsvpGreeting, RsvpInvitation, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
-import { fullName } from "../guests/filtering";
 import { emphasize } from "./emphasize";
+import { guestName, isUnnamedPlusOne } from "./guestNames";
 import { photoUrl } from "./photos";
 import { RsvpFrame } from "./RsvpFrame";
 import { TitleWithDate } from "./TitleWithDate";
@@ -129,34 +129,40 @@ export function RsvpPage() {
               ))}
             </div>
           )}
-          {invitation.guests.map((guest) => (
-            /*
-             * A labelled group rather than a fieldset: Safari on iPhone sizes a fieldset with a
-             * legend too tall on first paint, leaving a blank gap under the toggle until it re-renders.
-             */
-            <div key={guest.id} role="group" aria-labelledby={`guest-${guest.id}-name`}>
-              <p id={`guest-${guest.id}-name`} className="mb-2 text-[20px] font-semibold text-on-surface">
-                {fullName(guest)}
-              </p>
-              {/* Radios underneath, so it stays one choice per person for keyboards and screen readers. */}
-              <div className="flex rounded-full bg-surface-container-low p-1">
-                {(["yes", "no"] as const).map((choice) => (
-                  <label key={choice} className="flex-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      name={`guest-${guest.id}`}
-                      checked={choices[guest.id] === choice}
-                      onChange={() => choose(guest.id, choice)}
-                      className="peer sr-only"
-                    />
-                    <span className="block rounded-full py-3 text-center text-[16px] font-bold text-on-surface-variant transition-colors peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-on-secondary-fixed-variant">
-                      {t(choice === "yes" ? "rsvp.attending" : "rsvp.notAttending")}
-                    </span>
-                  </label>
-                ))}
+          {invitation.guests.map((guest) => {
+            // Whoever brings an unnamed plus-one answers for them, so their choices speak about them.
+            const [attending, notAttending]: TranslationKey[] = isUnnamedPlusOne(guest)
+              ? ["rsvp.plusOne.attending", "rsvp.plusOne.notAttending"]
+              : ["rsvp.attending", "rsvp.notAttending"];
+            return (
+              /*
+               * A labelled group rather than a fieldset: Safari on iPhone sizes a fieldset with a
+               * legend too tall on first paint, leaving a blank gap under the toggle until it re-renders.
+               */
+              <div key={guest.id} role="group" aria-labelledby={`guest-${guest.id}-name`}>
+                <p id={`guest-${guest.id}-name`} className="mb-2 text-[20px] font-semibold text-on-surface">
+                  {guestName(guest, t, "rsvp.plusOne")}
+                </p>
+                {/* Radios underneath, so it stays one choice per person for keyboards and screen readers. */}
+                <div className="flex rounded-full bg-surface-container-low p-1">
+                  {(["yes", "no"] as const).map((choice) => (
+                    <label key={choice} className="flex-1 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={`guest-${guest.id}`}
+                        checked={choices[guest.id] === choice}
+                        onChange={() => choose(guest.id, choice)}
+                        className="peer sr-only"
+                      />
+                      <span className="block rounded-full py-3 text-center text-[16px] font-bold text-on-surface-variant transition-colors peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-on-secondary-fixed-variant">
+                        {t(choice === "yes" ? attending : notAttending)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {saveError && (
             <p role="alert" className="text-body-sm text-error">

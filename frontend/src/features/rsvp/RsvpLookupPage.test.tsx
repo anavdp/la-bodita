@@ -78,6 +78,26 @@ describe("RsvpLookupPage", () => {
     expect(await screen.findByText("Opened invitation rossi-token")).toBeInTheDocument();
   });
 
+  it("given a shared name in a household with an unnamed plus-one, when it is looked up, then the plus-one shows as a plus-one", async () => {
+    vi.mocked(rsvpApi.lookUpInvitation).mockResolvedValue([
+      {
+        token: "cordero",
+        name: "Manuel Cordero",
+        members: [
+          { firstName: "Manuel", lastName: "Cordero" },
+          { firstName: "Esposa de Manuel", lastName: "Cordero" },
+        ],
+      },
+      { token: "other", name: "Otro Manuel", members: [{ firstName: "Manuel", lastName: "Cordero" }] },
+    ]);
+    renderPage();
+
+    await searchFor("Manuel Cordero");
+
+    expect(await screen.findByRole("button", { name: "Manuel Cordero, Plus-one" })).toBeInTheDocument();
+    expect(screen.queryByText(/Esposa de/)).not.toBeInTheDocument();
+  });
+
   it("given a name nobody is invited under, when it is looked up, then the guest is asked to check the spelling", async () => {
     vi.mocked(rsvpApi.lookUpInvitation).mockResolvedValue([]);
     renderPage();
