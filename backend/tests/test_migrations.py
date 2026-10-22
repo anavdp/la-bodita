@@ -484,3 +484,29 @@ def test_given_migrations_at_head_when_the_budget_table_is_inspected_then_lines_
     }
     foreign_keys = {key["name"]: key["referred_table"] for key in inspector.get_foreign_keys("budget_line")}
     assert foreign_keys == {"fk_budget_line_item_id_item": "item", "fk_budget_line_wedding_id_wedding": "wedding"}
+
+
+def test_given_migrations_at_head_when_the_calendar_table_is_inspected_then_events_hang_off_items(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'calendar_schema_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    inspector = inspect(create_engine(database_url))
+    columns = {column["name"] for column in inspector.get_columns("calendar_event")}
+    assert columns == {
+        "id",
+        "wedding_id",
+        "item_id",
+        "title",
+        "start_date",
+        "end_date",
+        "start_time",
+        "notes",
+        "created_at",
+        "updated_at",
+    }
+    foreign_keys = {key["name"]: key["referred_table"] for key in inspector.get_foreign_keys("calendar_event")}
+    assert foreign_keys == {
+        "fk_calendar_event_item_id_item": "item",
+        "fk_calendar_event_wedding_id_wedding": "wedding",
+    }

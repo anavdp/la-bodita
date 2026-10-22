@@ -1,4 +1,5 @@
 from app.schemas.budget_line import BudgetLineCreate, BudgetLineRead, BudgetLineUpdate
+from app.schemas.calendar_event import CalendarEventCreate, CalendarEventRead, CalendarEventUpdate
 from app.schemas.category import (
     CategoryCreate,
     CategoryRead,
@@ -30,6 +31,9 @@ __all__ = [
     "BudgetLineCreate",
     "BudgetLineRead",
     "BudgetLineUpdate",
+    "CalendarEventCreate",
+    "CalendarEventRead",
+    "CalendarEventUpdate",
     "CategoryCreate",
     "CategoryRead",
     "CategoryUpdate",

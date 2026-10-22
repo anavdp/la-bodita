@@ -10,6 +10,7 @@ from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixi
 
 if TYPE_CHECKING:
     from app.models.budget_line import BudgetLine
+    from app.models.calendar_event import CalendarEvent
     from app.models.requirement import Requirement
 
 
@@ -61,5 +62,12 @@ class Item(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
         back_populates="item",
         order_by="BudgetLine.id",
         cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    calendar_events: Mapped[list["CalendarEvent"]] = relationship(
+        back_populates="item",
+        order_by="(CalendarEvent.start_date, CalendarEvent.id)",
+        # Not delete-orphan: taking an event off its item keeps the event.
+        cascade="all",
         passive_deletes=True,
     )
