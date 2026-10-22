@@ -30,7 +30,16 @@ describe("TopBar", () => {
     renderWithProviders(<TopBar />);
 
     expect(screen.getByRole("button", { name: "Notifications" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Settings" })).toBeDisabled();
+  });
+
+  it("given any screen, when the gear is pressed, then settings slide in over it and close again", async () => {
+    renderWithProviders(<TopBar />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Settings" }));
+    expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("dialog", { name: "Settings" })).not.toBeInTheDocument();
   });
 
   it("given any screen, when Add Task is pressed, then the checklist opens on a new task", async () => {

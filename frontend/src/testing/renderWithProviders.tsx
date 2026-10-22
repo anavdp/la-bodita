@@ -33,6 +33,7 @@ export function renderWithProviders(ui: ReactElement, options: Options = {}): Re
     wedding: aWedding,
     isLoading: false,
     error: null,
+    saveWedding: () => Promise.resolve(),
     ...wedding,
   };
 

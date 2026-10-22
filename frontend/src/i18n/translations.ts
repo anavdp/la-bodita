@@ -30,6 +30,12 @@ const en = {
 
   "comingSoon.body": "This screen has its own issue and lands in a later slice.",
 
+  "settings.weddingTitle": "Wedding title",
+  "settings.titleHint": "Shown in the sidebar and as the title of your guests' RSVP page.",
+  "settings.weddingDate": "Wedding date",
+  "settings.dateHint": "The sidebar's countdown counts down to this day.",
+  "settings.titleRequired": "Give the wedding a title.",
+
   "guests.title": "Guest List",
   "guests.subtitle": "Your people. Your party. One very good list.",
   "guests.showing": "Showing {shown} of {total} guests",
@@ -439,6 +445,12 @@ const es: Record<TranslationKey, string> = {
   "layout.user": "Nombre de Usuario",
 
   "comingSoon.body": "Esta pantalla tiene su propia incidencia y llega en una fase posterior.",
+
+  "settings.weddingTitle": "Título de la boda",
+  "settings.titleHint": "Aparece en la barra lateral y como título de la página de RSVP de tus invitados.",
+  "settings.weddingDate": "Fecha de la boda",
+  "settings.dateHint": "La cuenta atrás de la barra lateral cuenta hasta este día.",
+  "settings.titleRequired": "Ponle un título a la boda.",
 
   "guests.title": "Lista de Invitados",
   "guests.subtitle": "Tu gente. Tu fiesta. Una muy buena lista.",

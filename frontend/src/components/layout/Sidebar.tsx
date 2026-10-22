@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
-import { daysUntil } from "./countdown";
+import { CountdownSticker } from "./CountdownSticker";
 import { navigationItems } from "./navigationItems";
 
 const activeItem = "border-ink bg-accent";
@@ -12,24 +12,16 @@ export function Sidebar() {
   const { t, language, toggleLanguage } = useTranslation();
   const { wedding } = useWedding();
 
-  const countdown = (): string => {
-    if (!wedding?.wedding_date) {
-      return t("layout.dateToBeDecided");
-    }
-    const remaining = daysUntil(wedding.wedding_date);
-    return remaining > 0 ? t("layout.daysToGo", { count: remaining }) : t("layout.today");
-  };
-
   return (
     <aside className="fixed left-0 top-0 z-20 hidden h-full w-[260px] flex-col border-r-[2.5px] border-ink bg-sidebar py-6 font-playful text-ink md:flex">
       <div className="mb-6 px-6">
         {/* The confetti dashes and the sticker's hearts are the mockup's doodles, kept as plain marks. */}
-        <h1 className="playful-outline -rotate-3 font-playful-logo text-[52px] leading-none text-paper [--playful-outline:#1f1d2b]">
+        <h1 className="playful-outline -rotate-3 font-playful-logo text-[52px] leading-none break-words text-paper [--playful-outline:#1f1d2b]">
           {wedding?.name ?? "La Bodita"}
         </h1>
-        <p className="mt-5 inline-block -rotate-6 rounded-md border-[2.5px] border-ink bg-butter px-4 py-2 font-playful-display text-2xl uppercase leading-tight shadow-[3px_3px_0_rgba(31,29,43,0.2)]">
-          {countdown()}
-        </p>
+        <div className="mt-5">
+          <CountdownSticker weddingDate={wedding?.wedding_date ?? null} />
+        </div>
       </div>
 
       <nav aria-label={t("layout.mainNavigation")} className="flex-1 overflow-y-auto px-3">

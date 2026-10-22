@@ -1,14 +1,18 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
-import type { Wedding } from "../api/types";
-import { listWeddings } from "../api/weddings";
+import type { Wedding, WeddingChanges } from "../api/types";
+import { listWeddings, updateWedding } from "../api/weddings";
 
 export interface WeddingContextValue {
   wedding: Wedding | null;
   isLoading: boolean;
   error: string | null;
+  /** Saves Settings and shares the result with every screen; rejects if it could not. */
+  saveWedding: (changes: WeddingChanges) => Promise<void>;
 }
+
+type WeddingState = Omit<WeddingContextValue, "saveWedding">;
 
 export const WeddingContext = createContext<WeddingContextValue | null>(null);
 
@@ -17,7 +21,7 @@ export const WeddingContext = createContext<WeddingContextValue | null>(null);
  * date, and every screen needs its id to scope what it reads.
  */
 export function WeddingProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<WeddingContextValue>({
+  const [state, setState] = useState<WeddingState>({
     wedding: null,
     isLoading: true,
     error: null,
@@ -43,7 +47,20 @@ export function WeddingProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <WeddingContext.Provider value={state}>{children}</WeddingContext.Provider>;
+  const weddingId = state.wedding?.id;
+  const saveWedding = useCallback(
+    async (changes: WeddingChanges) => {
+      if (weddingId === undefined) {
+        throw new Error("There is no wedding to save");
+      }
+      const saved = await updateWedding(weddingId, changes);
+      setState((current) => ({ ...current, wedding: saved }));
+    },
+    [weddingId],
+  );
+
+  const value = useMemo(() => ({ ...state, saveWedding }), [state, saveWedding]);
+  return <WeddingContext.Provider value={value}>{children}</WeddingContext.Provider>;
 }
 
 export function useWedding(): WeddingContextValue {

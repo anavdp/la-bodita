@@ -125,6 +125,9 @@ export interface Wedding {
   wedding_date: string | null;
 }
 
+/** What Settings change: the title is never blank, the date can go back to none. */
+export type WeddingChanges = Partial<Pick<Wedding, "name" | "wedding_date">>;
+
 /** A couple's own tag (Church, Photographer...): its color marks items everywhere. */
 export interface Category {
   id: number;

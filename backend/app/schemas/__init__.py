@@ -25,7 +25,7 @@ from app.schemas.household import (
     RsvpLookupResult,
     RsvpReply,
 )
-from app.schemas.wedding import WeddingRead
+from app.schemas.wedding import WeddingRead, WeddingUpdate
 
 __all__ = [
     "BudgetLineCreate",
@@ -66,4 +66,5 @@ __all__ = [
     "SubcategoryRead",
     "SubcategoryUpdate",
     "WeddingRead",
+    "WeddingUpdate",
 ]
