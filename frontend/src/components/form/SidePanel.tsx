@@ -56,7 +56,7 @@ export function SidePanel({ title, sticker, wide = false, onClose, children }: S
             )}
             <h2
               id={titleId}
-              className="playful-outline font-playful-display text-[32px] uppercase leading-none tracking-wide text-sky"
+              className="playful-outline font-playful-display text-[32px] uppercase leading-none tracking-wide text-title"
             >
               {title}
             </h2>

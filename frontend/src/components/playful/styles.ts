@@ -21,7 +21,7 @@ export const outlinedCard = "rounded-[28px] border-[2.5px] border-ink bg-cream-l
 
 /** The page title: chunky sky-blue capitals with an ink outline. */
 export const pageTitle =
-  "playful-outline font-playful-display text-[56px] uppercase leading-none tracking-wide text-sky md:text-[72px]";
+  "playful-outline font-playful-display text-[56px] uppercase leading-none tracking-wide text-title md:text-[72px]";
 
 export const pageTagline = "mt-3 font-playful text-xl text-ink";
 

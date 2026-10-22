@@ -76,6 +76,7 @@ export default {
         mint: { DEFAULT: token("play-mint"), soft: token("play-mint-soft") },
         coral: { DEFAULT: token("play-coral"), soft: token("play-coral-soft") },
         sidebar: token("play-sidebar"),
+        title: token("play-title"),
         lilac: token("play-lilac"),
         peach: token("play-peach"),
         // The logo's lettering stays paper white on the blue in either theme.
