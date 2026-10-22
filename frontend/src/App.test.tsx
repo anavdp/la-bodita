@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 
 import { AppRoutes } from "./App";
 import * as budgetApi from "./api/budget";
+import * as calendarApi from "./api/calendar";
 import * as categoriesApi from "./api/categories";
 import * as guestsApi from "./api/guests";
 import * as householdsApi from "./api/households";
@@ -15,6 +16,7 @@ import { LanguageProvider } from "./i18n/LanguageProvider";
 import { WeddingProvider } from "./wedding/WeddingProvider";
 
 vi.mock("./api/budget");
+vi.mock("./api/calendar");
 vi.mock("./api/categories");
 vi.mock("./api/guests");
 vi.mock("./api/households");
@@ -46,6 +48,7 @@ describe("AppRoutes", () => {
     vi.mocked(itemsApi.listItems).mockResolvedValue([]);
     vi.mocked(tasksApi.listTasks).mockResolvedValue([]);
     vi.mocked(budgetApi.listBudgetLines).mockResolvedValue([]);
+    vi.mocked(calendarApi.listCalendarEvents).mockResolvedValue([]);
   });
 
   it("given a household's RSVP link, when it is visited, then the RSVP page shows without the planner shell", async () => {
@@ -151,10 +154,17 @@ describe("AppRoutes", () => {
     expect(await screen.findByText(/No costs yet/)).toBeInTheDocument();
   });
 
-  it("given a screen that is not built yet, when it is visited, then it says it is coming", async () => {
+  it("given the calendar route, when it is visited, then the calendar is shown inside the shell", async () => {
     renderAt("/calendar");
 
-    expect(await screen.findByRole("heading", { name: "Calendar" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Calendar", level: 1 })).toBeInTheDocument();
+    expect(await screen.findByText(/Nothing on the calendar ahead/)).toBeInTheDocument();
+  });
+
+  it("given a screen that is not built yet, when it is visited, then it says it is coming", async () => {
+    renderAt("/documents");
+
+    expect(await screen.findByRole("heading", { name: "Documents" })).toBeInTheDocument();
     expect(screen.getByText(/lands in a later slice/)).toBeInTheDocument();
   });
 

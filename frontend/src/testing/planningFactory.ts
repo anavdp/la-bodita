@@ -1,4 +1,4 @@
-import type { BudgetLine, Category, Item, Task } from "../api/types";
+import type { BudgetLine, CalendarEvent, Category, Item, Task } from "../api/types";
 
 let nextId = 1;
 
@@ -50,6 +50,21 @@ export function aBudgetLine(overrides: Partial<BudgetLine> = {}): BudgetLine {
     currency: "USD",
     estimatedAmount: 1800,
     actualAmount: null,
+    notes: null,
+    itemId: null,
+    itemName: null,
+    categoryId: null,
+    ...overrides,
+  };
+}
+
+export function aCalendarEvent(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
+  return {
+    id: nextId++,
+    title: "Bridal fair",
+    startDate: "2026-11-07",
+    endDate: null,
+    startTime: null,
     notes: null,
     itemId: null,
     itemName: null,

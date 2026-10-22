@@ -235,3 +235,25 @@ export type BudgetLineDraft = Omit<BudgetLine, "id" | "status" | "itemName" | "c
 
 /** A PATCH changes only what it names. */
 export type BudgetLineChanges = Partial<BudgetLineDraft> & { status?: BudgetLineStatus };
+
+/** Something on the calendar that is not a to-do: a trip, a fair, the wedding weekend. */
+export interface CalendarEvent {
+  id: number;
+  title: string;
+  /** ISO date. */
+  startDate: string;
+  /** ISO date of the last day of a range; null for a one-day event. */
+  endDate: string | null;
+  /** "HH:MM:SS", or null for all day. */
+  startTime: string | null;
+  notes: string | null;
+  /** Null for an event that belongs to no item. */
+  itemId: number | null;
+  itemName: string | null;
+  categoryId: number | null;
+}
+
+export type CalendarEventDraft = Omit<CalendarEvent, "id" | "itemName" | "categoryId">;
+
+/** A PATCH changes only what it names. */
+export type CalendarEventChanges = Partial<CalendarEventDraft>;
