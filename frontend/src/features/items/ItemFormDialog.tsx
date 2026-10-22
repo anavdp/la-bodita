@@ -7,7 +7,7 @@ import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePan
 import { fieldLabel, pillField, textArea } from "../../components/form/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
-import { primaryButton, secondaryButton } from "../households/dialogStyles";
+import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { categoryLabel } from "../planning/CategoryChips";
 import { itemStatuses } from "./itemStatus";
 
@@ -155,8 +155,8 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
             />
           </div>
 
-          <fieldset className="flex flex-col gap-3 border-t border-outline-variant/50 pt-5">
-            <legend className="mb-3 font-label-lg text-label-lg text-primary">{t("items.howToReach")}</legend>
+          <fieldset className="flex flex-col gap-3 border-t-2 border-ink/15 pt-5">
+            <legend className="mb-3 font-playful-display text-xl uppercase tracking-wide text-ink">{t("items.howToReach")}</legend>
             <div>
               <label htmlFor={idFor("contactName")} className={fieldLabel}>
                 {t("items.contactName")}
@@ -198,7 +198,7 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
                         label: t(own.labelKey),
                       })}
                       onClick={() => setContacts((current) => current.filter((_, at) => at !== index))}
-                      className="h-10 w-10 rounded-full text-xl text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-error"
+                      className="h-10 w-10 rounded-full text-xl text-ink/70 transition-colors hover:bg-coral-soft hover:text-ink"
                     >
                       ×
                     </button>
@@ -210,7 +210,7 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
               <button
                 type="button"
                 onClick={() => setContacts((current) => [...current, { channel: unused[0].name, value: "" }])}
-                className="self-start rounded-full border border-dashed border-primary px-4 py-1.5 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
+                className="self-start rounded-full border-[2.5px] border-dashed border-ink px-4 py-1.5 text-lg text-ink transition-colors hover:bg-accent/40"
               >
                 {t("items.addContact")}
               </button>
@@ -230,7 +230,7 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
             />
           </div>
           {error !== null && (
-            <p role="alert" className="font-body-sm text-body-sm text-error">
+            <p role="alert" className="text-lg text-coral">
               {t(error)}
             </p>
           )}

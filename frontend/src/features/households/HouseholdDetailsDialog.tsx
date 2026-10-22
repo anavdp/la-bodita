@@ -31,11 +31,11 @@ export function HouseholdDetailsDialog({ household, guests, onClose }: Household
         <h3 id={membersId} className={fieldLabel}>
           {t("households.details.members")}
         </h3>
-        <ul aria-labelledby={membersId} className="mb-6 flex flex-col divide-y divide-surface-container">
+        <ul aria-labelledby={membersId} className="mb-6 flex flex-col divide-y-2 divide-ink/10">
           {membersOf(household, guests).map((guest) => (
-            <li key={guest.id} className="flex items-center justify-between py-3 font-body-sm text-body-sm">
-              <span className="font-title-lg text-title-lg text-on-surface">{fullName(guest)}</span>
-              <span className="text-on-surface-variant">{t(rsvpLabelKey(guest.rsvpStatus))}</span>
+            <li key={guest.id} className="flex items-center justify-between py-3 text-lg">
+              <span className="text-xl">{fullName(guest)}</span>
+              <span className="text-ink/70">{t(rsvpLabelKey(guest.rsvpStatus))}</span>
             </li>
           ))}
         </ul>

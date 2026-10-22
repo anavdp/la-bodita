@@ -13,7 +13,8 @@ import type {
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
-import { outlinedCard, pageTagline, pageTitle, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { ActionIcon, PageHeader } from "../../components/playful/PageHeader";
+import { outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
@@ -183,7 +184,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
         );
       }
       return (
-        <div className={`${outlinedCard} p-6`}>
+        <div className={`${outlinedCard} overflow-hidden`}>
           <HouseholdsPanel
           households={visibleHouseholds}
           onDetails={(household) => setHouseholdDialog({ kind: "details", household })}
@@ -222,52 +223,34 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
 
   return (
     <>
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-6">
-        <div className="flex items-center gap-6">
-          <div>
-            <h1 className={pageTitle}>{t("guests.title")}</h1>
-            <p className={pageTagline}>{t("guests.subtitle")}</p>
-          </div>
-          {/* Stand-in for the mockup's clinking-glasses illustration. */}
-          <span aria-hidden="true" className="hidden text-7xl lg:inline">
-            🥂
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {tab === "households" ? (
+      <PageHeader title={t("guests.title")} subtitle={t("guests.subtitle")} art="title-cheers.png">
+        {tab === "households" ? (
+          <button
+            type="button"
+            onClick={() => setHouseholdDialog({ kind: "form", household: null })}
+            className={primaryButton}
+          >
+            <ActionIcon name="add" />
+            {t("households.add")}
+          </button>
+        ) : (
+          <>
             <button
               type="button"
-              onClick={() => setHouseholdDialog({ kind: "form", household: null })}
-              className={primaryButton}
+              onClick={() => setIsImportOpen(true)}
+              disabled={weddingId === null}
+              className={secondaryButton}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">
-                add
-              </span>
-              {t("households.add")}
+              <ActionIcon name="upload" />
+              {t("guests.import.open")}
             </button>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => setIsImportOpen(true)}
-                disabled={weddingId === null}
-                className={secondaryButton}
-              >
-                <span className="material-symbols-outlined" aria-hidden="true">
-                  upload
-                </span>
-                {t("guests.import.open")}
-              </button>
-              <button type="button" onClick={() => setDialogTarget({ guest: null })} className={primaryButton}>
-                <span className="material-symbols-outlined" aria-hidden="true">
-                  add
-                </span>
-                {t("guests.add")}
-              </button>
-            </>
-          )}
-        </div>
-      </header>
+            <button type="button" onClick={() => setDialogTarget({ guest: null })} className={primaryButton}>
+              <ActionIcon name="add" />
+              {t("guests.add")}
+            </button>
+          </>
+        )}
+      </PageHeader>
 
       <GuestStats
         guests={guests}

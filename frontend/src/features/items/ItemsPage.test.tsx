@@ -56,6 +56,18 @@ describe("ItemsPage", () => {
     expect(itemsApi.listItems).toHaveBeenCalledWith(1);
   });
 
+  it("given a category drawn with an icon, when the page loads, then its chip and its items show that icon", async () => {
+    const venue = aCategory({ name: "Venue", emoji: "venue" });
+    vi.mocked(categoriesApi.listCategories).mockResolvedValue([venue]);
+    vi.mocked(itemsApi.listItems).mockResolvedValue([anItem({ name: "Hacienda La Vega", categoryId: venue.id })]);
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    const row = await screen.findByRole("button", { name: /Hacienda La Vega/ });
+    expect(row.querySelector("img")).toHaveAttribute("src", "/icons/venue.png");
+    const chip = within(screen.getByRole("group", { name: "Filter by category" })).getByRole("button", { name: "Venue 1" });
+    expect(chip.querySelector("img")).toHaveAttribute("src", "/icons/venue.png");
+  });
+
   it("given categories, when one is picked, then only its items are listed", async () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
@@ -318,22 +330,21 @@ describe("ItemsPage", () => {
   });
 
   it("given a new category, when it is added, then it is created", async () => {
-    vi.mocked(categoriesApi.createCategory).mockResolvedValue(aCategory({ name: "Cake", emoji: "🎂" }));
+    vi.mocked(categoriesApi.createCategory).mockResolvedValue(aCategory({ name: "Cake", emoji: "cake" }));
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
     await userEvent.click(screen.getByRole("button", { name: "+ Category" }));
     const dialog = screen.getByRole("dialog", { name: "New category" });
     await userEvent.type(within(dialog).getByLabelText("Name"), "Cake");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Emoji" }));
-    await userEvent.type(within(dialog).getByRole("searchbox"), "cake");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Wedding cake" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: "Icon" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: "Cake" }));
     await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
 
     await waitFor(() =>
       expect(categoriesApi.createCategory).toHaveBeenCalledWith(1, {
         name: "Cake",
-        emoji: "🎂",
+        emoji: "cake",
         color: expect.stringMatching(/^#[0-9a-f]{6}$/),
       }),
     );

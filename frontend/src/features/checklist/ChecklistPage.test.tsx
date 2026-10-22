@@ -42,6 +42,19 @@ describe("ChecklistPage", () => {
 
   const section = (name: string) => screen.getByRole("region", { name });
 
+  it("given a task whose category has an icon, when the list shows, then its item is marked with that icon", async () => {
+    const venue = aCategory({ name: "Venue", emoji: "venue" });
+    vi.mocked(categoriesApi.listCategories).mockResolvedValue([venue]);
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([
+      aTask({ title: "Visit the hacienda", itemId: 77, itemName: "Hacienda La Vega", categoryId: venue.id }),
+    ]);
+    renderWithProviders(<ChecklistPage />, { route: "/checklist" });
+
+    const row = (await screen.findByText("Visit the hacienda")).closest("li");
+    expect(row).toHaveTextContent("Hacienda La Vega");
+    expect(row?.querySelector("img")).toHaveAttribute("src", "/icons/venue.png");
+  });
+
   it("given open tasks, when the page loads, then they are grouped by when they are due", async () => {
     renderWithProviders(<ChecklistPage />, { route: "/checklist" });
 

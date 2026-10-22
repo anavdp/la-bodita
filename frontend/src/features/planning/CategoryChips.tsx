@@ -1,16 +1,19 @@
 import type { Category } from "../../api/types";
+import { CategoryIcon } from "../../components/playful/IconPicker";
+import { isIconName } from "../../components/playful/iconCatalog";
 import { useTranslation } from "../../i18n/LanguageProvider";
 
 export const chip = (isActive: boolean) =>
-  `rounded-full border px-4 py-1.5 font-label-md text-label-md transition-colors ${
-    isActive
-      ? "border-primary bg-primary text-on-primary"
-      : "border-outline-variant bg-surface-container-lowest text-on-surface hover:border-primary"
+  `inline-flex items-center gap-2 rounded-full border-[2.5px] border-ink px-4 py-1.5 font-playful text-lg text-ink transition-colors ${
+    isActive ? "bg-accent" : "bg-cream-light hover:bg-accent/40"
   }`;
 
-/** "⛪ Church", or just "Church" for a category with no emoji. */
+/**
+ * "⛪ Church" for a category still on an emoji, just "Church" for one with an
+ * icon (drawn beside it by CategoryIcon) or with neither.
+ */
 export const categoryLabel = (category: Pick<Category, "name" | "emoji">) =>
-  category.emoji ? `${category.emoji} ${category.name}` : category.name;
+  category.emoji && !isIconName(category.emoji) ? `${category.emoji} ${category.name}` : category.name;
 
 interface CategoryChipsProps {
   categories: Category[];
@@ -49,6 +52,7 @@ export function CategoryChips({ categories, activeId, onChange, counts, showAll 
           onClick={() => onChange(activeId === category.id ? null : category.id)}
           className={chip(activeId === category.id)}
         >
+          <CategoryIcon value={category.emoji} />
           {withCount(categoryLabel(category), counts && (counts.byCategory.get(category.id) ?? 0))}
         </button>
       ))}

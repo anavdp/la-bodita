@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import type { CategoryDraft } from "../../api/types";
-import { EmojiPicker } from "../../components/form/EmojiPicker";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
+import { IconPicker } from "../../components/playful/IconPicker";
+import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
-import { primaryButton, secondaryButton } from "../households/dialogStyles";
 
 /** Soft colors that read well behind dark text, offered in turn as a new category's default. */
 const palette = ["#624cab", "#7189ff", "#f39237", "#e56399", "#3fa796", "#c49b2e"];
@@ -46,7 +46,7 @@ export function CategoryFormDialog({ existingCount, onSave, onClose }: CategoryF
   };
 
   return (
-    <SidePanel title={t("categories.new")} onClose={onClose}>
+    <SidePanel title={t("categories.new")} sticker="🏷️" onClose={onClose}>
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div>
@@ -57,7 +57,7 @@ export function CategoryFormDialog({ existingCount, onSave, onClose }: CategoryF
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <EmojiPicker label={t("categories.emoji")} value={emoji} onChange={setEmoji} />
+              <IconPicker label={t("categories.icon")} value={emoji} onChange={setEmoji} />
             </div>
             <div>
               <label htmlFor="category-color" className={fieldLabel}>
@@ -68,12 +68,12 @@ export function CategoryFormDialog({ existingCount, onSave, onClose }: CategoryF
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value.toLowerCase())}
-                className="h-12 w-16 cursor-pointer rounded-full border-0 bg-surface-container-low p-1.5 dark:bg-surface-container-highest [&::-moz-color-swatch]:rounded-full [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0"
+                className="h-12 w-16 cursor-pointer rounded-[18px] border-[2.5px] border-ink bg-cream-light p-1.5 [&::-moz-color-swatch]:rounded-full [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0"
               />
             </div>
           </div>
           {error !== null && (
-            <p role="alert" className="font-body-sm text-body-sm text-error">
+            <p role="alert" className="text-lg text-coral">
               {t(error)}
             </p>
           )}

@@ -80,7 +80,7 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
         className={`${pillField} flex items-center gap-3 text-left`}
       >
         <span aria-hidden="true">📅</span>
-        <span className={picked ? "" : "text-on-surface-variant/70"}>
+        <span className={picked ? "" : "text-ink/50"}>
           {picked ? shortDate.format(picked) : t("datePicker.placeholder")}
         </span>
       </button>
@@ -91,25 +91,25 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
               type="button"
               aria-label={t("datePicker.previous")}
               onClick={() => shiftMonth(-1)}
-              className="h-8 w-8 rounded-full text-primary hover:bg-primary-container/40"
+              className="h-8 w-8 rounded-full text-ink hover:bg-accent/60"
             >
               ‹
             </button>
-            <span className="font-label-lg text-label-lg capitalize text-on-surface" aria-live="polite">
+            <span className="font-playful-display text-lg capitalize text-ink" aria-live="polite">
               {monthTitle}
             </span>
             <button
               type="button"
               aria-label={t("datePicker.next")}
               onClick={() => shiftMonth(1)}
-              className="h-8 w-8 rounded-full text-primary hover:bg-primary-container/40"
+              className="h-8 w-8 rounded-full text-ink hover:bg-accent/60"
             >
               ›
             </button>
           </div>
           <div className="grid grid-cols-7 gap-0.5 text-center">
             {weekdays.map((weekday) => (
-              <span key={weekday} className="py-1 font-label-md text-[12px] uppercase text-on-surface-variant">
+              <span key={weekday} className="py-1 text-[13px] uppercase text-ink/60">
                 {weekday}
               </span>
             ))}
@@ -125,10 +125,10 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
                   aria-current={iso === todayIso ? "date" : undefined}
                   onClick={() => choose(iso)}
                   style={day.getDate() === 1 ? { gridColumnStart: mondayFirst(day) + 1 } : undefined}
-                  className={`h-9 rounded-full font-label-md text-label-md tabular-nums transition-colors ${
+                  className={`h-9 rounded-full text-base tabular-nums transition-colors ${
                     isPicked
-                      ? "bg-primary text-on-primary"
-                      : `text-on-surface hover:bg-primary-container/50 ${iso === todayIso ? "ring-2 ring-inset ring-primary" : ""}`
+                      ? "bg-sky text-white ring-2 ring-inset ring-ink"
+                      : `text-ink hover:bg-accent/60 ${iso === todayIso ? "ring-2 ring-inset ring-ink" : ""}`
                   }`}
                 >
                   {day.getDate()}
@@ -136,11 +136,11 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
               );
             })}
           </div>
-          <div className="mt-2 flex justify-end border-t border-outline-variant/50 pt-2">
+          <div className="mt-2 flex justify-end border-t-2 border-ink/15 pt-2">
             <button
               type="button"
               onClick={() => choose(null)}
-              className="rounded-full px-3 py-1 font-label-md text-label-md text-on-surface-variant hover:text-primary"
+              className="rounded-full px-3 py-1 text-lg text-ink/70 hover:text-ink"
             >
               {t("datePicker.clear")}
             </button>

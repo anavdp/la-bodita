@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import type { BroadcastList, Household } from "../../api/types";
 import { iconUrl } from "../../components/playful/icons";
+import { menuItem, menuPanel } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 
@@ -20,8 +21,8 @@ const broadcastLists: BroadcastList[] = ["bride", "groom"];
 const broadcastIcon: Record<BroadcastList, string> = { bride: iconUrl("dress.png"), groom: iconUrl("suit.png") };
 const broadcastLabelKey = (list: BroadcastList | null): TranslationKey => `households.broadcast.${list ?? "none"}`;
 
-const menuItem =
-  "flex items-center gap-2 rounded px-3 py-2 text-left font-label-md text-label-md transition-colors hover:bg-surface-container-high";
+const headerCell = "px-4 py-4 font-normal";
+const cell = "px-4 py-3";
 
 /**
  * The households, by name and size. Someone invited alone is a household too,
@@ -60,42 +61,43 @@ export function HouseholdsPanel({
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <label className="flex w-max items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">
+    <div className="flex flex-col font-playful text-ink">
+      <label className="flex w-max items-center gap-3 px-6 py-4 text-lg">
         <input
           type="checkbox"
           checked={showSolo}
           onChange={(event) => setShowSolo(event.target.checked)}
-          className="h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary"
+          className="h-5 w-5 rounded border-2 border-ink text-sky focus:ring-sky"
         />
         {t("households.showSolo")}
       </label>
 
       {visible.length === 0 ? (
-        <p className="font-body-lg text-body-lg text-on-surface-variant">{t("households.emptyFamilies")}</p>
+        <p className="px-6 pb-6 text-lg">{t("households.emptyFamilies")}</p>
       ) : (
         <div className={`overflow-x-auto ${openMenu === null ? "" : "pb-36"}`}>
           <table className="w-full border-collapse text-left">
             <thead>
-              <tr className="border-b border-surface-variant font-label-md text-label-md uppercase text-on-surface-variant">
-                <th className="px-4 py-4 font-semibold">{t("households.column.name")}</th>
-                <th className="px-4 py-4 font-semibold">{t("households.column.guests")}</th>
-                <th className="px-4 py-4 text-center font-semibold">{t("households.column.broadcast")}</th>
-                <th className="px-4 py-4 text-right font-semibold">{t("households.column.actions")}</th>
+              <tr className="border-y-[2.5px] border-ink bg-cream text-[15px] uppercase tracking-wider">
+                <th className={`${headerCell} border-r-2 border-ink/20 pl-6`}>{t("households.column.name")}</th>
+                <th className={headerCell}>{t("households.column.guests")}</th>
+                <th className={`${headerCell} text-center`}>{t("households.column.broadcast")}</th>
+                <th className={`${headerCell} pr-6 text-right`}>{t("households.column.actions")}</th>
               </tr>
             </thead>
-            <tbody className="font-body-sm text-body-sm">
+            <tbody className="text-lg">
               {visible.map((household) => (
-                <tr key={household.id} className="table-row-hover border-b border-surface-container transition-colors">
-                  <td className="px-4 py-4">
-                    <span className="font-title-lg text-title-lg text-on-surface">{household.name}</span>
-                  </td>
-                  <td className="px-4 py-4 text-on-surface-variant">{household.guestIds.length}</td>
+                <tr
+                  key={household.id}
+                  className="border-b-2 border-ink/15 transition-colors last:border-b-0 hover:bg-accent/25"
+                >
+                  <td className={`${cell} border-r-2 border-ink/20 pl-6`}>{household.name}</td>
+                  <td className={cell}>{household.guestIds.length}</td>
 
                   {/* Like the guests' RSVP: the list is the emoji itself, and the emoji is
                       how you change it. A household on no list gets a faint circle, so the
                       cell is still something to click. */}
-                  <td className="px-4 py-4 text-center">
+                  <td className={`${cell} text-center`}>
                     <div className="relative inline-block">
                       <button
                         type="button"
@@ -106,7 +108,7 @@ export function HouseholdsPanel({
                         title={t(broadcastLabelKey(household.broadcastList))}
                         aria-expanded={isOpen(household, "broadcast")}
                         onClick={() => toggleMenu(household, "broadcast")}
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-outline-variant transition-opacity hover:opacity-70 hover:text-primary"
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-ink/40 transition-colors hover:bg-accent/60 hover:text-ink"
                       >
                         {household.broadcastList === null ? (
                           <span className="material-symbols-outlined" aria-hidden="true">
@@ -118,7 +120,7 @@ export function HouseholdsPanel({
                       </button>
 
                       {isOpen(household, "broadcast") && (
-                        <div className="absolute left-1/2 z-10 mt-2 flex w-max -translate-x-1/2 flex-col gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest p-2 shadow-lg">
+                        <div className={`${menuPanel} left-1/2 -translate-x-1/2`}>
                           {broadcastLists
                             .filter((list) => list !== household.broadcastList)
                             .map((list) => (
@@ -138,7 +140,7 @@ export function HouseholdsPanel({
                               onClick={() => changeBroadcastList(household, null)}
                               className={menuItem}
                             >
-                              <span className="material-symbols-outlined text-outline-variant" aria-hidden="true">
+                              <span className="material-symbols-outlined text-ink/40" aria-hidden="true">
                                 radio_button_unchecked
                               </span>
                               {t("households.broadcast.clear")}
@@ -149,21 +151,21 @@ export function HouseholdsPanel({
                     </div>
                   </td>
 
-                  <td className="px-4 py-4 text-right">
+                  <td className={`${cell} pr-6 text-right`}>
                     <div className="relative inline-block">
                       <button
                         type="button"
                         aria-label={t("households.actions.open", { name: household.name })}
                         aria-expanded={isOpen(household, "actions")}
                         onClick={() => toggleMenu(household, "actions")}
-                        className="text-outline transition-colors hover:text-primary"
+                        className="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-accent/60"
                       >
                         <span className="material-symbols-outlined" aria-hidden="true">
-                          more_horiz
+                          more_vert
                         </span>
                       </button>
                       {isOpen(household, "actions") && (
-                        <div className="absolute right-0 z-10 mt-2 flex w-max flex-col gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest p-2 shadow-lg">
+                        <div className={`${menuPanel} right-0`}>
                           <button type="button" onClick={() => act(onDetails, household)} className={menuItem}>
                             {t("households.actions.details")}
                           </button>
@@ -173,7 +175,7 @@ export function HouseholdsPanel({
                           <button
                             type="button"
                             onClick={() => act(onDelete, household)}
-                            className={`${menuItem} text-error`}
+                            className={`${menuItem} !text-coral`}
                           >
                             {t("households.actions.delete")}
                           </button>

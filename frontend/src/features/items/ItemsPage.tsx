@@ -1,13 +1,16 @@
 import { useMemo, useState } from "react";
 
 import type { Item, ItemDraft, ItemStatus, Task } from "../../api/types";
+import { CategoryIcon } from "../../components/playful/IconPicker";
+import { isIconName } from "../../components/playful/iconCatalog";
+import { PageHeader } from "../../components/playful/PageHeader";
+import { outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { CategoryChips } from "../planning/CategoryChips";
 import { CategoryFormDialog } from "../planning/CategoryFormDialog";
-import { PageHeader } from "../planning/PageHeader";
 import { formatDueDate } from "../planning/schedule";
 import { usePlanning } from "../planning/usePlanning";
 import { ItemDetail, instagramHandle } from "./ItemDetail";
@@ -17,7 +20,7 @@ import { statusPill } from "./itemStatus";
 /** Which item dialog is open: an item to edit, or null to create one. */
 type DialogTarget = { item: Item | null } | null;
 
-const card = "rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]";
+const card = `${outlinedCard} p-4`;
 
 /**
  * Every vendor, place and thing being decided on, filterable by category, with
@@ -80,10 +83,11 @@ export function ItemsPage() {
     }
   };
 
-  const emojiOf = (item: Item) => {
+  /** The subcategory's icon or emoji, else its category's. */
+  const markOf = (item: Item) => {
     const category = item.categoryId === null ? undefined : categoriesById.get(item.categoryId);
     const subcategory = category?.subcategories.find((each) => each.id === item.subcategoryId);
-    return subcategory?.emoji ?? category?.emoji ?? "•";
+    return subcategory?.emoji ?? category?.emoji ?? null;
   };
 
   /** Who to talk to, then how many tasks are still open. */
@@ -95,50 +99,46 @@ export function ItemsPage() {
 
   const listArea = () => {
     if (isLoading) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("items.loading")}</p>;
+      return <p className="font-playful text-xl text-ink/70">{t("items.loading")}</p>;
     }
     if (hasLoadError) {
       return (
         <div className="flex flex-col items-start gap-4">
-          <p className="font-body-lg text-body-lg text-error">{t("planning.loadFailed")}</p>
-          <button
-            type="button"
-            onClick={planning.reload}
-            className="rounded-full border border-primary px-6 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-          >
+          <p className="font-playful text-xl text-coral">{t("planning.loadFailed")}</p>
+          <button type="button" onClick={planning.reload} className={secondaryButton}>
             {t("planning.retry")}
           </button>
         </div>
       );
     }
     if (items.length === 0) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("items.empty")}</p>;
+      return <p className="font-playful text-xl text-ink/70">{t("items.empty")}</p>;
     }
     if (visible.length === 0) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("items.noMatches")}</p>;
+      return <p className="font-playful text-xl text-ink/70">{t("items.noMatches")}</p>;
     }
     return (
       <ul className="flex flex-col">
         {visible.map((item) => (
-          <li key={item.id} className="border-b border-surface-variant last:border-b-0">
+          <li key={item.id} className="border-b-2 border-ink/10 last:border-b-0">
             <button
               type="button"
               onClick={() => setSelectedId(item.id)}
               aria-current={item.id === selected?.id}
               className={`grid w-full grid-cols-[2.5rem_1fr_auto] items-center gap-3 rounded-2xl px-3 py-4 text-left transition-colors sm:grid-cols-[2.5rem_1fr_8rem_8rem] ${
-                item.id === selected?.id ? "bg-primary-container/40" : "hover:bg-surface-container-low"
+                item.id === selected?.id ? "bg-accent/60" : "hover:bg-accent/25"
               }`}
             >
-              <span className="text-2xl" aria-hidden="true">
-                {emojiOf(item)}
+              <span className="flex h-10 w-10 items-center justify-center text-2xl" aria-hidden="true">
+                {isIconName(markOf(item)) ? <CategoryIcon value={markOf(item)} className="h-10 w-10" /> : (markOf(item) ?? "•")}
               </span>
               <span className="min-w-0">
-                <span className="block truncate font-label-lg text-label-lg text-on-surface">{item.name}</span>
-                <span className="block truncate font-body-sm text-body-sm text-on-surface-variant">
+                <span className="block truncate font-playful text-xl text-ink">{item.name}</span>
+                <span className="block truncate font-playful text-base text-ink/70">
                   {sublineOf(item)}
                 </span>
               </span>
-              <span className="hidden font-body-sm text-body-sm text-on-surface-variant sm:block">
+              <span className="hidden font-playful text-base text-ink sm:block">
                 {item.nextTask ? `📅 ${formatDueDate(item.nextTask.dueDate, language)}` : "–"}
               </span>
               <span className="justify-self-end">
@@ -153,12 +153,11 @@ export function ItemsPage() {
 
   return (
     <>
-      <PageHeader
-        title={t("items.title")}
-        subtitle={t("items.subtitle")}
-        actionLabel={t("items.add")}
-        onAction={() => setDialogTarget({ item: null })}
-      />
+      <PageHeader title={t("items.title")} subtitle={t("items.subtitle")} art="title-car.png">
+        <button type="button" onClick={() => setDialogTarget({ item: null })} className={primaryButton}>
+          {t("items.add")}
+        </button>
+      </PageHeader>
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <CategoryChips
@@ -170,14 +169,14 @@ export function ItemsPage() {
         <button
           type="button"
           onClick={() => setIsCategoryDialogOpen(true)}
-          className="rounded-full border border-dashed border-primary px-4 py-1.5 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
+          className="rounded-full border-[2.5px] border-dashed border-ink px-4 py-1.5 font-playful text-lg text-ink transition-colors hover:bg-accent/40"
         >
           {t("categories.add")}
         </button>
       </div>
 
       {actionError !== null && (
-        <p role="alert" className="mb-4 font-body-sm text-body-sm text-error">
+        <p role="alert" className="mb-4 font-playful text-lg text-coral">
           {t(actionError)}
         </p>
       )}

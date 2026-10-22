@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import type { Category, Item, ItemStatus, Task, TaskDraft } from "../../api/types";
 import { Dropdown } from "../../components/form/Dropdown";
 import { useTranslation } from "../../i18n/LanguageProvider";
+import { CategoryIcon } from "../../components/playful/IconPicker";
+import { outlinedCard } from "../../components/playful/styles";
 import { AddTaskForm } from "../planning/AddTaskForm";
 import { categoryLabel } from "../planning/CategoryChips";
 import { formatDueDate, formatDueTime, isOverdue } from "../planning/schedule";
@@ -31,14 +33,14 @@ export function instagramHandle(value: string): { handle: string; href: string }
 
 function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[7rem_1fr] gap-3 border-b border-surface-variant py-3 last:border-b-0">
-      <dt className="font-body-sm text-body-sm text-on-surface-variant">{label}</dt>
-      <dd className="font-body-sm text-body-sm text-on-surface">{children}</dd>
+    <div className="grid grid-cols-[7rem_1fr] gap-3 border-b-2 border-ink/10 py-3 last:border-b-0">
+      <dt className="text-base text-ink/70">{label}</dt>
+      <dd className="text-lg text-ink">{children}</dd>
     </div>
   );
 }
 
-const linkStyle = "font-label-md text-label-md text-primary hover:underline";
+const linkStyle = "text-lg text-sky-deep underline-offset-4 hover:underline";
 
 /** Everything about one item: how to reach them, where things stand, and what's left to do. */
 export function ItemDetail({
@@ -64,18 +66,19 @@ export function ItemDetail({
   return (
     <section
       aria-labelledby={titleId}
-      className="flex flex-col gap-6 rounded-[40px_20px_30px_10px] bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]"
+      className={`flex flex-col gap-6 ${outlinedCard} p-8 font-playful text-ink`}
     >
       <header className="flex flex-col items-start gap-2">
         {category && (
           <span
-            className="rounded-full px-3 py-0.5 font-label-md text-[12px] uppercase tracking-wide text-on-surface"
-            style={{ backgroundColor: `${category.color}26` }}
+            className="inline-flex items-center gap-2 rounded-full border-2 border-ink px-3 py-0.5 text-base"
+            style={{ backgroundColor: `${category.color}33` }}
           >
+            <CategoryIcon value={category.emoji} />
             {categoryLabel(category)}
           </span>
         )}
-        <h2 id={titleId} className="font-headline-md text-headline-md text-on-surface">
+        <h2 id={titleId} className="font-playful-display text-[32px] leading-tight text-ink">
           {item.name}
         </h2>
         <div className="flex flex-wrap items-center gap-3">
@@ -90,7 +93,7 @@ export function ItemDetail({
           <button type="button" onClick={onEdit} className={linkStyle}>
             {t("planning.edit")}
           </button>
-          <button type="button" onClick={onDelete} className="font-label-md text-label-md text-error hover:underline">
+          <button type="button" onClick={onDelete} className="text-lg text-coral underline-offset-4 hover:underline">
             {t("planning.delete")}
           </button>
         </div>
@@ -131,9 +134,9 @@ export function ItemDetail({
       </dl>
 
       <div className="flex flex-col gap-2">
-        <h3 className="font-label-lg text-label-lg text-primary">☑ {t("tasks.heading")}</h3>
+        <h3 className="font-playful-display text-xl uppercase tracking-wide">{t("tasks.heading")}</h3>
         {ordered.length === 0 && !isAdding && (
-          <p className="font-body-sm text-body-sm text-on-surface-variant">{t("tasks.none")}</p>
+          <p className="text-lg text-ink/70">{t("tasks.none")}</p>
         )}
         <ul className="flex flex-col">
           {ordered.map((task) => (
@@ -143,21 +146,15 @@ export function ItemDetail({
                   type="checkbox"
                   checked={task.isDone}
                   onChange={() => onToggleTask(task)}
-                  className="h-5 w-5 cursor-pointer accent-primary"
+                  className="h-6 w-6 cursor-pointer rounded-md border-[2.5px] border-ink bg-cream-light text-sky focus:ring-sky"
                 />
-                <span
-                  className={`font-body-sm text-body-sm ${
-                    task.isDone ? "text-on-surface-variant line-through" : "text-on-surface"
-                  }`}
-                >
+                <span className={`text-lg ${task.isDone ? "text-ink/50 line-through" : ""}`}>
                   {task.title}
                 </span>
               </label>
               {task.dueDate && !task.isDone && (
                 <span
-                  className={`font-label-md text-label-md ${
-                    isOverdue(task) ? "text-error" : "text-on-surface-variant"
-                  }`}
+                  className={`text-base ${isOverdue(task) ? "text-coral" : "text-ink/70"}`}
                 >
                   {formatDueDate(task.dueDate, language)}
                   {task.dueTime && ` · ${formatDueTime(task.dueTime)}`}
@@ -167,7 +164,7 @@ export function ItemDetail({
                 type="button"
                 aria-label={t("tasks.delete", { title: task.title })}
                 onClick={() => onDeleteTask(task)}
-                className="px-1 text-on-surface-variant opacity-40 transition-opacity hover:text-error hover:opacity-100 group-hover:opacity-100"
+                className="px-1 text-xl text-ink opacity-40 transition-opacity hover:text-coral hover:opacity-100 group-hover:opacity-100"
               >
                 ×
               </button>
@@ -184,7 +181,7 @@ export function ItemDetail({
       </div>
 
       {item.notes && (
-        <p className="whitespace-pre-line rounded-2xl bg-surface-container-low p-4 font-body-sm text-body-sm italic text-on-surface-variant">
+        <p className="whitespace-pre-line rounded-[20px] border-2 border-dashed border-ink/40 bg-butter/40 p-4 text-lg text-ink">
           {item.notes}
         </p>
       )}

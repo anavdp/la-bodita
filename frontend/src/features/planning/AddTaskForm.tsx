@@ -7,7 +7,7 @@ import type { TranslationKey } from "../../i18n/translations";
 import { DatePicker } from "../../components/form/DatePicker";
 import { Dropdown } from "../../components/form/Dropdown";
 import { fieldLabel, pillField } from "../../components/form/styles";
-import { primaryButton, secondaryButton } from "../households/dialogStyles";
+import { primaryButton, secondaryButton } from "../../components/playful/styles";
 
 interface AddTaskFormProps {
   /** The item the task is for; omitted, the form offers a picker over `items`. */
@@ -56,7 +56,7 @@ export function AddTaskForm({ itemId, items = [], onAdd, onClose }: AddTaskFormP
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="flex flex-col gap-3 rounded-[24px_24px_24px_8px] border border-outline-variant/60 bg-surface-container-lowest p-4"
+      className="flex flex-col gap-3 rounded-[24px] border-[2.5px] border-ink bg-cream-light p-4 font-playful text-ink"
     >
       <div>
         <label htmlFor={idFor("title")} className={fieldLabel}>
@@ -104,7 +104,7 @@ export function AddTaskForm({ itemId, items = [], onAdd, onClose }: AddTaskFormP
         </div>
       </div>
       {error !== null && (
-        <p role="alert" className="font-body-sm text-body-sm text-error">
+        <p role="alert" className="text-lg text-coral">
           {t(error)}
         </p>
       )}

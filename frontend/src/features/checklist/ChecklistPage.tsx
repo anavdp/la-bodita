@@ -3,13 +3,16 @@ import type { ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import type { Category, Task } from "../../api/types";
+import { CategoryIcon } from "../../components/playful/IconPicker";
+import { isIconName } from "../../components/playful/iconCatalog";
+import { PageHeader } from "../../components/playful/PageHeader";
+import { outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { AddTaskForm } from "../planning/AddTaskForm";
 import { CategoryChips, chip } from "../planning/CategoryChips";
-import { PageHeader } from "../planning/PageHeader";
 import { formatDueDate, formatDueTime, groupOpenTasks, isOverdue } from "../planning/schedule";
 import { usePlanning } from "../planning/usePlanning";
 
@@ -28,27 +31,30 @@ function TaskRow({ task, category, onToggle }: TaskRowProps) {
     : "–";
 
   return (
-    <li className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 border-b border-surface-variant py-3 last:border-b-0 sm:grid-cols-[1fr_14rem_8rem]">
+    <li className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 border-b-2 border-ink/10 py-3 font-playful text-ink last:border-b-0 sm:grid-cols-[1fr_14rem_8rem]">
       <label className="flex cursor-pointer items-center gap-4">
         <input
           type="checkbox"
           checked={task.isDone}
           onChange={() => onToggle(task)}
-          className="h-5 w-5 shrink-0 cursor-pointer accent-primary"
+          className="h-6 w-6 shrink-0 cursor-pointer rounded-md border-[2.5px] border-ink bg-cream-light text-sky focus:ring-sky"
         />
-        <span
-          className={`font-body-lg text-body-lg ${task.isDone ? "text-on-surface-variant line-through" : "text-on-surface"}`}
-        >
+        <span className={`text-xl ${task.isDone ? "text-ink/50 line-through" : ""}`}>
           {task.title}
         </span>
       </label>
-      <span className="col-start-1 row-start-2 truncate pl-9 font-body-sm text-body-sm text-on-surface-variant sm:col-start-2 sm:row-start-1 sm:pl-0">
-        {task.itemName && [category?.emoji, task.itemName].filter(Boolean).join(" ")}
+      <span className="col-start-1 row-start-2 flex min-w-0 items-center gap-2 pl-10 text-base text-ink/70 sm:col-start-2 sm:row-start-1 sm:pl-0">
+        {task.itemName && (
+          <>
+            <CategoryIcon value={category?.emoji} />
+            <span className="truncate">
+              {[isIconName(category?.emoji) ? null : category?.emoji, task.itemName].filter(Boolean).join(" ")}
+            </span>
+          </>
+        )}
       </span>
       <span
-        className={`text-right font-label-md text-label-md ${
-          isOverdue(task) ? "text-error" : "text-on-surface"
-        }`}
+        className={`text-right text-base ${isOverdue(task) ? "text-coral" : ""}`}
       >
         {due}
       </span>
@@ -60,7 +66,10 @@ function TaskSection({ title, children }: { title: string; children: ReactNode }
   const headingId = useId();
   return (
     <section aria-labelledby={headingId} className="mb-6 last:mb-0">
-      <h2 id={headingId} className="mb-1 font-label-md text-label-md uppercase tracking-wide text-on-surface-variant">
+      <h2
+        id={headingId}
+        className="mb-1 inline-block -rotate-1 rounded-md border-2 border-ink bg-butter px-3 py-0.5 font-playful-display text-base uppercase tracking-wide text-ink"
+      >
         {title}
       </h2>
       <ul>{children}</ul>
@@ -116,17 +125,13 @@ export function ChecklistPage() {
 
   const listArea = () => {
     if (isLoading) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("checklist.loading")}</p>;
+      return <p className="font-playful text-xl text-ink/70">{t("checklist.loading")}</p>;
     }
     if (hasLoadError) {
       return (
         <div className="flex flex-col items-start gap-4">
-          <p className="font-body-lg text-body-lg text-error">{t("planning.loadFailed")}</p>
-          <button
-            type="button"
-            onClick={planning.reload}
-            className="rounded-full border border-primary px-6 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-          >
+          <p className="font-playful text-xl text-coral">{t("planning.loadFailed")}</p>
+          <button type="button" onClick={planning.reload} className={secondaryButton}>
             {t("planning.retry")}
           </button>
         </div>
@@ -134,14 +139,14 @@ export function ChecklistPage() {
     }
     if (showing === "done") {
       return done.length === 0 ? (
-        <p className="font-body-lg text-body-lg text-on-surface-variant">{t("checklist.empty")}</p>
+        <p className="font-playful text-xl text-ink/70">{t("checklist.empty")}</p>
       ) : (
         <ul>{done.map(row)}</ul>
       );
     }
     const groups = groupOpenTasks(filtered);
     if (groups.length === 0) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("checklist.empty")}</p>;
+      return <p className="font-playful text-xl text-ink/70">{t("checklist.empty")}</p>;
     }
     return groups.map((group) => (
       <TaskSection key={group.key} title={t(`checklist.group.${group.key}`)}>
@@ -152,12 +157,11 @@ export function ChecklistPage() {
 
   return (
     <>
-      <PageHeader
-        title={t("checklist.title")}
-        subtitle={t("checklist.subtitle")}
-        actionLabel={t("checklist.add")}
-        onAction={() => setSearchParams({ add: "task" })}
-      />
+      <PageHeader title={t("checklist.title")} subtitle={t("checklist.subtitle")} art="title-checklist.png">
+        <button type="button" onClick={() => setSearchParams({ add: "task" })} className={primaryButton}>
+          {t("checklist.add")}
+        </button>
+      </PageHeader>
 
       {isAdding && (
         <div className="mb-6">
@@ -188,12 +192,12 @@ export function ChecklistPage() {
       </div>
 
       {actionError !== null && (
-        <p role="alert" className="mb-4 font-body-sm text-body-sm text-error">
+        <p role="alert" className="mb-4 font-playful text-lg text-coral">
           {t(actionError)}
         </p>
       )}
 
-      <div className="rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
+      <div className={`${outlinedCard} p-6`}>
         {listArea()}
       </div>
     </>

@@ -4,7 +4,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import { rsvpUrl } from "../guests/households";
 
 const iconButton =
-  "flex h-10 w-10 items-center justify-center rounded-full text-outline transition-colors hover:bg-surface-container-high hover:text-primary";
+  "flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-accent/60";
 
 /** Open or copy a household's private RSVP page. */
 export function RsvpLinkActions({ label, token }: { label: string; token: string }) {

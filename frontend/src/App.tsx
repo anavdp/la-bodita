@@ -43,9 +43,9 @@ export function AppRoutes() {
         <Route path="/dashboard" element={<ComingSoon titleKey="nav.dashboard" />} />
         <Route path="/items" element={<ItemsPage />} />
         <Route path="/checklist" element={<ChecklistPage />} />
-        <Route path="/calendar" element={<ComingSoon titleKey="nav.calendar" />} />
-        <Route path="/budget" element={<ComingSoon titleKey="nav.budget" />} />
-        <Route path="/documents" element={<ComingSoon titleKey="nav.documents" />} />
+        <Route path="/calendar" element={<ComingSoon titleKey="nav.calendar" art="title-calendar.png" />} />
+        <Route path="/budget" element={<ComingSoon titleKey="nav.budget" art="title-budget.png" />} />
+        <Route path="/documents" element={<ComingSoon titleKey="nav.documents" art="title-documents.png" />} />
         <Route path="/categories" element={<ComingSoon titleKey="nav.categories" />} />
         <Route path="*" element={<Navigate to="/guests" replace />} />
       </Route>

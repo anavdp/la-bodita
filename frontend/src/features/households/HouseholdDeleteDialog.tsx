@@ -38,12 +38,12 @@ export function HouseholdDeleteDialog({ household, onConfirm, onClose }: Househo
         <h2 id={titleId} className={dialogTitle}>
           {t("households.delete.title", { name: household.name })}
         </h2>
-        <p className="mb-6 font-body-lg text-body-lg text-on-surface-variant">
+        <p className="mb-6 text-xl text-ink/80">
           {count === 1 ? t("households.delete.questionOne") : t("households.delete.questionMany", { count })}
         </p>
 
         {hasFailed && (
-          <p role="alert" className="mb-4 font-body-sm text-body-sm text-error">
+          <p role="alert" className="mb-4 text-lg text-coral">
             {t("households.delete.failed")}
           </p>
         )}
@@ -61,7 +61,7 @@ export function HouseholdDeleteDialog({ household, onConfirm, onClose }: Househo
             type="button"
             disabled={isBusy}
             onClick={() => void confirm(true)}
-            className="rounded-full bg-error px-6 py-3 font-label-md text-label-md text-on-error shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-[22px] border-[2.5px] border-ink bg-coral px-6 py-3 font-playful text-[22px] text-white transition-[filter] hover:brightness-95 disabled:opacity-50"
           >
             {t("households.delete.withGuests")}
           </button>
