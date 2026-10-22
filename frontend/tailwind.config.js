@@ -66,17 +66,20 @@ export default {
         "on-error": token("on-error"),
         "error-container": token("error-container"),
         "on-error-container": token("on-error-container"),
-        // Redesign proof of concept ("playful" look): fixed hexes for now, used
-        // only by the shell and the Guest List. They become tokens if it ships.
-        ink: "#1f1d2b",
-        cream: { DEFAULT: "#fdf5e6", light: "#fffbf3" },
-        sky: { DEFAULT: "#3f8cf3", deep: "#2b74e8" },
-        bubblegum: { DEFAULT: "#f9c4dd", deep: "#f2a6ca" },
-        butter: { DEFAULT: "#fbe48e", deep: "#f6c935" },
-        mint: "#3cbf6a",
-        coral: "#f2603e",
-        lilac: "#ddd3fb",
-        peach: "#fdd4b8",
+        // Redesign proof of concept ("playful" look), used by the shell, the Guest
+        // List and the side panels. Tokens like the rest, so dark mode can swap them.
+        ink: token("play-ink"),
+        cream: { DEFAULT: token("play-cream"), light: token("play-cream-light") },
+        sky: { DEFAULT: token("play-sky"), deep: token("play-sky-deep"), soft: token("play-sky-soft") },
+        periwinkle: { DEFAULT: token("play-periwinkle"), deep: token("play-periwinkle-deep") },
+        butter: { DEFAULT: token("play-butter"), deep: token("play-butter-deep") },
+        mint: { DEFAULT: token("play-mint"), soft: token("play-mint-soft") },
+        coral: { DEFAULT: token("play-coral"), soft: token("play-coral-soft") },
+        sidebar: token("play-sidebar"),
+        lilac: token("play-lilac"),
+        peach: token("play-peach"),
+        // The logo's lettering stays paper white on the blue in either theme.
+        paper: "#fdf5e6",
       },
       borderRadius: {
         DEFAULT: "0.25rem",

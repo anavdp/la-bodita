@@ -28,9 +28,9 @@ type OpenMenu = { guestId: number; kind: "rsvp" | "actions" } | null;
 
 /** The RSVP pill's fill: soft green, butter, or soft coral. */
 const rsvpPillClass: Record<RsvpStatus, string> = {
-  confirmed: "bg-[#c9efd3]",
+  confirmed: "bg-mint-soft",
   pending: "bg-butter",
-  declined: "bg-[#fcd0c3]",
+  declined: "bg-coral-soft",
 };
 
 /** "Maria Rossi" reads as MR, a guest with only a first name as its first letter. */
@@ -94,7 +94,7 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
             return (
               <tr
                 key={guest.id}
-                className="border-b-2 border-ink/15 transition-colors last:border-b-0 hover:bg-bubblegum/25"
+                className="border-b-2 border-ink/15 transition-colors last:border-b-0 hover:bg-periwinkle/25"
               >
                 <td className={`${cell} border-r-2 border-ink/20 pl-6`}>
                   <span className="flex items-center gap-3">
@@ -189,7 +189,7 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                       aria-label={t("guests.actions.open", { name })}
                       aria-expanded={isOpen(guest, "actions")}
                       onClick={() => toggleMenu(guest, "actions")}
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-bubblegum/60"
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-periwinkle/60"
                     >
                       <span className="material-symbols-outlined" aria-hidden="true">
                         more_vert
@@ -206,7 +206,7 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                                 closeMenus();
                                 onDelete(guest);
                               }}
-                              className={`${menuItem} text-coral hover:bg-[#fcd0c3]`}
+                              className={`${menuItem} text-coral hover:bg-coral-soft`}
                             >
                               {t("guests.deleteConfirm", { name })}
                             </button>

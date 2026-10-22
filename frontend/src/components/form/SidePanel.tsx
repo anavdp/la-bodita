@@ -6,7 +6,7 @@ import { useCloseOnEscape } from "../../features/households/dialogStyles";
 
 /** The scrolling middle of a panel, and the bar that keeps its buttons at the bottom. */
 export const panelBody = "flex flex-1 flex-col gap-5 overflow-y-auto px-8 py-6 font-playful text-ink";
-export const panelFooter = "flex flex-wrap justify-end gap-3 border-t-[2.5px] border-ink bg-bubblegum/40 px-8 py-4";
+export const panelFooter = "flex flex-wrap justify-end gap-3 border-t-[2.5px] border-ink bg-periwinkle/40 px-8 py-4";
 
 interface SidePanelProps {
   title: string;
@@ -34,7 +34,7 @@ export function SidePanel({ title, sticker, wide = false, onClose, children }: S
         data-testid="side-panel-backdrop"
         aria-hidden="true"
         onClick={onClose}
-        className="absolute inset-0 bg-ink/30"
+        className="absolute inset-0 bg-black/30 dark:bg-black/60"
       />
       <aside
         role="dialog"
@@ -44,7 +44,7 @@ export function SidePanel({ title, sticker, wide = false, onClose, children }: S
           wide ? "max-w-2xl" : "max-w-md"
         }`}
       >
-        <header className="flex items-center justify-between gap-4 border-b-[2.5px] border-ink bg-bubblegum px-8 py-5">
+        <header className="flex items-center justify-between gap-4 border-b-[2.5px] border-ink bg-periwinkle px-8 py-5">
           <div className="flex items-center gap-3">
             {sticker !== undefined && (
               <span

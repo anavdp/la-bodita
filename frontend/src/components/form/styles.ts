@@ -2,7 +2,7 @@
 export const fieldLabel = "mb-1.5 block font-playful text-[15px] uppercase tracking-wider text-ink";
 
 export const pillField =
-  "h-12 w-full rounded-[18px] border-[2.5px] border-ink bg-cream-light px-5 text-left font-playful text-lg text-ink transition-shadow placeholder:text-ink/50 hover:bg-white focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/25";
+  "h-12 w-full rounded-[18px] border-[2.5px] border-ink bg-cream-light px-5 text-left font-playful text-lg text-ink transition-shadow placeholder:text-ink/50 hover:border-sky focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/25";
 
 export const textArea =
   "w-full rounded-[18px] border-[2.5px] border-ink bg-cream-light px-5 py-3 font-playful text-lg text-ink transition-shadow placeholder:text-ink/50 focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/25";

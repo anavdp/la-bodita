@@ -106,7 +106,7 @@ export function GuestImportDialog({ weddingId, onImport, onClose }: GuestImportD
           2
         </span>
         {/* The whole dashed card is the file picker: the invisible input covers it. */}
-        <div className="relative flex flex-1 flex-col items-center gap-2 rounded-[24px] border-[2.5px] border-dashed border-ink bg-cream-light px-6 py-10 text-center transition-colors focus-within:border-sky hover:bg-bubblegum/30">
+        <div className="relative flex flex-1 flex-col items-center gap-2 rounded-[24px] border-[2.5px] border-dashed border-ink bg-cream-light px-6 py-10 text-center transition-colors focus-within:border-sky hover:bg-periwinkle/30">
           <span className="text-5xl" aria-hidden="true">
             📄
           </span>
@@ -181,7 +181,7 @@ export function GuestImportDialog({ weddingId, onImport, onClose }: GuestImportD
         )}
 
         {problemRows.length > 0 && (
-          <div className="rounded-[20px] border-[2.5px] border-ink bg-[#fcd0c3] p-4">
+          <div className="rounded-[20px] border-[2.5px] border-ink bg-coral-soft p-4">
             <p className="mb-2 font-playful-display text-lg">
               {count("guests.import.problemsOne", "guests.import.problemsMany", problemRows.length)}
             </p>

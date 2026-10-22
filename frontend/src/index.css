@@ -54,6 +54,25 @@
     --color-error-container: 249 222 220; /* #f9dedc */
     --color-on-error-container: 140 29 24; /* #8c1d18 */
     --grid-dot: rgba(160, 221, 255, 0.55);
+
+    /* Redesign proof of concept. The periwinkle is the palette's primary-container. */
+    --color-play-ink: 31 29 43; /* #1f1d2b */
+    --color-play-cream: 253 245 230; /* #fdf5e6 */
+    --color-play-cream-light: 255 251 243; /* #fffbf3 */
+    --color-play-sky: 63 140 243; /* #3f8cf3 */
+    --color-play-sky-deep: 43 116 232; /* #2b74e8 */
+    --color-play-sky-soft: 191 220 255; /* #bfdcff */
+    --color-play-sidebar: 63 140 243; /* #3f8cf3 */
+    --color-play-periwinkle: 193 206 254; /* #c1cefe */
+    --color-play-periwinkle-deep: 168 184 251; /* #a8b8fb */
+    --color-play-butter: 251 228 142; /* #fbe48e */
+    --color-play-butter-deep: 246 201 53; /* #f6c935 */
+    --color-play-mint: 60 191 106; /* #3cbf6a */
+    --color-play-mint-soft: 201 239 211; /* #c9efd3 */
+    --color-play-coral: 242 96 62; /* #f2603e */
+    --color-play-coral-soft: 252 208 195; /* #fcd0c3 */
+    --color-play-lilac: 221 211 251; /* #ddd3fb */
+    --color-play-peach: 253 212 184; /* #fdd4b8 */
   }
 
   /* The planner's dark theme. Statuses keep their hues but are lifted so they
@@ -109,6 +128,27 @@
     --color-tertiary-container: 110 134 255; /* #6e86ff */
     --color-on-tertiary-container: 11 22 89; /* #0b1659 */
     --grid-dot: rgba(160, 221, 255, 0.10);
+
+    /* Redesign proof of concept, dark option A ("Night sky"): the ink turns to
+       chalk, the paper to navy, and every fill sinks to a deep tint of itself so
+       the chalk lettering on it still reads. */
+    --color-play-ink: 236 232 250; /* #ece8fa */
+    --color-play-cream: 17 20 38; /* #111426 */
+    --color-play-cream-light: 27 31 54; /* #1b1f36 */
+    --color-play-sky: 92 156 255; /* #5c9cff */
+    --color-play-sky-deep: 63 132 240; /* #3f84f0 */
+    --color-play-sky-soft: 38 64 112; /* #264070 */
+    --color-play-sidebar: 29 63 138; /* #1d3f8a */
+    --color-play-periwinkle: 58 68 128; /* #3a4480 */
+    --color-play-periwinkle-deep: 74 86 156; /* #4a569c */
+    --color-play-butter: 102 82 24; /* #665218 */
+    --color-play-butter-deep: 246 201 53; /* #f6c935 */
+    --color-play-mint: 76 214 124; /* #4cd67c */
+    --color-play-mint-soft: 26 78 48; /* #1a4e30 */
+    --color-play-coral: 255 128 96; /* #ff8060 */
+    --color-play-coral-soft: 104 40 30; /* #68281e */
+    --color-play-lilac: 70 56 120; /* #463878 */
+    --color-play-peach: 110 64 40; /* #6e4028 */
   }
 
   body {
@@ -140,7 +180,7 @@
 
   /* Redesign proof of concept: the chunky outlined title and logo. */
   .playful-outline {
-    --outline: theme("colors.ink");
+    --outline: var(--playful-outline, rgb(var(--color-play-ink)));
     text-shadow:
       2px 0 0 var(--outline), -2px 0 0 var(--outline), 0 2px 0 var(--outline), 0 -2px 0 var(--outline),
       2px 2px 0 var(--outline), -2px 2px 0 var(--outline), 2px -2px 0 var(--outline), -2px -2px 0 var(--outline),

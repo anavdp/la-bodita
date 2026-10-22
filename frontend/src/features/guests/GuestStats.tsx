@@ -56,7 +56,7 @@ export function GuestStats({ guests, activeStatus, onToggleStatus }: GuestStatsP
     <div
       role="group"
       aria-label={t("guests.summary.label")}
-      className="flex flex-wrap divide-ink/40 rounded-[28px] border-[2.5px] border-ink bg-bubblegum p-2 md:flex-nowrap md:divide-x-2"
+      className="flex flex-wrap divide-ink/40 rounded-[28px] border-[2.5px] border-ink bg-periwinkle p-2 md:flex-nowrap md:divide-x-2"
     >
       {totals.map(({ labelKey, count }) => (
         <div key={labelKey} className={cellSlot}>

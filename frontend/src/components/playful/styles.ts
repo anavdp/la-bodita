@@ -1,6 +1,6 @@
 /**
  * The redesign proof of concept's shared look: cream paper, thick ink
- * outlines, bubblegum and sky pills. Only the shell and the Guest List use it
+ * outlines, periwinkle and sky pills. Only the shell and the Guest List use it
  * so far; rolling it out means moving the other screens onto these too.
  */
 
@@ -10,11 +10,11 @@ const outlinedPill =
 /** The page's main action: sky blue with white lettering. */
 export const primaryButton = `${outlinedPill} bg-sky px-6 py-3 text-[22px] !text-white hover:bg-sky-deep`;
 
-/** Every other action: bubblegum pink. */
-export const secondaryButton = `${outlinedPill} bg-bubblegum px-6 py-3 text-[22px] hover:bg-bubblegum-deep`;
+/** Every other action: periwinkle pink. */
+export const secondaryButton = `${outlinedPill} bg-periwinkle px-6 py-3 text-[22px] hover:bg-periwinkle-deep`;
 
 /** The same pink, sized for the top bar. */
-export const compactButton = `${outlinedPill} bg-bubblegum px-5 py-2 text-lg hover:bg-bubblegum-deep`;
+export const compactButton = `${outlinedPill} bg-periwinkle px-5 py-2 text-lg hover:bg-periwinkle-deep`;
 
 /** The outlined card everything on a screen sits in. */
 export const outlinedCard = "rounded-[28px] border-[2.5px] border-ink bg-cream-light";
@@ -26,10 +26,10 @@ export const pageTitle =
 export const pageTagline = "mt-3 font-playful text-xl text-ink";
 
 /** Initials avatars cycle through the soft pastels, so neighbours rarely match. */
-export const avatarTones = ["bg-bubblegum", "bg-[#bfdcff]", "bg-[#c9efd3]", "bg-lilac", "bg-peach"];
+export const avatarTones = ["bg-periwinkle", "bg-sky-soft", "bg-mint-soft", "bg-lilac", "bg-peach"];
 
 /** A floating menu, as opened from a table row. */
 export const menuPanel =
   "absolute z-10 mt-2 flex w-max flex-col gap-1 rounded-2xl border-2 border-ink bg-cream-light p-2 font-playful shadow-[4px_4px_0_rgba(31,29,43,0.15)]";
 export const menuItem =
-  "flex items-center gap-2 rounded-xl px-3 py-2 text-left text-lg text-ink transition-colors hover:bg-bubblegum/60";
+  "flex items-center gap-2 rounded-xl px-3 py-2 text-left text-lg text-ink transition-colors hover:bg-periwinkle/60";

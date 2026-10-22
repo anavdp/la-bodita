@@ -42,7 +42,7 @@ const tabLink =
   (edge: string) =>
   ({ isActive }: { isActive: boolean }) =>
     `border-[2.5px] border-ink px-10 py-2 font-playful text-[22px] text-ink transition-colors ${edge} ${
-      isActive ? "bg-bubblegum" : "bg-cream-light hover:bg-bubblegum/40"
+      isActive ? "bg-periwinkle" : "bg-cream-light hover:bg-periwinkle/40"
     }`;
 
 /**

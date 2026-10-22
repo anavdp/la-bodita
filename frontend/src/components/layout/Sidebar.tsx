@@ -5,7 +5,7 @@ import { useWedding } from "../../wedding/WeddingProvider";
 import { daysUntil } from "./countdown";
 import { navigationItems } from "./navigationItems";
 
-const activeItem = "border-ink bg-bubblegum";
+const activeItem = "border-ink bg-periwinkle";
 const restingItem = "border-transparent hover:bg-white/15";
 
 export function Sidebar() {
@@ -21,10 +21,10 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-20 hidden h-full w-[260px] flex-col border-r-[2.5px] border-ink bg-sky py-6 font-playful text-ink md:flex">
+    <aside className="fixed left-0 top-0 z-20 hidden h-full w-[260px] flex-col border-r-[2.5px] border-ink bg-sidebar py-6 font-playful text-ink md:flex">
       <div className="mb-6 px-6">
         {/* The confetti dashes and the sticker's hearts are the mockup's doodles, kept as plain marks. */}
-        <h1 className="playful-outline -rotate-3 font-playful-logo text-[52px] leading-none text-cream">
+        <h1 className="playful-outline -rotate-3 font-playful-logo text-[52px] leading-none text-paper [--playful-outline:#1f1d2b]">
           {wedding?.name ?? "La Bodita"}
         </h1>
         <p className="mt-5 inline-block -rotate-6 rounded-md border-[2.5px] border-ink bg-butter px-4 py-2 font-playful-display text-2xl uppercase leading-tight shadow-[3px_3px_0_rgba(31,29,43,0.2)]">
@@ -70,7 +70,7 @@ export function Sidebar() {
         </button>
         <div className="flex items-center">
           <div
-            className="mr-3 flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-ink bg-bubblegum text-xl"
+            className="mr-3 flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-ink bg-periwinkle text-xl"
             aria-hidden="true"
           >
             👰

@@ -6,7 +6,7 @@ import { useTheme } from "../../theme/ThemeProvider";
 import { compactButton } from "../playful/styles";
 
 const iconButton =
-  "flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-bubblegum/60 disabled:cursor-not-allowed disabled:opacity-50";
+  "flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-periwinkle/60 disabled:cursor-not-allowed disabled:opacity-50";
 
 export function TopBar() {
   const { t } = useTranslation();
