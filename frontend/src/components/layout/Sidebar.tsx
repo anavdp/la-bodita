@@ -51,11 +51,6 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Stand-in for the mockup's getaway car illustration. */}
-      <p aria-hidden="true" className="px-6 pb-2 text-5xl">
-        🚗💨
-      </p>
-
       <div className="mx-4 mt-2 border-t-2 border-ink/70 pt-3">
         <button
           type="button"
