@@ -9,6 +9,7 @@ from app.models.category import Category, Subcategory
 from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin, stored_as_text
 
 if TYPE_CHECKING:
+    from app.models.budget_line import BudgetLine
     from app.models.requirement import Requirement
 
 
@@ -53,6 +54,12 @@ class Item(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     requirements: Mapped[list["Requirement"]] = relationship(
         back_populates="item",
         order_by="(Requirement.due_date.is_(None), Requirement.due_date, Requirement.due_time, Requirement.id)",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    budget_lines: Mapped[list["BudgetLine"]] = relationship(
+        back_populates="item",
+        order_by="BudgetLine.id",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )

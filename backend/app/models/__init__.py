@@ -1,3 +1,4 @@
+from app.models.budget_line import BudgetLine, BudgetLineStatus
 from app.models.category import Category, Subcategory
 from app.models.guest import (
     Guest,
@@ -13,6 +14,8 @@ from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixi
 from app.models.wedding import Wedding
 
 __all__ = [
+    "BudgetLine",
+    "BudgetLineStatus",
     "Category",
     "Guest",
     "GuestGender",

@@ -1,3 +1,4 @@
+from app.schemas.budget_line import BudgetLineCreate, BudgetLineRead, BudgetLineUpdate
 from app.schemas.category import (
     CategoryCreate,
     CategoryRead,
@@ -26,6 +27,9 @@ from app.schemas.household import (
 from app.schemas.wedding import WeddingRead
 
 __all__ = [
+    "BudgetLineCreate",
+    "BudgetLineRead",
+    "BudgetLineUpdate",
     "CategoryCreate",
     "CategoryRead",
     "CategoryUpdate",
