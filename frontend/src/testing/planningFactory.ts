@@ -1,4 +1,4 @@
-import type { Category, Item, Task } from "../api/types";
+import type { BudgetLine, Category, Item, Task } from "../api/types";
 
 let nextId = 1;
 
@@ -34,6 +34,22 @@ export function aTask(overrides: Partial<Task> = {}): Task {
     isDone: false,
     dueDate: null,
     dueTime: null,
+    notes: null,
+    itemId: null,
+    itemName: null,
+    categoryId: null,
+    ...overrides,
+  };
+}
+
+export function aBudgetLine(overrides: Partial<BudgetLine> = {}): BudgetLine {
+  return {
+    id: nextId++,
+    title: "Photo + video, 8 hours",
+    status: "idea",
+    currency: "USD",
+    estimatedAmount: 1800,
+    actualAmount: null,
     notes: null,
     itemId: null,
     itemName: null,

@@ -206,3 +206,32 @@ export interface TaskDraft {
 
 /** A PATCH changes only what it names. */
 export type TaskChanges = Partial<TaskDraft> & { isDone?: boolean };
+
+/**
+ * Where a cost stands, mirrored from `app/models/budget_line.py`. On the budget
+ * screen: idea is switched off, considering is switched on, confirmed is booked.
+ */
+export type BudgetLineStatus = "idea" | "considering" | "confirmed" | "paid";
+
+/** One cost: a vendor's quote or any other expense, in its own currency. */
+export interface BudgetLine {
+  id: number;
+  title: string;
+  status: BudgetLineStatus;
+  /** ISO 4217, uppercase: "USD", "EUR". */
+  currency: string;
+  /** The quote; null while waiting for one. */
+  estimatedAmount: number | null;
+  /** What it finally cost, once known. */
+  actualAmount: number | null;
+  notes: string | null;
+  /** Null for a cost that belongs to no item. */
+  itemId: number | null;
+  itemName: string | null;
+  categoryId: number | null;
+}
+
+export type BudgetLineDraft = Omit<BudgetLine, "id" | "status" | "itemName" | "categoryId">;
+
+/** A PATCH changes only what it names. */
+export type BudgetLineChanges = Partial<BudgetLineDraft> & { status?: BudgetLineStatus };
