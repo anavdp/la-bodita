@@ -119,7 +119,7 @@ export function Dropdown({
         {/* The arrow is drawn by CSS so the field reads as just its value. */}
         <span
           aria-hidden="true"
-          className={`text-on-surface-variant transition-transform after:content-['▾'] ${isOpen ? "rotate-180" : ""}`}
+          className={`text-ink transition-transform after:content-['▾'] ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
       {isOpen && (
@@ -161,9 +161,9 @@ export function Dropdown({
                   aria-selected={option.value === value}
                   onMouseEnter={() => setHighlighted(index)}
                   onClick={() => pick(option)}
-                  className={`flex cursor-pointer items-center justify-between gap-3 whitespace-nowrap rounded-full px-4 py-2.5 font-body-sm text-body-sm ${
-                    index === highlighted ? "bg-primary-container/50" : ""
-                  } ${option.value === value ? "font-semibold text-primary after:content-['✓']" : "text-on-surface"}`}
+                  className={`flex cursor-pointer items-center justify-between gap-3 whitespace-nowrap rounded-[14px] px-4 py-2 text-lg ${
+                    index === highlighted ? "bg-bubblegum/60" : ""
+                  } ${option.value === value ? "text-sky-deep after:content-['✓']" : "text-ink"}`}
                 >
                   {option.label}
                 </li>

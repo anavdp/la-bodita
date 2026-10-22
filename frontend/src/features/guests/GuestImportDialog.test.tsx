@@ -64,6 +64,12 @@ describe("GuestImportDialog", () => {
     vi.resetAllMocks();
   });
 
+  it("given the import, when it opens, then it slides in from the side like the guest form", () => {
+    renderDialog();
+
+    expect(screen.getByTestId("side-panel-backdrop")).toBeInTheDocument();
+  });
+
   it("given the dialog opens, when nothing is uploaded yet, then it offers the template and a file picker", () => {
     renderDialog();
 

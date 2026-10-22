@@ -5,6 +5,7 @@ import type { Guest, GuestDraft, GuestGender, GuestRelationshipType, GuestSide, 
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField as field } from "../../components/form/styles";
+import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import {
   genderLabelKey,
@@ -99,7 +100,11 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
   };
 
   return (
-    <SidePanel title={t(guest ? "guests.form.editTitle" : "guests.form.createTitle")} onClose={onClose}>
+    <SidePanel
+      title={t(guest ? "guests.form.editTitle" : "guests.form.createTitle")}
+      sticker="💌"
+      onClose={onClose}
+    >
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -196,35 +201,32 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
             onChange={setHousehold}
           />
 
-          <label className="flex items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">
+          {/* A sticker-style tick box: the whole pill turns butter yellow when ticked. */}
+          <label
+            className={`flex w-max cursor-pointer items-center gap-3 rounded-[16px] border-[2.5px] border-ink px-4 py-2 text-lg transition-colors ${
+              isChild ? "bg-butter" : "bg-cream-light hover:bg-white"
+            }`}
+          >
             <input
               type="checkbox"
               checked={isChild}
               onChange={(event) => setIsChild(event.target.checked)}
-              className="h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary"
+              className="h-5 w-5 rounded-md border-2 border-ink text-sky focus:ring-sky"
             />
             {t("guests.form.isChild")}
           </label>
 
           {error !== null && (
-            <p role="alert" className="font-body-sm text-body-sm text-error">
+            <p role="alert" className="text-lg text-coral">
               {error}
             </p>
           )}
         </div>
         <div className={panelFooter}>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-primary px-6 py-3 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-          >
+          <button type="button" onClick={onClose} className={secondaryButton}>
             {t("guests.form.cancel")}
           </button>
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="rounded-full bg-primary px-8 py-3 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
-          >
+          <button type="submit" disabled={isSaving} className={primaryButton}>
             {t(isSaving ? "guests.form.saving" : "guests.form.save")}
           </button>
         </div>

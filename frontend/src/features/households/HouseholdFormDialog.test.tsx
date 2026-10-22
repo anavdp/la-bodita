@@ -18,6 +18,14 @@ const households = [
 const guests = [carlos, lucia, maria, paolo];
 
 describe("HouseholdFormDialog", () => {
+  it("given the household form, when it opens, then it slides in from the side like the guest form", () => {
+    renderWithProviders(
+      <HouseholdFormDialog household={null} guests={guests} households={households} onSave={vi.fn()} onClose={vi.fn()} />,
+    );
+
+    expect(screen.getByTestId("side-panel-backdrop")).toBeInTheDocument();
+  });
+
   it("given no household, when guests are picked, then the new household is saved with all of them at once", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     renderWithProviders(

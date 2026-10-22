@@ -1,20 +1,13 @@
-import { useId, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 
 import type { Guest, Household, HouseholdDraft } from "../../api/types";
+import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
+import { fieldLabel, pillField as field } from "../../components/form/styles";
+import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { filterGuestsByName, fullName } from "../guests/filtering";
-import {
-  backdrop,
-  dialogTitle,
-  field,
-  fieldLabel,
-  panel,
-  primaryButton,
-  secondaryButton,
-  useCloseOnEscape,
-} from "./dialogStyles";
 
 interface HouseholdFormDialogProps {
   /** The household being edited, or null to create one. */
@@ -33,8 +26,6 @@ interface HouseholdFormDialogProps {
  */
 export function HouseholdFormDialog({ household, guests, households, onSave, onClose }: HouseholdFormDialogProps) {
   const { t } = useTranslation();
-  const titleId = useId();
-  useCloseOnEscape(onClose);
 
   const [name, setName] = useState(household?.name ?? "");
   const [selected, setSelected] = useState<Set<number>>(new Set(household?.guestIds ?? []));
@@ -84,13 +75,13 @@ export function HouseholdFormDialog({ household, guests, households, onSave, onC
   };
 
   return (
-    <div className={backdrop}>
-      <div role="dialog" aria-modal="true" aria-labelledby={titleId} className={panel}>
-        <h2 id={titleId} className={dialogTitle}>
-          {t(household ? "households.form.editTitle" : "households.form.createTitle")}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <SidePanel
+      title={t(household ? "households.form.editTitle" : "households.form.createTitle")}
+      sticker="🏡"
+      onClose={onClose}
+    >
+      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+        <div className={panelBody}>
           <div>
             <label className={fieldLabel} htmlFor="household-name">
               {t("households.form.name")}
@@ -103,8 +94,13 @@ export function HouseholdFormDialog({ household, guests, households, onSave, onC
             />
           </div>
 
-          <fieldset className="flex flex-col gap-2">
-            <legend className={fieldLabel}>{t("households.form.guests")}</legend>
+          <fieldset className="flex min-h-0 flex-col gap-2">
+            <legend className={fieldLabel}>
+              {t("households.form.guests")}{" "}
+              {selected.size > 0 && (
+                <span className="ml-1 rounded-full border-2 border-ink bg-butter px-2 text-sm">{selected.size}</span>
+              )}
+            </legend>
             <input
               type="search"
               aria-label={t("households.form.search")}
@@ -113,24 +109,28 @@ export function HouseholdFormDialog({ household, guests, households, onSave, onC
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
-            <div className="flex max-h-64 flex-col gap-1 overflow-y-auto rounded-lg border border-surface-variant p-2">
+            {/* Picked guests turn pink, like the active nav item, so the family reads at a glance. */}
+            <div className="flex max-h-[45vh] flex-col overflow-y-auto rounded-[20px] border-[2.5px] border-ink bg-cream-light">
               {offered.map((guest) => {
                 const currentFamily = guest.householdId === household?.id ? undefined : familyNames.get(guest.householdId);
+                const isPicked = selected.has(guest.id);
                 return (
                   <label
                     key={guest.id}
-                    className="flex items-center gap-3 rounded px-2 py-2 font-body-sm text-body-sm text-on-surface hover:bg-surface-container-high"
+                    className={`flex cursor-pointer items-center gap-3 border-b-2 border-ink/10 px-4 py-2.5 text-lg last:border-b-0 ${
+                      isPicked ? "bg-bubblegum/70" : "hover:bg-bubblegum/25"
+                    }`}
                   >
                     <input
                       type="checkbox"
-                      checked={selected.has(guest.id)}
+                      checked={isPicked}
                       onChange={() => toggle(guest.id)}
-                      className="h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary"
+                      className="h-5 w-5 rounded-md border-2 border-ink text-sky focus:ring-sky"
                     />
-                    <span className="flex flex-col">
+                    <span className="flex flex-col leading-tight">
                       <span>{fullName(guest)}</span>
                       {currentFamily !== undefined && (
-                        <span className="text-on-surface-variant">
+                        <span className="text-base text-ink/60">
                           {t("households.form.currentlyIn", { name: currentFamily })}
                         </span>
                       )}
@@ -142,21 +142,20 @@ export function HouseholdFormDialog({ household, guests, households, onSave, onC
           </fieldset>
 
           {error !== null && (
-            <p role="alert" className="font-body-sm text-body-sm text-error">
+            <p role="alert" className="text-lg text-coral">
               {t(error)}
             </p>
           )}
-
-          <div className="mt-2 flex justify-end gap-3">
-            <button type="button" onClick={onClose} className={secondaryButton}>
-              {t("guests.form.cancel")}
-            </button>
-            <button type="submit" disabled={isSaving} className={primaryButton}>
-              {t(isSaving ? "guests.form.saving" : "guests.form.save")}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+        <div className={panelFooter}>
+          <button type="button" onClick={onClose} className={secondaryButton}>
+            {t("guests.form.cancel")}
+          </button>
+          <button type="submit" disabled={isSaving} className={primaryButton}>
+            {t(isSaving ? "guests.form.saving" : "guests.form.save")}
+          </button>
+        </div>
+      </form>
+    </SidePanel>
   );
 }
