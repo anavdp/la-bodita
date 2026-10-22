@@ -51,6 +51,7 @@ describe("ItemsPage", () => {
     const row = await screen.findByRole("button", { name: /Iglesia San José/ });
     expect(row).toHaveTextContent("Padre Luis · 1 open");
     expect(row).toHaveTextContent("Sat, Oct 24");
+    expect(row.querySelector('img[src="/icons/title-calendar.png"]')).not.toBeNull();
     expect(row).toHaveTextContent("Booked");
     expect(screen.getByRole("button", { name: /Luz de Agua Fotografía/ })).toHaveTextContent("Meeting set");
     expect(itemsApi.listItems).toHaveBeenCalledWith(1);

@@ -1,6 +1,7 @@
 import { useCallback, useId, useRef, useState } from "react";
 
 import { useTranslation } from "../../i18n/LanguageProvider";
+import { CalendarMark } from "../playful/CalendarMark";
 import { fieldLabel, pillField, popover, popoverPlacement, shouldOpenUp } from "./styles";
 import { useDismiss } from "./useDismiss";
 
@@ -79,7 +80,7 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
         onClick={() => (isOpen ? close() : open())}
         className={`${pillField} flex items-center gap-3 text-left`}
       >
-        <span aria-hidden="true">📅</span>
+        <CalendarMark />
         <span className={picked ? "" : "text-ink/50"}>
           {picked ? shortDate.format(picked) : t("datePicker.placeholder")}
         </span>

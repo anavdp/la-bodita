@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import type { Item, ItemDraft, ItemStatus, Task } from "../../api/types";
+import { CalendarMark } from "../../components/playful/CalendarMark";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { isIconName } from "../../components/playful/iconCatalog";
 import { PageHeader } from "../../components/playful/PageHeader";
@@ -138,8 +139,15 @@ export function ItemsPage() {
                   {sublineOf(item)}
                 </span>
               </span>
-              <span className="hidden font-playful text-base text-ink sm:block">
-                {item.nextTask ? `📅 ${formatDueDate(item.nextTask.dueDate, language)}` : "–"}
+              <span className="hidden items-center gap-2 font-playful text-base text-ink sm:flex">
+                {item.nextTask ? (
+                  <>
+                    <CalendarMark className="h-5 w-5" />
+                    {formatDueDate(item.nextTask.dueDate, language)}
+                  </>
+                ) : (
+                  "–"
+                )}
               </span>
               <span className="justify-self-end">
                 <span className={statusPill(item.status)}>{t(`items.status.${item.status}`)}</span>

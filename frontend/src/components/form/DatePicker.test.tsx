@@ -35,6 +35,13 @@ describe("DatePicker", () => {
     expect(screen.getByRole("button", { name: "Date" })).toHaveTextContent("Pick a date");
   });
 
+  it("given the field, when it shows, then the calendar illustration marks it", () => {
+    renderWithProviders(<Picker initial={null} />);
+
+    const mark = screen.getByRole("button", { name: "Date" }).querySelector("img");
+    expect(mark).toHaveAttribute("src", "/icons/title-calendar.png");
+  });
+
   it("given a date, when it shows, then it reads as a short date", () => {
     renderWithProviders(<Picker initial="2026-12-22" />);
 
