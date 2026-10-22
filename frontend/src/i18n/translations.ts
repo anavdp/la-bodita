@@ -263,7 +263,7 @@ const en = {
   "iconPicker.clear": "No icon",
 
   "items.title": "Items",
-  "items.subtitle": "Vendors, places and everything you're deciding on",
+  "items.subtitle": "Everything you're deciding on",
   "items.add": "+ Add Item",
   "items.loading": "Loading items...",
   "items.empty": "No items yet. Add the church, a photographer, a cake shop...",
@@ -580,7 +580,7 @@ const es: Record<TranslationKey, string> = {
   "iconPicker.clear": "Sin icono",
 
   "items.title": "Elementos",
-  "items.subtitle": "Proveedores, lugares y todo lo que están decidiendo",
+  "items.subtitle": "Todo lo que están decidiendo",
   "items.add": "+ Añadir",
   "items.loading": "Cargando elementos...",
   "items.empty": "Aún no hay nada. Añade la iglesia, un fotógrafo, una pastelería...",
