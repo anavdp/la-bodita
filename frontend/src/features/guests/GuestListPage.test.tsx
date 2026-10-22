@@ -199,7 +199,7 @@ describe("GuestListPage", () => {
     renderWithProviders(<GuestListPage />);
 
     const row = await screen.findByRole("row", { name: /Carlos Mendoza/ });
-    expect(within(row).getByRole("img", { name: "Venezuela" })).toHaveTextContent("🇻🇪");
+    expect(within(row).getByRole("img", { name: "Venezuela" })).toHaveTextContent("VE");
   });
 });
 

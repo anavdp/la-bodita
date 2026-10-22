@@ -10,8 +10,9 @@ import {
   relationshipLabelKey,
   rsvpLabelKey,
   rsvpStatuses,
-  sideFlag,
+  sideCode,
   sideLabelKey,
+  sideTone,
 } from "./vocabulary";
 
 interface GuestTableProps {
@@ -119,7 +120,7 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                   )}
                 </td>
                 <td className={cell}>
-                  {/* The flag is the label: the country's name is what it is announced
+                  {/* The code is the label: the country's name is what it is announced
                       as, and what it says on hover. */}
                   {guest.side === null ? (
                     <NotSpecified />
@@ -128,9 +129,11 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                       role="img"
                       aria-label={t(sideLabelKey(guest.side))}
                       title={t(sideLabelKey(guest.side))}
-                      className="text-2xl leading-none"
+                      className={`inline-flex h-10 w-10 items-center justify-center rounded-full font-playful-display text-base ${
+                        sideTone[guest.side]
+                      }`}
                     >
-                      {sideFlag[guest.side]}
+                      {sideCode[guest.side]}
                     </span>
                   )}
                 </td>

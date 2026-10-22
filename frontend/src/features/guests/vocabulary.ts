@@ -20,16 +20,24 @@ export const relationshipLabelKey = (relationship: GuestRelationshipType): Trans
 export const genderLabelKey = (gender: GuestGender): TranslationKey => `guests.gender.${gender}`;
 
 /**
- * Each side of the family as its own flag. "Other" has no country behind it, so
- * it gets the globe. Country flag emoji do not render on Windows, where they
- * fall back to the two-letter code (ES, VE, IT, US) - still readable, just plainer.
+ * Each side of the family as its country code, in a circle like the guests'
+ * initials. "Other" has no country behind it, so it reads WW, for worldwide.
  */
-export const sideFlag: Record<GuestSide, string> = {
-  venezuela: "🇻🇪",
-  italy: "🇮🇹",
-  spain: "🇪🇸",
-  usa: "🇺🇸",
-  other: "🌍",
+export const sideCode: Record<GuestSide, string> = {
+  venezuela: "VE",
+  italy: "IT",
+  spain: "ES",
+  usa: "US",
+  other: "WW",
+};
+
+/** Each side's circle tint, so the column reads at a glance. */
+export const sideTone: Record<GuestSide, string> = {
+  venezuela: "bg-butter",
+  italy: "bg-mint-soft",
+  spain: "bg-coral-soft",
+  usa: "bg-sky-soft",
+  other: "bg-accent",
 };
 
 

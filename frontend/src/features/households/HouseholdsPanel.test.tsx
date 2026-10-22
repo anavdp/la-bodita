@@ -87,16 +87,21 @@ describe("HouseholdsPanel", () => {
     renderPanel();
 
     const button = screen.getByRole("button", { name: "Mendoza — Not on a list. Change broadcast list" });
-    expect(button).not.toHaveTextContent("💐");
-    expect(button).not.toHaveTextContent("🎩");
+    expect(button.querySelector("img")).toBeNull();
   });
 
-  it("given a household on the bride's list, when the table shows, then its emoji is the cell", () => {
+  it("given a household on the bride's list, when the table shows, then the dress icon is the cell", () => {
     renderPanel([bianchi]);
 
-    expect(screen.getByRole("button", { name: "Bianchi — Bride's list. Change broadcast list" })).toHaveTextContent(
-      "💐",
-    );
+    const button = screen.getByRole("button", { name: "Bianchi — Bride's list. Change broadcast list" });
+    expect(button.querySelector("img")).toHaveAttribute("src", "/icons/dress.png");
+  });
+
+  it("given a household on the groom's list, when the table shows, then the suit icon is the cell", () => {
+    renderPanel([aHousehold({ name: "Neri", guestIds: [9, 10], broadcastList: "groom" })]);
+
+    const button = screen.getByRole("button", { name: "Neri — Groom's list. Change broadcast list" });
+    expect(button.querySelector("img")).toHaveAttribute("src", "/icons/suit.png");
   });
 
   it("given a household on no list, when the groom's list is picked, then that household is reported with it", async () => {

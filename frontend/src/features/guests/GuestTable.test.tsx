@@ -57,25 +57,25 @@ describe("GuestTable", () => {
     expect(within(row).getByText("Maria Rossi")).toBeInTheDocument();
     expect(within(row).getByText("Adult")).toBeInTheDocument();
     expect(within(row).getByText("Family")).toBeInTheDocument();
-    expect(within(row).getByRole("img", { name: "Italy" })).toHaveTextContent("🇮🇹");
+    expect(within(row).getByRole("img", { name: "Italy" })).toHaveTextContent("IT");
   });
 
-  it("given each side, when the column is rendered, then it is that country's flag, not its name", () => {
+  it("given each side, when the column is rendered, then it is that country's code, not its name", () => {
     renderTable([
       aGuest({ firstName: "Ana", lastName: "Uno", side: "venezuela" }),
       aGuest({ firstName: "Ana", lastName: "Dos", side: "spain" }),
       aGuest({ firstName: "Ana", lastName: "Tres", side: "other" }),
     ]);
 
-    expect(screen.getByRole("img", { name: "Venezuela" })).toHaveTextContent("🇻🇪");
-    expect(screen.getByRole("img", { name: "Spain" })).toHaveTextContent("🇪🇸");
+    expect(screen.getByRole("img", { name: "Venezuela" })).toHaveTextContent("VE");
+    expect(screen.getByRole("img", { name: "Spain" })).toHaveTextContent("ES");
     expect(screen.queryByText("Venezuela")).not.toBeInTheDocument();
   });
 
-  it("given a side with no flag of its own, when the column is rendered, then it still reads as a side", () => {
+  it("given a side with no country of its own, when the column is rendered, then it reads WW, for worldwide", () => {
     renderTable([aGuest({ firstName: "Ana", lastName: "Tres", side: "other" })]);
 
-    expect(screen.getByRole("img", { name: "Other" })).toHaveTextContent("🌍");
+    expect(screen.getByRole("img", { name: "Other" })).toHaveTextContent("WW");
   });
 
   it("given a guest with no relationship or side yet, when the row is rendered, then both read as not specified", () => {
@@ -287,7 +287,7 @@ describe("GuestTable relationships", () => {
 });
 
 describe("GuestTable sides", () => {
-  it("given a guest from the United States, when the row is rendered, then their side is the US flag", () => {
+  it("given a guest from the United States, when the row is rendered, then their side reads US", () => {
     renderWithProviders(
       <GuestTable
         guests={[aGuest({ firstName: "Sarah", lastName: "Rizzo", side: "usa" })]}
@@ -298,6 +298,6 @@ describe("GuestTable sides", () => {
     );
 
     const row = screen.getByRole("row", { name: /Sarah Rizzo/ });
-    expect(within(row).getByRole("img", { name: "United States" })).toHaveTextContent("🇺🇸");
+    expect(within(row).getByRole("img", { name: "United States" })).toHaveTextContent("US");
   });
 });

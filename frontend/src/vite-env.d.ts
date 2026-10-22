@@ -7,4 +7,5 @@ interface ImportMetaEnv {
   readonly VITE_PUBLIC_URL?: string;
   /** The public bucket holding the real RSVP photos; empty means the bundled placeholders. */
   readonly VITE_PHOTOS_URL?: string;
+  readonly VITE_ICONS_URL?: string;
 }

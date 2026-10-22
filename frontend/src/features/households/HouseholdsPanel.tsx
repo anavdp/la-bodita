@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import type { BroadcastList, Household } from "../../api/types";
+import { iconUrl } from "../../components/playful/icons";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 
@@ -15,7 +16,8 @@ interface HouseholdsPanelProps {
 type OpenMenu = { householdId: number; kind: "broadcast" | "actions" } | null;
 
 const broadcastLists: BroadcastList[] = ["bride", "groom"];
-const broadcastEmoji: Record<BroadcastList, string> = { bride: "💐", groom: "🎩" };
+/** The bride's list is her dress, the groom's his suit. */
+const broadcastIcon: Record<BroadcastList, string> = { bride: iconUrl("dress.png"), groom: iconUrl("suit.png") };
 const broadcastLabelKey = (list: BroadcastList | null): TranslationKey => `households.broadcast.${list ?? "none"}`;
 
 const menuItem =
@@ -111,9 +113,7 @@ export function HouseholdsPanel({
                             radio_button_unchecked
                           </span>
                         ) : (
-                          <span className="text-[1.5rem] leading-none" aria-hidden="true">
-                            {broadcastEmoji[household.broadcastList]}
-                          </span>
+                          <img src={broadcastIcon[household.broadcastList]} alt="" className="h-8 w-8 object-contain" />
                         )}
                       </button>
 
@@ -128,9 +128,7 @@ export function HouseholdsPanel({
                                 onClick={() => changeBroadcastList(household, list)}
                                 className={menuItem}
                               >
-                                <span className="text-[1.25rem] leading-none" aria-hidden="true">
-                                  {broadcastEmoji[list]}
-                                </span>
+                                <img src={broadcastIcon[list]} alt="" className="h-6 w-6 object-contain" />
                                 {t(broadcastLabelKey(list))}
                               </button>
                             ))}
