@@ -109,7 +109,7 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
           </div>
           <div className="grid grid-cols-7 gap-0.5 text-center">
             {weekdays.map((weekday) => (
-              <span key={weekday} className="py-1 font-label-md text-[11px] uppercase text-on-surface-variant">
+              <span key={weekday} className="py-1 font-label-md text-[12px] uppercase text-on-surface-variant">
                 {weekday}
               </span>
             ))}

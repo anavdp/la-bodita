@@ -113,7 +113,9 @@ describe("ChecklistPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "+ Add Task" }));
     await userEvent.type(screen.getByLabelText("Task"), "Book the tasting");
-    await userEvent.selectOptions(screen.getByLabelText("Item"), "Dulce Rosa Pastelería");
+    await userEvent.click(screen.getByRole("combobox", { name: "Item" }));
+    await userEvent.type(screen.getByRole("searchbox"), "dulce");
+    await userEvent.click(screen.getByRole("option", { name: "Dulce Rosa Pastelería" }));
     await userEvent.click(screen.getByRole("button", { name: "Date" }));
     await userEvent.click(screen.getByRole("button", { name: "Wednesday, October 28, 2026" }));
     await userEvent.click(screen.getByRole("button", { name: "Add" }));

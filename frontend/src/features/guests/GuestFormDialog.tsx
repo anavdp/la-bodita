@@ -2,9 +2,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import type { Guest, GuestDraft, GuestGender, GuestRelationshipType, GuestSide, RsvpStatus } from "../../api/types";
-import { SearchableSelect } from "../../components/form/SearchableSelect";
+import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
-import { StyledSelect } from "../../components/form/StyledSelect";
 import { fieldLabel, pillField as field } from "../../components/form/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import {
@@ -129,78 +128,33 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label className={fieldLabel} htmlFor="guest-relationship">
-                {t("guests.form.relationship")}
-              </label>
-              <StyledSelect
-                id="guest-relationship"
-                value={relationshipType}
-                onChange={(event) =>
-                  setRelationshipType(event.target.value as GuestRelationshipType | "")
-                }
-              >
-                <option value="">{t("guests.notSpecified")}</option>
-                {relationshipTypes.map((option) => (
-                  <option key={option} value={option}>
-                    {t(relationshipLabelKey(option))}
-                  </option>
-                ))}
-              </StyledSelect>
-            </div>
-            <div>
-              <label className={fieldLabel} htmlFor="guest-side">
-                {t("guests.form.side")}
-              </label>
-              <StyledSelect
-                id="guest-side"
-                value={side}
-                onChange={(event) => setSide(event.target.value as GuestSide | "")}
-              >
-                <option value="">{t("guests.notSpecified")}</option>
-                {guestSides.map((option) => (
-                  <option key={option} value={option}>
-                    {t(sideLabelKey(option))}
-                  </option>
-                ))}
-              </StyledSelect>
-            </div>
+            <Dropdown
+              label={t("guests.form.relationship")}
+              value={relationshipType}
+              options={[{ value: "", label: t("guests.notSpecified") }, ...relationshipTypes.map((option) => ({ value: option, label: t(relationshipLabelKey(option)) }))]}
+              onChange={(next) => setRelationshipType(next as GuestRelationshipType | "")}
+            />
+            <Dropdown
+              label={t("guests.form.side")}
+              value={side}
+              options={[{ value: "", label: t("guests.notSpecified") }, ...guestSides.map((option) => ({ value: option, label: t(sideLabelKey(option)) }))]}
+              onChange={(next) => setSide(next as GuestSide | "")}
+            />
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label className={fieldLabel} htmlFor="guest-rsvp">
-                {t("guests.form.rsvp")}
-              </label>
-              <StyledSelect
-                id="guest-rsvp"
-                value={rsvpStatus}
-                onChange={(event) => setRsvpStatus(event.target.value as RsvpStatus)}
-              >
-                {rsvpStatuses.map((option) => (
-                  <option key={option} value={option}>
-                    {t(rsvpLabelKey(option))}
-                  </option>
-                ))}
-              </StyledSelect>
-            </div>
-            <div>
-              <label className={fieldLabel} htmlFor="guest-gender">
-                {t("guests.form.gender")}
-              </label>
-              <StyledSelect
-                id="guest-gender"
-                value={gender}
-                onChange={(event) => setGender(event.target.value as GuestGender | "")}
-              >
-                <option value="">{t("guests.gender.unspecified")}</option>
-                {guestGenders.map((option) => (
-                  <option key={option} value={option}>
-                    {t(genderLabelKey(option))}
-                  </option>
-                ))}
-              </StyledSelect>
-            </div>
+            <Dropdown
+              label={t("guests.form.rsvp")}
+              value={rsvpStatus}
+              options={[...rsvpStatuses.map((option) => ({ value: option, label: t(rsvpLabelKey(option)) }))]}
+              onChange={(next) => setRsvpStatus(next as RsvpStatus)}
+            />
+            <Dropdown
+              label={t("guests.form.gender")}
+              value={gender}
+              options={[{ value: "", label: t("guests.gender.unspecified") }, ...guestGenders.map((option) => ({ value: option, label: t(genderLabelKey(option)) }))]}
+              onChange={(next) => setGender(next as GuestGender | "")}
+            />
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -231,7 +185,8 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
             </div>
           </div>
 
-          <SearchableSelect
+          <Dropdown
+            searchable
             label={t("guests.form.household")}
             value={household}
             options={[

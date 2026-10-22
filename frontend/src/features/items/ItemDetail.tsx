@@ -2,6 +2,7 @@ import { useId, useState } from "react";
 import type { ReactNode } from "react";
 
 import type { Category, Item, ItemStatus, Task, TaskDraft } from "../../api/types";
+import { Dropdown } from "../../components/form/Dropdown";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { AddTaskForm } from "../planning/AddTaskForm";
 import { categoryLabel } from "../planning/CategoryChips";
@@ -53,7 +54,6 @@ export function ItemDetail({
 }: ItemDetailProps) {
   const { t, language } = useTranslation();
   const titleId = useId();
-  const statusId = useId();
   const [isAdding, setIsAdding] = useState(false);
 
   // Done tasks sink to the bottom, the rest keep the API's soonest-first order.
@@ -69,7 +69,7 @@ export function ItemDetail({
       <header className="flex flex-col items-start gap-2">
         {category && (
           <span
-            className="rounded-full px-3 py-0.5 font-label-md text-[11px] uppercase tracking-wide text-on-surface"
+            className="rounded-full px-3 py-0.5 font-label-md text-[12px] uppercase tracking-wide text-on-surface"
             style={{ backgroundColor: `${category.color}26` }}
           >
             {categoryLabel(category)}
@@ -79,21 +79,14 @@ export function ItemDetail({
           {item.name}
         </h2>
         <div className="flex flex-wrap items-center gap-3">
-          <label htmlFor={statusId} className="sr-only">
-            {t("items.statusLabel")}
-          </label>
-          <select
-            id={statusId}
+          <Dropdown
+            hideLabel
+            label={t("items.statusLabel")}
             value={item.status}
-            onChange={(e) => onChangeStatus(e.target.value as ItemStatus)}
-            className={`${statusPill(item.status)} cursor-pointer border-0 pr-8`}
-          >
-            {itemStatuses.map((status) => (
-              <option key={status} value={status}>
-                {t(`items.status.${status}`)}
-              </option>
-            ))}
-          </select>
+            options={itemStatuses.map((status) => ({ value: status, label: t(`items.status.${status}`) }))}
+            onChange={(status) => onChangeStatus(status as ItemStatus)}
+            triggerClassName={`${statusPill(item.status)} cursor-pointer border-0 pr-3`}
+          />
           <button type="button" onClick={onEdit} className={linkStyle}>
             {t("planning.edit")}
           </button>

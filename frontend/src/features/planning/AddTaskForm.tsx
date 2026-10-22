@@ -5,7 +5,7 @@ import type { Item, TaskDraft } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { DatePicker } from "../../components/form/DatePicker";
-import { StyledSelect } from "../../components/form/StyledSelect";
+import { Dropdown } from "../../components/form/Dropdown";
 import { fieldLabel, pillField } from "../../components/form/styles";
 import { primaryButton, secondaryButton } from "../households/dialogStyles";
 
@@ -74,17 +74,16 @@ export function AddTaskForm({ itemId, items = [], onAdd, onClose }: AddTaskFormP
       <div className="flex flex-wrap gap-3">
         {itemId === undefined && (
           <div className="min-w-48 flex-1">
-            <label htmlFor={idFor("item")} className={fieldLabel}>
-              {t("tasks.item")}
-            </label>
-            <StyledSelect id={idFor("item")} value={pickedItemId} onChange={(e) => setPickedItemId(e.target.value)}>
-              <option value="">{t("tasks.general")}</option>
-              {items.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </StyledSelect>
+            <Dropdown
+              searchable
+              label={t("tasks.item")}
+              value={pickedItemId}
+              options={[
+                { value: "", label: t("tasks.general") },
+                ...items.map((item) => ({ value: String(item.id), label: item.name })),
+              ]}
+              onChange={setPickedItemId}
+            />
           </div>
         )}
         <div className="min-w-44">

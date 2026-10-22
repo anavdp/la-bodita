@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 
 import { renderWithProviders } from "../../testing/renderWithProviders";
-import { SearchableSelect } from "./SearchableSelect";
+import { Dropdown } from "./Dropdown";
 
 const categories = [
   { value: "", label: "No category" },
@@ -15,8 +15,9 @@ const categories = [
 function Picker({ onChange = vi.fn() }: { onChange?: (value: string) => void }) {
   const [value, setValue] = useState("1");
   return (
-    <SearchableSelect
+    <Dropdown
       label="Category"
+      searchable
       value={value}
       options={categories}
       onChange={(next) => {
@@ -27,7 +28,7 @@ function Picker({ onChange = vi.fn() }: { onChange?: (value: string) => void }) 
   );
 }
 
-describe("SearchableSelect", () => {
+describe("Dropdown", () => {
   it("given a value, when it shows, then the picked option's label is on the field", () => {
     renderWithProviders(<Picker />);
 
@@ -116,5 +117,36 @@ describe("SearchableSelect", () => {
     await userEvent.click(screen.getByText("Elsewhere"));
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("given a short list, when it opens, then there is no search box and the keys still pick", async () => {
+    const onChange = vi.fn();
+    renderWithProviders(
+      <Dropdown
+        label="Status"
+        value="idea"
+        options={[
+          { value: "idea", label: "Idea" },
+          { value: "contacted", label: "Contacted" },
+          { value: "booked", label: "Booked" },
+        ]}
+        onChange={onChange}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
+    expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+    await userEvent.keyboard("{ArrowDown}{Enter}");
+
+    expect(onChange).toHaveBeenCalledWith("contacted");
+  });
+
+  it("given a hidden label, when it shows, then the field is still named by it", () => {
+    renderWithProviders(
+      <Dropdown label="Status" hideLabel value="a" options={[{ value: "a", label: "A" }]} onChange={vi.fn()} />,
+    );
+
+    expect(screen.getByRole("combobox", { name: "Status" })).toBeInTheDocument();
+    expect(screen.getByText("Status")).toHaveClass("sr-only");
   });
 });

@@ -2,9 +2,8 @@ import { useId, useState } from "react";
 import type { FormEvent } from "react";
 
 import type { Category, Item, ItemDraft, ItemStatus } from "../../api/types";
-import { SearchableSelect } from "../../components/form/SearchableSelect";
+import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
-import { StyledSelect } from "../../components/form/StyledSelect";
 import { fieldLabel, pillField, textArea } from "../../components/form/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -23,12 +22,37 @@ interface ItemFormDialogProps {
 type Channel = "phone" | "instagramUrl" | "email" | "websiteUrl";
 
 /** The ways to reach a vendor, the usual one first: it is the one a new item asks for. */
-const channels: { name: Channel; labelKey: TranslationKey; type: string; icon: string }[] = [
-  { name: "phone", labelKey: "items.phone", type: "tel", icon: "📱" },
-  { name: "instagramUrl", labelKey: "items.instagram", type: "text", icon: "📷" },
-  { name: "email", labelKey: "items.email", type: "email", icon: "✉️" },
-  { name: "websiteUrl", labelKey: "items.website", type: "url", icon: "🌐" },
+const channels: { name: Channel; labelKey: TranslationKey; type: string }[] = [
+  { name: "phone", labelKey: "items.phone", type: "tel" },
+  { name: "instagramUrl", labelKey: "items.instagram", type: "text" },
+  { name: "email", labelKey: "items.email", type: "email" },
+  { name: "websiteUrl", labelKey: "items.website", type: "url" },
 ];
+
+interface ContactRow {
+  channel: Channel;
+  value: string;
+}
+
+const defaultChannelKey = "la-bodita.contactType";
+
+/** The type picked for the last new item's first contact, so the next one starts there. */
+function rememberedChannel(): Channel {
+  try {
+    const saved = localStorage.getItem(defaultChannelKey);
+    return channels.some(({ name }) => name === saved) ? (saved as Channel) : "phone";
+  } catch {
+    return "phone";
+  }
+}
+
+function rememberChannel(channel: Channel): void {
+  try {
+    localStorage.setItem(defaultChannelKey, channel);
+  } catch {
+    // Private windows refuse storage; the default just stays the phone.
+  }
+}
 
 const blankToNull = (value: string) => (value.trim() === "" ? null : value.trim());
 
@@ -45,17 +69,19 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
   const [categoryId, setCategoryId] = useState(item?.categoryId?.toString() ?? "");
   const [status, setStatus] = useState<ItemStatus>(item?.status ?? "idea");
   const [contactName, setContactName] = useState(item?.contactName ?? "");
-  const [contacts, setContacts] = useState<Record<Channel, string>>({
-    phone: item?.phone ?? "",
-    instagramUrl: item?.instagramUrl ?? "",
-    email: item?.email ?? "",
-    websiteUrl: item?.websiteUrl ?? "",
+  // The ones already filled in, or one empty contact of the type picked last time.
+  const [contacts, setContacts] = useState<ContactRow[]>(() => {
+    const filled = channels
+      .map(({ name: channel }) => ({ channel, value: item?.[channel] ?? "" }))
+      .filter((row) => row.value !== "");
+    return filled.length > 0 ? filled : [{ channel: rememberedChannel(), value: "" }];
   });
-  // The ones already filled in, or just the phone for a new item.
-  const [shown, setShown] = useState<Set<Channel>>(() => {
-    const filled = channels.filter(({ name: channel }) => contacts[channel] !== "").map(({ name: channel }) => channel);
-    return new Set(filled.length > 0 ? filled : ["phone"]);
-  });
+  const unused = channels.filter(({ name: channel }) => !contacts.some((row) => row.channel === channel));
+
+  const changeContact = (index: number, change: Partial<ContactRow>) => {
+    if (change.channel && item === null && index === 0) rememberChannel(change.channel);
+    setContacts((current) => current.map((row, at) => (at === index ? { ...row, ...change } : row)));
+  };
   const [notes, setNotes] = useState(item?.notes ?? "");
   const [error, setError] = useState<TranslationKey | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -63,8 +89,13 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
   const idFor = (fieldName: string) => `${formId}-${fieldName}`;
   const categoryOptions = [
     { value: "", label: t("planning.uncategorized") },
-    ...categories.map((category) => ({ value: String(category.id), label: categoryLabel(category) })),
+    ...categories.map((category) => ({
+      value: String(category.id),
+      label: categoryLabel(category),
+    })),
   ];
+
+  const contactValue = (channel: Channel) => blankToNull(contacts.find((row) => row.channel === channel)?.value ?? "");
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -83,10 +114,10 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
         subcategoryId: item !== null && item.categoryId === pickedCategoryId ? item.subcategoryId : null,
         status,
         contactName: blankToNull(contactName),
-        phone: blankToNull(contacts.phone),
-        email: blankToNull(contacts.email),
-        instagramUrl: blankToNull(contacts.instagramUrl),
-        websiteUrl: blankToNull(contacts.websiteUrl),
+        phone: contactValue("phone"),
+        email: contactValue("email"),
+        instagramUrl: contactValue("instagramUrl"),
+        websiteUrl: contactValue("websiteUrl"),
         notes: blankToNull(notes),
       });
     } catch {
@@ -106,24 +137,22 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
             <input id={idFor("name")} value={name} onChange={(e) => setName(e.target.value)} className={pillField} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <SearchableSelect
+            <Dropdown
+              searchable
               label={t("items.category")}
               value={categoryId}
               options={categoryOptions}
               onChange={setCategoryId}
             />
-            <div>
-              <label htmlFor={idFor("status")} className={fieldLabel}>
-                {t("items.statusLabel")}
-              </label>
-              <StyledSelect id={idFor("status")} value={status} onChange={(e) => setStatus(e.target.value as ItemStatus)}>
-                {itemStatuses.map((each) => (
-                  <option key={each} value={each}>
-                    {t(`items.status.${each}`)}
-                  </option>
-                ))}
-              </StyledSelect>
-            </div>
+            <Dropdown
+              label={t("items.statusLabel")}
+              value={status}
+              options={itemStatuses.map((each) => ({
+                value: each,
+                label: t(`items.status.${each}`),
+              }))}
+              onChange={(next) => setStatus(next as ItemStatus)}
+            />
           </div>
 
           <fieldset className="flex flex-col gap-3 border-t border-outline-variant/50 pt-5">
@@ -139,48 +168,66 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
                 className={pillField}
               />
             </div>
-            {channels
-              .filter(({ name: channel }) => shown.has(channel))
-              .map(({ name: channel, labelKey, type, icon }) => (
-                <div key={channel}>
-                  <label htmlFor={idFor(channel)} className={fieldLabel}>
-                    {t(labelKey)}
-                  </label>
-                  <div className="relative">
-                    <span aria-hidden="true" className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2">
-                      {icon}
-                    </span>
-                    <input
-                      id={idFor(channel)}
-                      type={type}
-                      value={contacts[channel]}
-                      onChange={(e) => setContacts((current) => ({ ...current, [channel]: e.target.value }))}
-                      className={`${pillField} pl-12`}
+            {contacts.map((row, index) => {
+              const own = channels.find(({ name }) => name === row.channel)!;
+              return (
+                <div key={row.channel} className="flex items-center gap-2">
+                  <div className="w-52 shrink-0">
+                    <Dropdown
+                      hideLabel
+                      label={t("items.contactType")}
+                      value={row.channel}
+                      options={[own, ...unused].map(({ name, labelKey }) => ({
+                        value: name,
+                        label: t(labelKey),
+                      }))}
+                      onChange={(next) => changeContact(index, { channel: next as Channel })}
                     />
                   </div>
+                  <input
+                    aria-label={t(own.labelKey)}
+                    type={own.type}
+                    value={row.value}
+                    onChange={(e) => changeContact(index, { value: e.target.value })}
+                    className={`${pillField} min-w-0 flex-1`}
+                  />
+                  {contacts.length > 1 && (
+                    <button
+                      type="button"
+                      aria-label={t("items.removeContact", {
+                        label: t(own.labelKey),
+                      })}
+                      onClick={() => setContacts((current) => current.filter((_, at) => at !== index))}
+                      className="h-10 w-10 rounded-full text-xl text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-error"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
-              ))}
-            <div className="flex flex-wrap gap-2">
-              {channels
-                .filter(({ name: channel }) => !shown.has(channel))
-                .map(({ name: channel, labelKey }) => (
-                  <button
-                    key={channel}
-                    type="button"
-                    onClick={() => setShown((current) => new Set(current).add(channel))}
-                    className="rounded-full border border-dashed border-primary px-4 py-1.5 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-                  >
-                    + {t(labelKey)}
-                  </button>
-                ))}
-            </div>
+              );
+            })}
+            {unused.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setContacts((current) => [...current, { channel: unused[0].name, value: "" }])}
+                className="self-start rounded-full border border-dashed border-primary px-4 py-1.5 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
+              >
+                {t("items.addContact")}
+              </button>
+            )}
           </fieldset>
 
           <div>
             <label htmlFor={idFor("notes")} className={fieldLabel}>
               {t("items.notes")}
             </label>
-            <textarea id={idFor("notes")} rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} className={textArea} />
+            <textarea
+              id={idFor("notes")}
+              rows={4}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className={textArea}
+            />
           </div>
           {error !== null && (
             <p role="alert" className="font-body-sm text-body-sm text-error">

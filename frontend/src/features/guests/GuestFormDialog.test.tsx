@@ -5,15 +5,25 @@ import { aGuest } from "../../testing/guestFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { GuestFormDialog } from "./GuestFormDialog";
 
+async function choose(field: string, option: string) {
+  await userEvent.click(screen.getByRole("combobox", { name: field }));
+  await userEvent.click(screen.getByRole("option", { name: option }));
+}
+
+async function openOptions(field: string) {
+  await userEvent.click(screen.getByRole("combobox", { name: field }));
+  return within(screen.getByRole("listbox")).getAllByRole("option");
+}
+
 describe("GuestFormDialog", () => {
   it("given no guest, when the dialog opens, then it is an empty create form", () => {
     renderWithProviders(<GuestFormDialog guest={null} onSave={vi.fn()} onClose={vi.fn()} />);
 
     expect(screen.getByRole("dialog", { name: "Add Guest" })).toBeInTheDocument();
     expect(screen.getByLabelText("First name")).toHaveValue("");
-    expect(screen.getByLabelText("RSVP status")).toHaveValue("pending");
-    expect(screen.getByLabelText("Relationship")).toHaveValue("");
-    expect(screen.getByLabelText("Side")).toHaveValue("");
+    expect(screen.getByRole("combobox", { name: "RSVP status" })).toHaveTextContent("Pending");
+    expect(screen.getByRole("combobox", { name: "Relationship" })).toHaveTextContent("Not specified");
+    expect(screen.getByRole("combobox", { name: "Side" })).toHaveTextContent("Not specified");
   });
 
   it("given only a name, when a new guest is saved, then relationship and side are left empty", async () => {
@@ -35,7 +45,7 @@ describe("GuestFormDialog", () => {
       <GuestFormDialog guest={aGuest({ side: "italy" })} onSave={onSave} onClose={vi.fn()} />,
     );
 
-    await userEvent.selectOptions(screen.getByLabelText("Side"), "");
+    await choose("Side", "Not specified");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ side: null }));
@@ -64,10 +74,10 @@ describe("GuestFormDialog", () => {
     expect(screen.getByLabelText("First name")).toHaveValue("Lucia");
     expect(screen.getByLabelText("Last name")).toHaveValue("Mendoza");
     expect(screen.getByLabelText("This guest is a child")).toBeChecked();
-    expect(screen.getByLabelText("Gender")).toHaveValue("female");
-    expect(screen.getByLabelText("Relationship")).toHaveValue("friends");
-    expect(screen.getByLabelText("Side")).toHaveValue("venezuela");
-    expect(screen.getByLabelText("RSVP status")).toHaveValue("declined");
+    expect(screen.getByRole("combobox", { name: "Gender" })).toHaveTextContent("Female");
+    expect(screen.getByRole("combobox", { name: "Relationship" })).toHaveTextContent("Friends");
+    expect(screen.getByRole("combobox", { name: "Side" })).toHaveTextContent("Venezuela");
+    expect(screen.getByRole("combobox", { name: "RSVP status" })).toHaveTextContent("Declined");
     expect(screen.getByLabelText("Phone")).toHaveValue("+58 412 555 0134");
     expect(screen.getByLabelText("Email")).toHaveValue("lucia@example.com");
   });
@@ -78,8 +88,8 @@ describe("GuestFormDialog", () => {
 
     await userEvent.type(screen.getByLabelText("First name"), "Alejandro");
     await userEvent.type(screen.getByLabelText("Last name"), "Garcia");
-    await userEvent.selectOptions(screen.getByLabelText("Side"), "spain");
-    await userEvent.selectOptions(screen.getByLabelText("Relationship"), "other");
+    await choose("Side", "Spain");
+    await choose("Relationship", "Other");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(onSave).toHaveBeenCalledWith({
@@ -225,10 +235,10 @@ describe("GuestFormDialog", () => {
     // Already on their own: nothing to send, so their RSVP link stays the same.
     expect(onSave.mock.calls[0][0].householdId).toBeUndefined();
   });
-  it("given the relationship picker, when it opens, then it offers the bride's and groom's friends and plus ones", () => {
+  it("given the relationship picker, when it opens, then it offers the bride's and groom's friends and plus ones", async () => {
     renderWithProviders(<GuestFormDialog guest={null} onSave={vi.fn()} onClose={vi.fn()} />);
 
-    const options = within(screen.getByLabelText("Relationship")).getAllByRole("option");
+    const options = await openOptions("Relationship");
     expect(options.map((option) => option.textContent)).toEqual([
       "Not specified",
       "Family",
@@ -239,10 +249,10 @@ describe("GuestFormDialog", () => {
       "Other",
     ]);
   });
-  it("given the side picker, when it opens, then the United States is one of the sides", () => {
+  it("given the side picker, when it opens, then the United States is one of the sides", async () => {
     renderWithProviders(<GuestFormDialog guest={null} onSave={vi.fn()} onClose={vi.fn()} />);
 
-    const options = within(screen.getByLabelText("Side")).getAllByRole("option");
+    const options = await openOptions("Side");
     expect(options.map((option) => option.textContent)).toEqual([
       "Not specified",
       "Venezuela",

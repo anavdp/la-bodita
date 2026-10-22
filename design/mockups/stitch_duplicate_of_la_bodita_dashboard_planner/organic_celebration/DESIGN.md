@@ -72,19 +72,19 @@ typography:
     lineHeight: 32px
   title-lg:
     fontFamily: Be Vietnam Pro
-    fontSize: 18px
+    fontSize: 19px
     fontWeight: '600'
-    lineHeight: 24px
+    lineHeight: 26px
   body-lg:
     fontFamily: Be Vietnam Pro
-    fontSize: 16px
+    fontSize: 17px
     fontWeight: '400'
-    lineHeight: 24px
+    lineHeight: 26px
   body-sm:
     fontFamily: Be Vietnam Pro
-    fontSize: 14px
+    fontSize: 15px
     fontWeight: '400'
-    lineHeight: 20px
+    lineHeight: 22px
   label-lg:
     fontFamily: Be Vietnam Pro
     fontSize: 19px
@@ -93,9 +93,9 @@ typography:
     letterSpacing: 0.02em
   label-md:
     fontFamily: Be Vietnam Pro
-    fontSize: 12px
+    fontSize: 13px
     fontWeight: '600'
-    lineHeight: 16px
+    lineHeight: 18px
     letterSpacing: 0.05em
 rounded:
   sm: 0.25rem
@@ -167,7 +167,7 @@ lightness until white clears 4.5:1. Darkening alone is not enough - it turns
 **Or size the type up.** WCAG's threshold drops to 3:1 for large text, which
 means **at least 18.66px and bold (700)**, or 24px at any weight. Nothing smaller
 qualifies - 14px semibold is still normal text and still needs 4.5:1. This is why
-stat card labels are `label-lg` (19px/700) rather than the 12px `label-md` a
+stat card labels are `label-lg` (19px/700) rather than the 13px `label-md` a
 caption would normally use: it lets `#7189FF` keep the hue it was chosen for at
 3.12:1, and it is what the cards are built around.
 

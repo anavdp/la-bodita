@@ -1,19 +1,13 @@
-import { useId, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 
 import type { CategoryDraft } from "../../api/types";
+import { EmojiPicker } from "../../components/form/EmojiPicker";
+import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
+import { fieldLabel, pillField } from "../../components/form/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
-import {
-  backdrop,
-  dialogTitle,
-  field,
-  fieldLabel,
-  panel,
-  primaryButton,
-  secondaryButton,
-  useCloseOnEscape,
-} from "../households/dialogStyles";
+import { primaryButton, secondaryButton } from "../households/dialogStyles";
 
 /** Soft colors that read well behind dark text, offered in turn as a new category's default. */
 const palette = ["#624cab", "#7189ff", "#f39237", "#e56399", "#3fa796", "#c49b2e"];
@@ -28,8 +22,6 @@ interface CategoryFormDialogProps {
 /** A quick way to add a tag while filling in items; the Category Manager will do the rest. */
 export function CategoryFormDialog({ existingCount, onSave, onClose }: CategoryFormDialogProps) {
   const { t } = useTranslation();
-  const titleId = useId();
-  useCloseOnEscape(onClose);
 
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("");
@@ -54,29 +46,18 @@ export function CategoryFormDialog({ existingCount, onSave, onClose }: CategoryF
   };
 
   return (
-    <div className={backdrop}>
-      <div role="dialog" aria-modal="true" aria-labelledby={titleId} className={`${panel} max-w-sm`}>
-        <h2 id={titleId} className={dialogTitle}>
-          {t("categories.new")}
-        </h2>
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <SidePanel title={t("categories.new")} onClose={onClose}>
+      <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
+        <div className={panelBody}>
           <div>
             <label htmlFor="category-name" className={fieldLabel}>
               {t("categories.name")}
             </label>
-            <input id="category-name" value={name} onChange={(e) => setName(e.target.value)} className={field} />
+            <input id="category-name" value={name} onChange={(e) => setName(e.target.value)} className={pillField} />
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <label htmlFor="category-emoji" className={fieldLabel}>
-                {t("categories.emoji")}
-              </label>
-              <input
-                id="category-emoji"
-                value={emoji}
-                onChange={(e) => setEmoji(e.target.value)}
-                className={field}
-              />
+              <EmojiPicker label={t("categories.emoji")} value={emoji} onChange={setEmoji} />
             </div>
             <div>
               <label htmlFor="category-color" className={fieldLabel}>
@@ -87,7 +68,7 @@ export function CategoryFormDialog({ existingCount, onSave, onClose }: CategoryF
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value.toLowerCase())}
-                className="h-12 w-16 cursor-pointer rounded-lg border border-outline-variant bg-surface-container-low"
+                className="h-12 w-16 cursor-pointer rounded-full border-0 bg-surface-container-low p-1.5 dark:bg-surface-container-highest [&::-moz-color-swatch]:rounded-full [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0"
               />
             </div>
           </div>
@@ -96,16 +77,16 @@ export function CategoryFormDialog({ existingCount, onSave, onClose }: CategoryF
               {t(error)}
             </p>
           )}
-          <div className="mt-2 flex justify-end gap-3">
-            <button type="button" onClick={onClose} className={secondaryButton}>
-              {t("planning.cancel")}
-            </button>
-            <button type="submit" disabled={isSaving} className={primaryButton}>
-              {t("planning.save")}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+        <div className={panelFooter}>
+          <button type="button" onClick={onClose} className={secondaryButton}>
+            {t("planning.cancel")}
+          </button>
+          <button type="submit" disabled={isSaving} className={primaryButton}>
+            {t("planning.save")}
+          </button>
+        </div>
+      </form>
+    </SidePanel>
   );
 }

@@ -149,7 +149,8 @@ describe("GuestListPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Actions for Carlos Mendoza" }));
     await userEvent.click(screen.getByRole("button", { name: "Edit" }));
-    await userEvent.selectOptions(screen.getByLabelText("RSVP status"), "confirmed");
+    await userEvent.click(screen.getByRole("combobox", { name: "RSVP status" }));
+    await userEvent.click(screen.getByRole("option", { name: "Confirmed" }));
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() =>
