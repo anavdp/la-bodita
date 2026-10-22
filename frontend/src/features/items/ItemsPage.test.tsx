@@ -116,13 +116,18 @@ describe("ItemsPage", () => {
   });
 
   it("given an appointment, when it is added on the item, then it is created with its date and time", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 9, 22, 9, 0));
     vi.mocked(tasksApi.createTask).mockResolvedValue(aTask());
     renderWithProviders(<ItemsPage />, { route: "/items" });
     const detail = await screen.findByRole("region", { name: "Iglesia San José" });
 
     await userEvent.click(within(detail).getByRole("button", { name: "+ Add task" }));
     await userEvent.type(within(detail).getByLabelText("Task"), "Meet the choir");
-    await userEvent.type(within(detail).getByLabelText("Date"), "2026-11-02");
+    expect(within(detail).getByLabelText("Time")).toBeDisabled();
+    await userEvent.click(within(detail).getByRole("button", { name: "Date" }));
+    await userEvent.click(screen.getByRole("button", { name: "Next month" }));
+    await userEvent.click(screen.getByRole("button", { name: "Monday, November 2, 2026" }));
     await userEvent.type(within(detail).getByLabelText("Time"), "18:30");
     await userEvent.click(within(detail).getByRole("button", { name: "Add" }));
 
@@ -134,6 +139,7 @@ describe("ItemsPage", () => {
         dueTime: "18:30",
       }),
     );
+    vi.useRealTimers();
   });
 
   it("given a task with no title, when it is added, then nothing is sent", async () => {
@@ -166,6 +172,23 @@ describe("ItemsPage", () => {
     expect(itemsApi.updateItem).toHaveBeenCalledWith(1, luz.id, { status: "booked" });
   });
 
+  it("given a new item, when the panel opens, then it asks for a phone first and offers the other ways to reach them", async () => {
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+    await screen.findByRole("button", { name: /Iglesia San José/ });
+
+    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    const panel = screen.getByRole("dialog", { name: "New item" });
+
+    expect(within(panel).getByLabelText("Phone / WhatsApp")).toBeInTheDocument();
+    expect(within(panel).queryByLabelText("Instagram")).not.toBeInTheDocument();
+    expect(within(panel).getByRole("combobox", { name: "Category" })).toHaveTextContent("No category");
+    expect(
+      within(panel)
+        .getAllByRole("button", { name: /^\+ / })
+        .map((button) => button.textContent),
+    ).toEqual(["+ Instagram", "+ Email", "+ Website"]);
+  });
+
   it("given a new vendor, when it is added, then it is created with its category and Instagram", async () => {
     vi.mocked(itemsApi.createItem).mockResolvedValue(anItem());
     renderWithProviders(<ItemsPage />, { route: "/items" });
@@ -174,7 +197,11 @@ describe("ItemsPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
     const dialog = screen.getByRole("dialog", { name: "New item" });
     await userEvent.type(within(dialog).getByLabelText("Name"), "Dulce Rosa Pastelería");
-    await userEvent.selectOptions(within(dialog).getByLabelText("Category"), "📸 Photographer");
+    await userEvent.click(within(dialog).getByRole("combobox", { name: "Category" }));
+    await userEvent.type(within(dialog).getByRole("searchbox"), "photo");
+    await userEvent.click(within(dialog).getByRole("option", { name: "📸 Photographer" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: "+ Instagram" }));
+    expect(within(dialog).queryByRole("button", { name: "+ Instagram" })).not.toBeInTheDocument();
     await userEvent.type(within(dialog).getByLabelText("Instagram"), "https://instagram.com/dulcerosa");
     await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
 
@@ -227,6 +254,9 @@ describe("ItemsPage", () => {
     await userEvent.click(within(detail).getByRole("button", { name: "Edit" }));
     const dialog = screen.getByRole("dialog", { name: "Edit item" });
     expect(within(dialog).getByLabelText("Contact")).toHaveValue("Padre Luis");
+    expect(within(dialog).getByRole("combobox", { name: "Category" })).toHaveTextContent("⛪ Church");
+    expect(within(dialog).getByLabelText("Instagram")).toHaveValue("https://instagram.com/parroquiasanjose");
+    expect(within(dialog).queryByLabelText("Email")).not.toBeInTheDocument();
     await userEvent.clear(within(dialog).getByLabelText("Notes"));
     await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
 

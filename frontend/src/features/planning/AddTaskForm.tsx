@@ -4,7 +4,10 @@ import type { FormEvent } from "react";
 import type { Item, TaskDraft } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
-import { field, fieldLabel, primaryButton, secondaryButton } from "../households/dialogStyles";
+import { DatePicker } from "../../components/form/DatePicker";
+import { StyledSelect } from "../../components/form/StyledSelect";
+import { fieldLabel, pillField } from "../../components/form/styles";
+import { primaryButton, secondaryButton } from "../households/dialogStyles";
 
 interface AddTaskFormProps {
   /** The item the task is for; omitted, the form offers a picker over `items`. */
@@ -53,7 +56,7 @@ export function AddTaskForm({ itemId, items = [], onAdd, onClose }: AddTaskFormP
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="flex flex-col gap-3 rounded-2xl bg-surface-container-low p-4"
+      className="flex flex-col gap-3 rounded-[24px_24px_24px_8px] border border-outline-variant/60 bg-surface-container-lowest p-4"
     >
       <div>
         <label htmlFor={idFor("title")} className={fieldLabel}>
@@ -64,7 +67,7 @@ export function AddTaskForm({ itemId, items = [], onAdd, onClose }: AddTaskFormP
           value={title}
           placeholder={t("tasks.titlePlaceholder")}
           onChange={(e) => setTitle(e.target.value)}
-          className={field}
+          className={pillField}
           autoFocus
         />
       </div>
@@ -74,32 +77,18 @@ export function AddTaskForm({ itemId, items = [], onAdd, onClose }: AddTaskFormP
             <label htmlFor={idFor("item")} className={fieldLabel}>
               {t("tasks.item")}
             </label>
-            <select
-              id={idFor("item")}
-              value={pickedItemId}
-              onChange={(e) => setPickedItemId(e.target.value)}
-              className={field}
-            >
+            <StyledSelect id={idFor("item")} value={pickedItemId} onChange={(e) => setPickedItemId(e.target.value)}>
               <option value="">{t("tasks.general")}</option>
               {items.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
                 </option>
               ))}
-            </select>
+            </StyledSelect>
           </div>
         )}
-        <div>
-          <label htmlFor={idFor("date")} className={fieldLabel}>
-            {t("tasks.date")}
-          </label>
-          <input
-            id={idFor("date")}
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className={field}
-          />
+        <div className="min-w-44">
+          <DatePicker label={t("tasks.date")} value={dueDate || null} onChange={(next) => setDueDate(next ?? "")} />
         </div>
         <div>
           <label htmlFor={idFor("time")} className={fieldLabel}>
@@ -111,7 +100,7 @@ export function AddTaskForm({ itemId, items = [], onAdd, onClose }: AddTaskFormP
             value={dueTime}
             disabled={dueDate === ""}
             onChange={(e) => setDueTime(e.target.value)}
-            className={field}
+            className={`${pillField} disabled:cursor-not-allowed disabled:opacity-50`}
           />
         </div>
       </div>

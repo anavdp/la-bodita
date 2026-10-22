@@ -46,7 +46,8 @@ describe("GuestListPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Add Guest" }));
     await userEvent.type(screen.getByLabelText("First name"), "Paolo");
     await userEvent.type(screen.getByLabelText("Last name"), "Rossi");
-    await userEvent.selectOptions(screen.getByLabelText("Household"), "Famiglia Rossi");
+    await userEvent.click(screen.getByRole("combobox", { name: "Household" }));
+    await userEvent.click(screen.getByRole("option", { name: "Famiglia Rossi" }));
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() =>
@@ -374,7 +375,8 @@ describe("the Households tab", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Add Guest" }));
 
-    const options = within(screen.getByLabelText("Household")).getAllByRole("option");
+    await userEvent.click(screen.getByRole("combobox", { name: "Household" }));
+    const options = within(screen.getByRole("listbox")).getAllByRole("option");
     expect(options.map((option) => option.textContent)).toEqual(["On their own", "Famiglia Rossi"]);
   });
 

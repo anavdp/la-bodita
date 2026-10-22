@@ -147,7 +147,7 @@ describe("GuestFormDialog", () => {
         <GuestFormDialog guest={null} households={households} onSave={onSave} onClose={vi.fn()} />,
       );
 
-      expect(screen.getByLabelText("Household")).toHaveValue("");
+      expect(screen.getByRole("combobox", { name: "Household" })).toHaveTextContent("On their own");
       await userEvent.type(screen.getByLabelText("First name"), "Maria");
       await userEvent.type(screen.getByLabelText("Last name"), "Rossi");
       await userEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -166,7 +166,7 @@ describe("GuestFormDialog", () => {
         />,
       );
 
-      expect(screen.getByLabelText("Household")).toHaveValue("10");
+      expect(screen.getByRole("combobox", { name: "Household" })).toHaveTextContent("Famiglia Rossi");
       await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
       expect(onSave.mock.calls[0][0].householdId).toBeUndefined();
@@ -183,7 +183,8 @@ describe("GuestFormDialog", () => {
         />,
       );
 
-      await userEvent.selectOptions(screen.getByLabelText("Household"), "Carlos Mendoza");
+      await userEvent.click(screen.getByRole("combobox", { name: "Household" }));
+      await userEvent.click(screen.getByRole("option", { name: "Carlos Mendoza" }));
       await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ householdId: 20 }));
@@ -200,7 +201,8 @@ describe("GuestFormDialog", () => {
         />,
       );
 
-      await userEvent.selectOptions(screen.getByLabelText("Household"), "");
+      await userEvent.click(screen.getByRole("combobox", { name: "Household" }));
+      await userEvent.click(screen.getByRole("option", { name: "On their own" }));
       await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ householdId: null }));
@@ -217,7 +219,7 @@ describe("GuestFormDialog", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Household")).toHaveValue("");
+    expect(screen.getByRole("combobox", { name: "Household" })).toHaveTextContent("On their own");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     // Already on their own: nothing to send, so their RSVP link stays the same.

@@ -1,7 +1,11 @@
-import { useEffect, useId, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 
 import type { Guest, GuestDraft, GuestGender, GuestRelationshipType, GuestSide, RsvpStatus } from "../../api/types";
+import { SearchableSelect } from "../../components/form/SearchableSelect";
+import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
+import { StyledSelect } from "../../components/form/StyledSelect";
+import { fieldLabel, pillField as field } from "../../components/form/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import {
   genderLabelKey,
@@ -28,10 +32,6 @@ interface GuestFormDialogProps {
   onClose: () => void;
 }
 
-const field =
-  "w-full rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 font-body-sm text-body-sm text-on-surface focus:border-primary focus:outline-none";
-const fieldLabel = "mb-1 block font-label-md text-label-md uppercase text-on-surface-variant";
-
 /** An empty string in a form means "nothing entered"; the API wants null. */
 const orNull = (value: string): string | null => (value.trim() === "" ? null : value.trim());
 
@@ -50,7 +50,6 @@ function chosenHousehold(guest: Guest | null, picked: string, isInFamily: boolea
 
 export function GuestFormDialog({ guest, households = [], onSave, onClose }: GuestFormDialogProps) {
   const { t } = useTranslation();
-  const titleId = useId();
 
   const [firstName, setFirstName] = useState(guest?.firstName ?? "");
   const [lastName, setLastName] = useState(guest?.lastName ?? "");
@@ -69,16 +68,6 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
 
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [onClose]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -111,18 +100,9 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 dark:bg-black/60">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="max-h-full w-full max-w-lg overflow-y-auto rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-lg dark:bg-surface-container"
-      >
-        <h2 id={titleId} className="mb-6 font-headline-md text-headline-md text-primary">
-          {t(guest ? "guests.form.editTitle" : "guests.form.createTitle")}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <SidePanel title={t(guest ? "guests.form.editTitle" : "guests.form.createTitle")} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+        <div className={panelBody}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className={fieldLabel} htmlFor="guest-first-name">
@@ -153,9 +133,8 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
               <label className={fieldLabel} htmlFor="guest-relationship">
                 {t("guests.form.relationship")}
               </label>
-              <select
+              <StyledSelect
                 id="guest-relationship"
-                className={field}
                 value={relationshipType}
                 onChange={(event) =>
                   setRelationshipType(event.target.value as GuestRelationshipType | "")
@@ -167,15 +146,14 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
                     {t(relationshipLabelKey(option))}
                   </option>
                 ))}
-              </select>
+              </StyledSelect>
             </div>
             <div>
               <label className={fieldLabel} htmlFor="guest-side">
                 {t("guests.form.side")}
               </label>
-              <select
+              <StyledSelect
                 id="guest-side"
-                className={field}
                 value={side}
                 onChange={(event) => setSide(event.target.value as GuestSide | "")}
               >
@@ -185,7 +163,7 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
                     {t(sideLabelKey(option))}
                   </option>
                 ))}
-              </select>
+              </StyledSelect>
             </div>
           </div>
 
@@ -194,9 +172,8 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
               <label className={fieldLabel} htmlFor="guest-rsvp">
                 {t("guests.form.rsvp")}
               </label>
-              <select
+              <StyledSelect
                 id="guest-rsvp"
-                className={field}
                 value={rsvpStatus}
                 onChange={(event) => setRsvpStatus(event.target.value as RsvpStatus)}
               >
@@ -205,15 +182,14 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
                     {t(rsvpLabelKey(option))}
                   </option>
                 ))}
-              </select>
+              </StyledSelect>
             </div>
             <div>
               <label className={fieldLabel} htmlFor="guest-gender">
                 {t("guests.form.gender")}
               </label>
-              <select
+              <StyledSelect
                 id="guest-gender"
-                className={field}
                 value={gender}
                 onChange={(event) => setGender(event.target.value as GuestGender | "")}
               >
@@ -223,7 +199,7 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
                     {t(genderLabelKey(option))}
                   </option>
                 ))}
-              </select>
+              </StyledSelect>
             </div>
           </div>
 
@@ -255,24 +231,15 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
             </div>
           </div>
 
-          <div>
-            <label className={fieldLabel} htmlFor="guest-household">
-              {t("guests.form.household")}
-            </label>
-            <select
-              id="guest-household"
-              className={field}
-              value={household}
-              onChange={(event) => setHousehold(event.target.value)}
-            >
-              <option value="">{t("guests.form.householdNew")}</option>
-              {households.map((option) => (
-                <option key={option.id} value={String(option.id)}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SearchableSelect
+            label={t("guests.form.household")}
+            value={household}
+            options={[
+              { value: "", label: t("guests.form.householdNew") },
+              ...households.map((option) => ({ value: String(option.id), label: option.label })),
+            ]}
+            onChange={setHousehold}
+          />
 
           <label className="flex items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">
             <input
@@ -289,25 +256,24 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
               {error}
             </p>
           )}
-
-          <div className="mt-2 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full border border-primary px-6 py-3 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-            >
-              {t("guests.form.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="rounded-full bg-primary px-8 py-3 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              {t(isSaving ? "guests.form.saving" : "guests.form.save")}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+        <div className={panelFooter}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-primary px-6 py-3 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
+          >
+            {t("guests.form.cancel")}
+          </button>
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="rounded-full bg-primary px-8 py-3 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            {t(isSaving ? "guests.form.saving" : "guests.form.save")}
+          </button>
+        </div>
+      </form>
+    </SidePanel>
   );
 }

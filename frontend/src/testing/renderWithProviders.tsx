@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import type { Wedding } from "../api/types";
 import { LanguageProvider } from "../i18n/LanguageProvider";
+import type { Language } from "../i18n/translations";
 import { SearchProvider } from "../search/SearchProvider";
 import { ThemeProvider } from "../theme/ThemeProvider";
 import { WeddingContext } from "../wedding/WeddingProvider";
@@ -23,10 +24,11 @@ interface Options {
   wedding?: Partial<WeddingContextValue>;
   /** Seeds the top bar's search box, which screens below it filter by. */
   searchTerm?: string;
+  language?: Language;
 }
 
 export function renderWithProviders(ui: ReactElement, options: Options = {}): RenderResult {
-  const { route = "/guests", path, wedding = {}, searchTerm = "" } = options;
+  const { route = "/guests", path, wedding = {}, searchTerm = "", language = "en" } = options;
   const weddingValue: WeddingContextValue = {
     wedding: aWedding,
     isLoading: false,
@@ -44,7 +46,7 @@ export function renderWithProviders(ui: ReactElement, options: Options = {}): Re
 
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <LanguageProvider>
+      <LanguageProvider initialLanguage={language}>
         <WeddingContext.Provider value={weddingValue}>
           <ThemeProvider>
             <SearchProvider initialTerm={searchTerm}>{wrapped}</SearchProvider>
