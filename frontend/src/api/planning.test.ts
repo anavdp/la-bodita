@@ -1,4 +1,4 @@
-import { createCategory, listCategories } from "./categories";
+import { createCategory, deleteCategory, listCategories, updateCategory } from "./categories";
 import { createItem, deleteItem, listItems, updateItem } from "./items";
 import { createTask, deleteTask, listTasks, updateTask } from "./tasks";
 
@@ -78,6 +78,30 @@ describe("the planning API", () => {
     expect(init.method).toBe("POST");
     expect(JSON.parse(init.body as string)).toEqual({ name: "Photographer", emoji: "📸", color: "#f39237" });
     expect(category.name).toBe("Photographer");
+  });
+
+  it("given a new color, when a category is updated, then only the color is patched", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse(categoryPayload));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const category = await updateCategory(3, 2, { color: "#e56399" });
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("http://localhost:8000/api/weddings/3/categories/2");
+    expect(init.method).toBe("PATCH");
+    expect(JSON.parse(init.body as string)).toEqual({ color: "#e56399" });
+    expect(category.subcategories[0].categoryId).toBe(2);
+  });
+
+  it("given a category, when it is deleted, then a DELETE is sent", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse(null, 204));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await deleteCategory(3, 2);
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("http://localhost:8000/api/weddings/3/categories/2");
+    expect(init.method).toBe("DELETE");
   });
 
   it("given a wedding, when its items are listed, then each comes back with its next task in app terms", async () => {

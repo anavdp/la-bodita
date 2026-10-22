@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { createCategory, listCategories } from "../../api/categories";
+import { createCategory, deleteCategory, listCategories, updateCategory } from "../../api/categories";
 import { createItem, deleteItem, listItems, updateItem } from "../../api/items";
 import { createTask, deleteTask, listTasks, updateTask } from "../../api/tasks";
 import type { Category, CategoryDraft, Item, ItemDraft, Task, TaskDraft } from "../../api/types";
@@ -13,6 +13,8 @@ export interface PlanningState {
   hasLoadError: boolean;
   reload: () => void;
   addCategory: (draft: CategoryDraft) => Promise<void>;
+  editCategory: (categoryId: number, changes: Partial<CategoryDraft>) => Promise<void>;
+  removeCategory: (categoryId: number) => Promise<void>;
   addItem: (draft: ItemDraft) => Promise<void>;
   editItem: (itemId: number, changes: Partial<ItemDraft>) => Promise<void>;
   removeItem: (itemId: number) => Promise<void>;
@@ -95,6 +97,8 @@ export function usePlanning(weddingId: number | null): PlanningState {
       void load();
     },
     addCategory: (draft) => changeThenReload((id) => createCategory(id, draft)),
+    editCategory: (categoryId, changes) => changeThenReload((id) => updateCategory(id, categoryId, changes)),
+    removeCategory: (categoryId) => changeThenReload((id) => deleteCategory(id, categoryId)),
     addItem: (draft) => changeThenReload((id) => createItem(id, draft)),
     editItem: (itemId, changes) => changeThenReload((id) => updateItem(id, itemId, changes)),
     removeItem: (itemId) => changeThenReload((id) => deleteItem(id, itemId)),

@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom
 import { ComingSoon } from "./components/ComingSoon";
 import { AppLayout } from "./components/layout/AppLayout";
 import { BudgetPage } from "./features/budget/BudgetPage";
+import { CategoriesPage } from "./features/categories/CategoriesPage";
 import { ChecklistPage } from "./features/checklist/ChecklistPage";
 import { GuestListPage } from "./features/guests/GuestListPage";
 import { ItemsPage } from "./features/items/ItemsPage";
@@ -14,7 +15,7 @@ import { WeddingProvider } from "./wedding/WeddingProvider";
 
 /**
  * Every planner screen sits in the shared shell. The guest list, items,
- * checklist and budget are built; the rest each have their own issue and show a
+ * checklist, budget and categories are built; the rest each have their own issue and show a
  * placeholder until then.
  * The RSVP pages are the guests' side, so they stand outside the shell: /rsvp
  * finds a household by name, /rsvp/:token is that household's invitation, and
@@ -47,7 +48,7 @@ export function AppRoutes() {
         <Route path="/calendar" element={<ComingSoon titleKey="nav.calendar" art="title-calendar.png" />} />
         <Route path="/budget" element={<BudgetPage />} />
         <Route path="/documents" element={<ComingSoon titleKey="nav.documents" art="title-documents.png" />} />
-        <Route path="/categories" element={<ComingSoon titleKey="nav.categories" />} />
+        <Route path="/categories" element={<CategoriesPage />} />
         <Route path="*" element={<Navigate to="/guests" replace />} />
       </Route>
     </Routes>

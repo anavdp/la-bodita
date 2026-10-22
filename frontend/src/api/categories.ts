@@ -43,3 +43,21 @@ export async function createCategory(weddingId: number, draft: CategoryDraft): P
   const payload = await request<CategoryPayload>(categoriesUrl(weddingId), { method: "POST", body: draft });
   return toCategory(payload);
 }
+
+/** Only the fields named; a null emoji clears it. */
+export async function updateCategory(
+  weddingId: number,
+  categoryId: number,
+  changes: Partial<CategoryDraft>,
+): Promise<Category> {
+  const payload = await request<CategoryPayload>(`${categoriesUrl(weddingId)}/${categoryId}`, {
+    method: "PATCH",
+    body: changes,
+  });
+  return toCategory(payload);
+}
+
+/** Its subcategories go with it; its items stay, with no category. */
+export function deleteCategory(weddingId: number, categoryId: number): Promise<void> {
+  return request<void>(`${categoriesUrl(weddingId)}/${categoryId}`, { method: "DELETE" });
+}

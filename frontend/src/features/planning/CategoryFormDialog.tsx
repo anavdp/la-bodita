@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
-import type { CategoryDraft } from "../../api/types";
+import type { Category, CategoryDraft } from "../../api/types";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
 import { IconPicker } from "../../components/playful/IconPicker";
@@ -13,19 +13,21 @@ import type { TranslationKey } from "../../i18n/translations";
 const palette = ["#624cab", "#7189ff", "#f39237", "#e56399", "#3fa796", "#c49b2e"];
 
 interface CategoryFormDialogProps {
+  /** The category to edit, or left out to create one. */
+  category?: Category | null;
   /** How many categories exist, to start each new one on the next color. */
   existingCount: number;
   onSave: (draft: CategoryDraft) => Promise<void>;
   onClose: () => void;
 }
 
-/** A quick way to add a tag while filling in items; the Category Manager will do the rest. */
-export function CategoryFormDialog({ existingCount, onSave, onClose }: CategoryFormDialogProps) {
+/** The one drawer for a category: added inline from Items, or added and edited in the Category Manager. */
+export function CategoryFormDialog({ category = null, existingCount, onSave, onClose }: CategoryFormDialogProps) {
   const { t } = useTranslation();
 
-  const [name, setName] = useState("");
-  const [emoji, setEmoji] = useState("");
-  const [color, setColor] = useState(palette[existingCount % palette.length]);
+  const [name, setName] = useState(category?.name ?? "");
+  const [emoji, setEmoji] = useState(category?.emoji ?? "");
+  const [color, setColor] = useState(category?.color ?? palette[existingCount % palette.length]);
   const [error, setError] = useState<TranslationKey | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -46,7 +48,7 @@ export function CategoryFormDialog({ existingCount, onSave, onClose }: CategoryF
   };
 
   return (
-    <SidePanel title={t("categories.new")} sticker="🏷️" onClose={onClose}>
+    <SidePanel title={t(category === null ? "categories.new" : "categories.edit")} sticker="🏷️" onClose={onClose}>
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div>
