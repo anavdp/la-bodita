@@ -118,7 +118,7 @@ export function HouseholdFormDialog({ household, guests, households, onSave, onC
                   <label
                     key={guest.id}
                     className={`flex cursor-pointer items-center gap-3 border-b-2 border-ink/10 px-4 py-2.5 text-lg last:border-b-0 ${
-                      isPicked ? "bg-periwinkle/70" : "hover:bg-periwinkle/25"
+                      isPicked ? "bg-accent/70" : "hover:bg-accent/25"
                     }`}
                   >
                     <input

@@ -35,7 +35,7 @@ export function RsvpFrame({ children, picture, phonePicture }: RsvpFrameProps) {
             <img src={picture} alt="" className="h-72 w-full object-cover object-[center_35%] sm:h-[26rem]" />
           </picture>
         )}
-        {/* A periwinkle wash at the bottom, so the card's top edge sits on color rather than on the photo. */}
+        {/* A accent wash at the bottom, so the card's top edge sits on color rather than on the photo. */}
         <div
           aria-hidden="true"
           className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-on-secondary-fixed-variant/50 to-transparent"

@@ -5,7 +5,7 @@ import { useWedding } from "../../wedding/WeddingProvider";
 import { daysUntil } from "./countdown";
 import { navigationItems } from "./navigationItems";
 
-const activeItem = "border-ink bg-periwinkle";
+const activeItem = "border-ink bg-accent";
 const restingItem = "border-transparent hover:bg-white/15";
 
 export function Sidebar() {
@@ -70,7 +70,7 @@ export function Sidebar() {
         </button>
         <div className="flex items-center">
           <div
-            className="mr-3 flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-ink bg-periwinkle text-xl"
+            className="mr-3 flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-ink bg-accent text-xl"
             aria-hidden="true"
           >
             👰

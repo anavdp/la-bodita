@@ -204,7 +204,7 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
           {/* A sticker-style tick box: the whole pill turns butter yellow when ticked. */}
           <label
             className={`flex w-max cursor-pointer items-center gap-3 rounded-[16px] border-[2.5px] border-ink px-4 py-2 text-lg transition-colors ${
-              isChild ? "bg-butter" : "bg-cream-light hover:bg-periwinkle/30"
+              isChild ? "bg-butter" : "bg-cream-light hover:bg-accent/30"
             }`}
           >
             <input

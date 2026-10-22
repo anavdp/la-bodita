@@ -162,7 +162,7 @@ export function Dropdown({
                   onMouseEnter={() => setHighlighted(index)}
                   onClick={() => pick(option)}
                   className={`flex cursor-pointer items-center justify-between gap-3 whitespace-nowrap rounded-[14px] px-4 py-2 text-lg ${
-                    index === highlighted ? "bg-periwinkle/60" : ""
+                    index === highlighted ? "bg-accent/60" : ""
                   } ${option.value === value ? "text-sky-deep after:content-['✓']" : "text-ink"}`}
                 >
                   {option.label}

@@ -172,7 +172,7 @@ describe("RsvpPage", () => {
     vi.unstubAllEnvs();
   });
 
-  it("given a household link, when it opens, then the title and send button share the muted periwinkle", async () => {
+  it("given a household link, when it opens, then the title and send button share the muted accent", async () => {
     renderPage();
     const title = await screen.findByRole("heading", { name: "La Bodita" });
 
@@ -180,7 +180,7 @@ describe("RsvpPage", () => {
     expect(screen.getByRole("button", { name: "Send RSVP" })).toHaveClass("bg-on-secondary-fixed-variant");
   });
 
-  it("given a household link, when a member picks an answer, then it lights up in the light periwinkle", async () => {
+  it("given a household link, when a member picks an answer, then it lights up in the light accent", async () => {
     renderPage();
     const maria = within(await screen.findByRole("group", { name: "Maria Rossi" }));
 

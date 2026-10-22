@@ -71,7 +71,7 @@ export default {
         ink: token("play-ink"),
         cream: { DEFAULT: token("play-cream"), light: token("play-cream-light") },
         sky: { DEFAULT: token("play-sky"), deep: token("play-sky-deep"), soft: token("play-sky-soft") },
-        periwinkle: { DEFAULT: token("play-periwinkle"), deep: token("play-periwinkle-deep") },
+        accent: { DEFAULT: token("play-accent"), deep: token("play-accent-deep") },
         butter: { DEFAULT: token("play-butter"), deep: token("play-butter-deep") },
         mint: { DEFAULT: token("play-mint"), soft: token("play-mint-soft") },
         coral: { DEFAULT: token("play-coral"), soft: token("play-coral-soft") },
