@@ -2,14 +2,14 @@ import { useState } from "react";
 
 import type { Guest, Household, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
+import { avatarTones, menuItem, menuPanel } from "../../components/playful/styles";
 import { fullName } from "./filtering";
+import { statusDotClass } from "./GuestStats";
 import { NotSpecified } from "./NotSpecified";
 import {
   relationshipLabelKey,
-  rsvpIcon,
   rsvpLabelKey,
   rsvpStatuses,
-  rsvpToneClass,
   sideFlag,
   sideLabelKey,
 } from "./vocabulary";
@@ -26,10 +26,23 @@ interface GuestTableProps {
 /** Both columns open a menu, and only ever one at a time. */
 type OpenMenu = { guestId: number; kind: "rsvp" | "actions" } | null;
 
-const menuPanel =
-  "absolute z-10 mt-2 flex w-max flex-col gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest p-2 shadow-lg";
-const menuItem =
-  "flex items-center gap-2 rounded px-3 py-2 text-left font-label-md text-label-md transition-colors hover:bg-surface-container-high";
+/** The RSVP pill's fill: soft green, butter, or soft coral. */
+const rsvpPillClass: Record<RsvpStatus, string> = {
+  confirmed: "bg-[#c9efd3]",
+  pending: "bg-butter",
+  declined: "bg-[#fcd0c3]",
+};
+
+/** "Maria Rossi" reads as MR, a guest with only a first name as its first letter. */
+export function initialsOf(guest: Guest): string {
+  return [guest.firstName, guest.lastName]
+    .map((part) => part.trim().charAt(0))
+    .join("")
+    .toUpperCase();
+}
+
+const headerCell = "px-4 py-4 font-normal";
+const cell = "px-4 py-3";
 
 export function GuestTable({ guests, households = [], onEdit, onDelete, onChangeRsvp }: GuestTableProps) {
   const { t } = useTranslation();
@@ -61,19 +74,19 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
     // the browser clip vertically too - which cuts off a row menu opened near the
     // bottom. Reserving room while a menu is open keeps it reachable.
     <div className={`overflow-x-auto ${openMenu === null ? "" : "pb-28"}`}>
-      <table className="w-full border-collapse text-left">
+      <table className="w-full border-collapse text-left font-playful text-ink">
         <thead>
-          <tr className="border-b border-surface-variant font-label-md text-label-md uppercase text-on-surface-variant">
-            <th className="px-4 py-4 font-semibold">{t("guests.column.name")}</th>
-            <th className="px-4 py-4 font-semibold">{t("guests.column.household")}</th>
-            <th className="px-4 py-4 font-semibold">{t("guests.column.type")}</th>
-            <th className="px-4 py-4 font-semibold">{t("guests.column.relationship")}</th>
-            <th className="px-4 py-4 font-semibold">{t("guests.column.side")}</th>
-            <th className="px-4 py-4 text-right font-semibold">{t("guests.column.rsvp")}</th>
-            <th className="px-4 py-4 text-right font-semibold">{t("guests.column.actions")}</th>
+          <tr className="border-b-[2.5px] border-ink bg-cream text-[15px] uppercase tracking-wider">
+            <th className={`${headerCell} border-r-2 border-ink/20 pl-6`}>{t("guests.column.name")}</th>
+            <th className={headerCell}>{t("guests.column.household")}</th>
+            <th className={headerCell}>{t("guests.column.type")}</th>
+            <th className={headerCell}>{t("guests.column.relationship")}</th>
+            <th className={headerCell}>{t("guests.column.side")}</th>
+            <th className={`${headerCell} text-center`}>{t("guests.column.rsvp")}</th>
+            <th className={`${headerCell} pr-6 text-right`}>{t("guests.column.actions")}</th>
           </tr>
         </thead>
-        <tbody className="font-body-sm text-body-sm">
+        <tbody className="text-lg">
           {guests.map((guest) => {
             const name = fullName(guest);
             const statusLabel = t(rsvpLabelKey(guest.rsvpStatus));
@@ -81,28 +94,31 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
             return (
               <tr
                 key={guest.id}
-                className="table-row-hover border-b border-surface-container transition-colors"
+                className="border-b-2 border-ink/15 transition-colors last:border-b-0 hover:bg-bubblegum/25"
               >
-                <td className="px-4 py-4">
-                  {/* The mockup starts each row with the design system's circular
-                      checkbox, but with nothing selectable behind it. It comes back
-                      with batch confirmation (issue #37). */}
-                  <span className="font-title-lg text-title-lg text-on-surface">{name}</span>
+                <td className={`${cell} border-r-2 border-ink/20 pl-6`}>
+                  <span className="flex items-center gap-3">
+                    <span
+                      aria-hidden="true"
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-playful-display text-base ${
+                        avatarTones[guest.id % avatarTones.length]
+                      }`}
+                    >
+                      {initialsOf(guest)}
+                    </span>
+                    <span>{name}</span>
+                  </span>
                 </td>
-                <td className="px-4 py-4 text-on-surface-variant">
-                  {householdNames.get(guest.householdId)}
-                </td>
-                <td className="px-4 py-4 text-on-surface-variant">
-                  {t(guest.isChild ? "guests.type.child" : "guests.type.adult")}
-                </td>
-                <td className="px-4 py-4 text-on-surface-variant">
+                <td className={cell}>{householdNames.get(guest.householdId)}</td>
+                <td className={cell}>{t(guest.isChild ? "guests.type.child" : "guests.type.adult")}</td>
+                <td className={cell}>
                   {guest.relationshipType === null ? (
                     <NotSpecified />
                   ) : (
                     t(relationshipLabelKey(guest.relationshipType))
                   )}
                 </td>
-                <td className="px-4 py-4">
+                <td className={cell}>
                   {/* The flag is the label: the country's name is what it is announced
                       as, and what it says on hover. */}
                   {guest.side === null ? (
@@ -119,9 +135,8 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                   )}
                 </td>
 
-                {/* The status is the icon itself, and the icon is how you change it.
-                    Right-aligned so it sits beside the actions rather than adrift. */}
-                <td className="px-4 py-4 text-right">
+                {/* The status pill is also how you change it. */}
+                <td className={`${cell} text-center`}>
                   <div className="relative inline-block">
                     <button
                       type="button"
@@ -129,13 +144,16 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                       title={statusLabel}
                       aria-expanded={isOpen(guest, "rsvp")}
                       onClick={() => toggleMenu(guest, "rsvp")}
-                      className={`flex h-10 w-10 items-center justify-center rounded-full transition-opacity hover:opacity-70 ${
-                        rsvpToneClass[guest.rsvpStatus]
+                      data-status={guest.rsvpStatus}
+                      className={`inline-flex items-center gap-2 rounded-[14px] border-2 border-ink px-4 py-1 text-lg transition-[filter] hover:brightness-95 ${
+                        rsvpPillClass[guest.rsvpStatus]
                       }`}
                     >
-                      <span className="material-symbols-outlined icon-filled" aria-hidden="true">
-                        {rsvpIcon[guest.rsvpStatus]}
-                      </span>
+                      <span
+                        aria-hidden="true"
+                        className={`h-3 w-3 rounded-full border-2 border-ink ${statusDotClass[guest.rsvpStatus]}`}
+                      />
+                      {statusLabel}
                     </button>
 
                     {isOpen(guest, "rsvp") && (
@@ -153,11 +171,9 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                               className={menuItem}
                             >
                               <span
-                                className={`material-symbols-outlined icon-filled ${rsvpToneClass[status]}`}
                                 aria-hidden="true"
-                              >
-                                {rsvpIcon[status]}
-                              </span>
+                                className={`h-3 w-3 rounded-full border-2 border-ink ${statusDotClass[status]}`}
+                              />
                               {t("guests.rsvp.markAs", { status: t(rsvpLabelKey(status)) })}
                             </button>
                           ))}
@@ -166,17 +182,17 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                   </div>
                 </td>
 
-                <td className="px-4 py-4 text-right">
+                <td className={`${cell} pr-6 text-right`}>
                   <div className="relative inline-block">
                     <button
                       type="button"
                       aria-label={t("guests.actions.open", { name })}
                       aria-expanded={isOpen(guest, "actions")}
                       onClick={() => toggleMenu(guest, "actions")}
-                      className="text-outline transition-colors hover:text-primary"
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-bubblegum/60"
                     >
                       <span className="material-symbols-outlined" aria-hidden="true">
-                        more_horiz
+                        more_vert
                       </span>
                     </button>
 
@@ -190,7 +206,7 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                                 closeMenus();
                                 onDelete(guest);
                               }}
-                              className={`${menuItem} text-error hover:bg-error-container`}
+                              className={`${menuItem} text-coral hover:bg-[#fcd0c3]`}
                             >
                               {t("guests.deleteConfirm", { name })}
                             </button>
@@ -217,7 +233,7 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                             <button
                               type="button"
                               onClick={() => setIsConfirmingDelete(true)}
-                              className={`${menuItem} text-error`}
+                              className={`${menuItem} !text-coral`}
                             >
                               {t("guests.actions.delete")}
                             </button>

@@ -31,7 +31,9 @@ describe("GuestListPage", () => {
 
     renderWithProviders(<GuestListPage />);
 
-    expect(await screen.findByText("Guests: 3 · Households: 2")).toBeInTheDocument();
+    const summary = await screen.findByRole("group", { name: "RSVP summary" });
+    await waitFor(() => expect(summary).toHaveTextContent("3 Guests"));
+    expect(summary).toHaveTextContent("2 Households");
     expect(householdsApi.listHouseholds).toHaveBeenCalledWith(1);
   });
 
@@ -75,8 +77,8 @@ describe("GuestListPage", () => {
     renderWithProviders(<GuestListPage />);
 
     expect(screen.getByRole("heading", { name: "Guest List" })).toBeInTheDocument();
-    expect(screen.getByText("Manage your wedding guests and RSVPs")).toBeInTheDocument();
-    expect(await screen.findByRole("button", { name: /^\d+ Confirmed/ })).toHaveTextContent("1 Confirmed 50%");
+    expect(screen.getByText("Your people. Your party. One very good list.")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /^\d+ Confirmed/ })).toHaveTextContent("1 Confirmed");
   });
 
   it("given a wedding with no guests, when the list loads, then the screen invites adding one", async () => {

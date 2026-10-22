@@ -66,6 +66,17 @@ export default {
         "on-error": token("on-error"),
         "error-container": token("error-container"),
         "on-error-container": token("on-error-container"),
+        // Redesign proof of concept ("playful" look): fixed hexes for now, used
+        // only by the shell and the Guest List. They become tokens if it ships.
+        ink: "#1f1d2b",
+        cream: { DEFAULT: "#fdf5e6", light: "#fffbf3" },
+        sky: { DEFAULT: "#3f8cf3", deep: "#2b74e8" },
+        bubblegum: { DEFAULT: "#f9c4dd", deep: "#f2a6ca" },
+        butter: { DEFAULT: "#fbe48e", deep: "#f6c935" },
+        mint: "#3cbf6a",
+        coral: "#f2603e",
+        lilac: "#ddd3fb",
+        peach: "#fdd4b8",
       },
       borderRadius: {
         DEFAULT: "0.25rem",
@@ -95,6 +106,11 @@ export default {
         // for the titles (Cormorant stands in for The Seasons, which we can't
         // licence), and a script for the couple's signature (Allura, a free
         // look-alike for Brigovin, which reads too thin on a phone).
+        // Redesign proof of concept: a hand-lettered body, a chunky display face
+        // for page titles, and a bubbly one for the logo.
+        playful: ["Itim", "Be Vietnam Pro", "sans-serif"],
+        "playful-display": ["Lilita One", "Quicksand", "sans-serif"],
+        "playful-logo": ["Chewy", "Quicksand", "cursive"],
         guest: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         "guest-display": ["Cormorant", "Times New Roman", "serif"],
         "guest-script": ["Allura", "cursive"],

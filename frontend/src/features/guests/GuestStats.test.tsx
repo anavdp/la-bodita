@@ -13,19 +13,20 @@ const guests = [
 ];
 
 describe("GuestStats", () => {
-  it("given a guest list, when the summary is rendered, then each RSVP state gets its count and share", () => {
+  it("given a guest list, when the summary is rendered, then each RSVP state gets its count", () => {
     renderWithProviders(<GuestStats guests={guests} activeStatus={null} onToggleStatus={vi.fn()} />);
 
-    expect(screen.getByRole("button", { name: /Confirmed/ })).toHaveTextContent("2 Confirmed 50%");
-    expect(screen.getByRole("button", { name: /Pending/ })).toHaveTextContent("1 Pending 25%");
-    expect(screen.getByRole("button", { name: /Declined/ })).toHaveTextContent("1 Declined 25%");
+    expect(screen.getByRole("button", { name: /Confirmed/ })).toHaveTextContent("2 Confirmed");
+    expect(screen.getByRole("button", { name: /Pending/ })).toHaveTextContent("1 Pending");
+    expect(screen.getByRole("button", { name: /Declined/ })).toHaveTextContent("1 Declined");
   });
 
-  it("given a guest list, when the summary is rendered, then the bar is split by each state's count", () => {
-    const { container } = renderWithProviders(<GuestStats guests={guests} activeStatus={null} />);
+  it("given guests in households, when the summary is rendered, then it leads with the guest and household totals", () => {
+    const household = [aGuest({ householdId: 7 }), aGuest({ householdId: 7 }), aGuest()];
+    renderWithProviders(<GuestStats guests={household} activeStatus={null} />);
 
-    const segments = container.querySelectorAll<HTMLElement>("[data-status]");
-    expect(Array.from(segments, (segment) => segment.style.flexGrow)).toEqual(["2", "1", "1"]);
+    expect(screen.getByText("Guests").parentElement).toHaveTextContent("3 Guests");
+    expect(screen.getByText("Households").parentElement).toHaveTextContent("2 Households");
   });
 
   it("given a status, when it is clicked, then the summary asks to filter by it", async () => {
@@ -48,6 +49,6 @@ describe("GuestStats", () => {
     renderWithProviders(<GuestStats guests={guests} activeStatus={null} />);
 
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
-    expect(screen.getByText("Confirmed").parentElement).toHaveTextContent("2 Confirmed 50%");
+    expect(screen.getByText("Confirmed").parentElement).toHaveTextContent("2 Confirmed");
   });
 });

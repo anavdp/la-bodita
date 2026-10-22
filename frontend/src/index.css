@@ -138,6 +138,15 @@
     border-radius: 20px 40px 20px 10px;
   }
 
+  /* Redesign proof of concept: the chunky outlined title and logo. */
+  .playful-outline {
+    --outline: theme("colors.ink");
+    text-shadow:
+      2px 0 0 var(--outline), -2px 0 0 var(--outline), 0 2px 0 var(--outline), 0 -2px 0 var(--outline),
+      2px 2px 0 var(--outline), -2px 2px 0 var(--outline), 2px -2px 0 var(--outline), -2px -2px 0 var(--outline),
+      3px 4px 0 var(--outline);
+  }
+
   .icon-filled {
     font-variation-settings: "FILL" 1;
   }

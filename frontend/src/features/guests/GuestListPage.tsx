@@ -13,6 +13,7 @@ import type {
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
+import { outlinedCard, pageTagline, pageTitle, primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
@@ -36,10 +37,13 @@ type HouseholdDialog =
 
 export type GuestListTab = "guests" | "households";
 
-const tabLink = ({ isActive }: { isActive: boolean }) =>
-  `border-b-2 px-4 py-3 font-label-lg text-label-lg transition-colors ${
-    isActive ? "border-primary text-primary" : "border-transparent text-on-surface-variant hover:text-primary"
-  }`;
+/** Two folder tabs side by side; the open one is pink. */
+const tabLink =
+  (edge: string) =>
+  ({ isActive }: { isActive: boolean }) =>
+    `border-[2.5px] border-ink px-10 py-2 font-playful text-[22px] text-ink transition-colors ${edge} ${
+      isActive ? "bg-bubblegum" : "bg-cream-light hover:bg-bubblegum/40"
+    }`;
 
 /**
  * The guest list, in two tabs that share the header and the RSVP cards: the
@@ -97,7 +101,6 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
         .sort((first, second) => first.label.localeCompare(second.label)),
     [households],
   );
-  const householdCount = new Set(guests.map((guest) => guest.householdId)).size;
 
   const handleSave = async (draft: GuestDraft) => {
     if (dialogTarget?.guest) {
@@ -156,138 +159,138 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
 
   const tableArea = () => {
     if (isLoading) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.loading")}</p>;
+      return <p className="font-playful text-xl text-ink/70">{t("guests.loading")}</p>;
     }
     if (hasLoadError) {
       return (
         <div className="flex flex-col items-start gap-4">
-          <p className="font-body-lg text-body-lg text-error">{t("guests.loadFailed")}</p>
-          <button
-            type="button"
-            onClick={reload}
-            className="rounded-full border border-primary px-6 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5"
-          >
+          <p className="font-playful text-xl text-coral">{t("guests.loadFailed")}</p>
+          <button type="button" onClick={reload} className={secondaryButton}>
             {t("guests.retry")}
           </button>
         </div>
       );
     }
     if (guests.length === 0) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.empty")}</p>;
+      return <p className="font-playful text-xl text-ink/70">{t("guests.empty")}</p>;
     }
     if (tab === "households") {
       if (visibleHouseholds.length === 0) {
         return (
-          <p className="font-body-lg text-body-lg text-on-surface-variant">
+          <p className="font-playful text-xl text-ink/70">
             {t("households.noMatches", { term })}
           </p>
         );
       }
       return (
-        <HouseholdsPanel
+        <div className={`${outlinedCard} p-6`}>
+          <HouseholdsPanel
           households={visibleHouseholds}
           onDetails={(household) => setHouseholdDialog({ kind: "details", household })}
           onEdit={(household) => setHouseholdDialog({ kind: "form", household })}
           onDelete={(household) => setHouseholdDialog({ kind: "delete", household })}
           onChangeBroadcastList={handleChangeBroadcastList}
-        />
+          />
+        </div>
       );
     }
     if (searchedGuests.length === 0) {
       return (
-        <p className="font-body-lg text-body-lg text-on-surface-variant">
+        <p className="font-playful text-xl text-ink/70">
           {t("guests.noMatches", { term })}
         </p>
       );
     }
     if (visibleGuests.length === 0) {
-      return <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.statusNoMatches")}</p>;
+      return <p className="font-playful text-xl text-ink/70">{t("guests.statusNoMatches")}</p>;
     }
     return (
-      <GuestTable
-        guests={visibleGuests}
-        households={households}
-        onEdit={(guest) => setDialogTarget({ guest })}
-        onDelete={handleDelete}
-        onChangeRsvp={handleChangeRsvp}
-      />
+      <div className={`${outlinedCard} overflow-hidden`}>
+        <GuestTable
+          guests={visibleGuests}
+          households={households}
+          onEdit={(guest) => setDialogTarget({ guest })}
+          onDelete={handleDelete}
+          onChangeRsvp={handleChangeRsvp}
+        />
+        <p className="border-t-2 border-ink/15 px-6 py-4 font-playful text-lg text-ink">
+          {t("guests.showing", { shown: visibleGuests.length, total: guests.length })}
+        </p>
+      </div>
     );
   };
 
   return (
     <>
-      <div className="organic-shape-1 mb-8 flex flex-col gap-6 bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-6">
+        <div className="flex items-center gap-6">
           <div>
-            <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("guests.title")}</h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant">{t("guests.subtitle")}</p>
-            {guests.length > 0 && (
-              <p className="mt-2 font-label-md text-label-md text-on-surface-variant">
-                {t("guests.householdSummary", {
-                  guests: guests.length,
-                  households: householdCount,
-                })}
-              </p>
-            )}
+            <h1 className={pageTitle}>{t("guests.title")}</h1>
+            <p className={pageTagline}>{t("guests.subtitle")}</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            {tab === "households" ? (
+          {/* Stand-in for the mockup's clinking-glasses illustration. */}
+          <span aria-hidden="true" className="hidden text-7xl lg:inline">
+            🥂
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {tab === "households" ? (
+            <button
+              type="button"
+              onClick={() => setHouseholdDialog({ kind: "form", household: null })}
+              className={primaryButton}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">
+                add
+              </span>
+              {t("households.add")}
+            </button>
+          ) : (
+            <>
               <button
                 type="button"
-                onClick={() => setHouseholdDialog({ kind: "form", household: null })}
-                className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
+                onClick={() => setIsImportOpen(true)}
+                disabled={weddingId === null}
+                className={secondaryButton}
               >
-                {t("households.add")}
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  upload
+                </span>
+                {t("guests.import.open")}
               </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setIsImportOpen(true)}
-                  disabled={weddingId === null}
-                  className="rounded-full border border-primary px-8 py-4 font-label-md text-label-md text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
-                >
-                  {t("guests.import.open")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDialogTarget({ guest: null })}
-                  className="rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary shadow-md transition-opacity hover:opacity-90"
-                >
-                  {t("guests.add")}
-                </button>
-              </>
-            )}
-          </div>
+              <button type="button" onClick={() => setDialogTarget({ guest: null })} className={primaryButton}>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  add
+                </span>
+                {t("guests.add")}
+              </button>
+            </>
+          )}
         </div>
+      </header>
 
-        <GuestStats
-          guests={guests}
-          activeStatus={rsvpFilter}
-          onToggleStatus={
-            tab === "guests"
-              ? (status) => setRsvpFilter((current) => (current === status ? null : status))
-              : undefined
-          }
-        />
-      </div>
+      <GuestStats
+        guests={guests}
+        activeStatus={rsvpFilter}
+        onToggleStatus={
+          tab === "guests" ? (status) => setRsvpFilter((current) => (current === status ? null : status)) : undefined
+        }
+      />
 
-      <div className="rounded-[30px_10px_40px_20px] bg-surface-container-lowest p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
-        <nav aria-label={t("guests.tabs.label")} className="mb-6 flex gap-2 border-b border-surface-variant">
-          <NavLink to="/guests" end className={tabLink}>
-            {t("guests.tabs.guests")}
-          </NavLink>
-          <NavLink to="/guests/households" className={tabLink}>
-            {t("guests.tabs.households")}
-          </NavLink>
-        </nav>
-        {actionError !== null && (
-          <p role="alert" className="mb-4 font-body-sm text-body-sm text-error">
-            {t(actionError)}
-          </p>
-        )}
-        {tableArea()}
-      </div>
+      <nav aria-label={t("guests.tabs.label")} className="mb-5 mt-7 flex">
+        <NavLink to="/guests" end className={tabLink("rounded-l-[18px]")}>
+          {t("guests.tabs.guests")}
+        </NavLink>
+        <NavLink to="/guests/households" className={tabLink("-ml-[2.5px] rounded-r-[18px]")}>
+          {t("guests.tabs.households")}
+        </NavLink>
+      </nav>
+      {actionError !== null && (
+        <p role="alert" className="mb-4 font-playful text-lg text-coral">
+          {t(actionError)}
+        </p>
+      )}
+      {tableArea()}
 
       {dialogTarget !== null && (
         <GuestFormDialog

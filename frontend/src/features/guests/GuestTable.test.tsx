@@ -98,22 +98,29 @@ describe("GuestTable", () => {
     ).toBeInTheDocument();
   });
 
-  it("given an RSVP, when the column is rendered, then it is the status icon, not its label", () => {
+  it("given an RSVP, when the column is rendered, then it is a pill naming the status", () => {
     renderTable([aGuest({ firstName: "Maria", lastName: "Rossi", rsvpStatus: "confirmed" })]);
 
     const rsvp = screen.getByRole("button", { name: "Maria Rossi — Confirmed. Change RSVP" });
-    expect(rsvp).toHaveTextContent("check_circle");
-    expect(screen.queryByText("Confirmed")).not.toBeInTheDocument();
+    expect(rsvp).toHaveTextContent("Confirmed");
+    expect(rsvp).toHaveAttribute("data-status", "confirmed");
   });
 
-  it("given each status, when its icon is rendered, then it matches the one on the summary cards", () => {
+  it("given each status, when its pill is rendered, then it names that status", () => {
     renderTable([
       aGuest({ firstName: "Ana", lastName: "Uno", rsvpStatus: "pending" }),
       aGuest({ firstName: "Ana", lastName: "Dos", rsvpStatus: "declined" }),
     ]);
 
-    expect(screen.getByRole("button", { name: /Ana Uno — Pending/ })).toHaveTextContent("hourglass_empty");
-    expect(screen.getByRole("button", { name: /Ana Dos — Declined/ })).toHaveTextContent("cancel");
+    expect(screen.getByRole("button", { name: /Ana Uno — Pending/ })).toHaveTextContent("Pending");
+    expect(screen.getByRole("button", { name: /Ana Dos — Declined/ })).toHaveTextContent("Declined");
+  });
+
+  it("given a guest, when the row is rendered, then it starts with their initials", () => {
+    renderTable([aGuest({ firstName: "Maria", lastName: "Rossi" }), aGuest({ firstName: "Cecilia", lastName: "" })]);
+
+    expect(within(screen.getByRole("row", { name: /Maria Rossi/ })).getByText("MR")).toBeInTheDocument();
+    expect(within(screen.getByRole("row", { name: /Cecilia/ })).getByText("C")).toBeInTheDocument();
   });
 
   it("given a confirmed guest, when its RSVP icon is clicked, then only the other statuses are offered", async () => {

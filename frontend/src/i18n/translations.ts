@@ -31,7 +31,8 @@ const en = {
   "comingSoon.body": "This screen has its own issue and lands in a later slice.",
 
   "guests.title": "Guest List",
-  "guests.subtitle": "Manage your wedding guests and RSVPs",
+  "guests.subtitle": "Your people. Your party. One very good list.",
+  "guests.showing": "Showing {shown} of {total} guests",
   "guests.add": "Add Guest",
   "guests.loading": "Loading guests...",
   "guests.loadFailed": "We could not load your guests.",
@@ -347,7 +348,8 @@ const es: Record<TranslationKey, string> = {
   "comingSoon.body": "Esta pantalla tiene su propia incidencia y llega en una fase posterior.",
 
   "guests.title": "Lista de Invitados",
-  "guests.subtitle": "Gestiona los invitados de tu boda y sus confirmaciones",
+  "guests.subtitle": "Tu gente. Tu fiesta. Una muy buena lista.",
+  "guests.showing": "Mostrando {shown} de {total} invitados",
   "guests.add": "Añadir Invitado",
   "guests.loading": "Cargando invitados...",
   "guests.loadFailed": "No pudimos cargar tus invitados.",

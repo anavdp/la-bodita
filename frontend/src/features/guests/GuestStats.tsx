@@ -12,17 +12,11 @@ const statusLabelKey: Record<RsvpStatus, TranslationKey> = {
   declined: "guests.declined",
 };
 
-const segmentClass: Record<RsvpStatus, string> = {
-  confirmed: "bg-secondary",
-  pending: "bg-tertiary",
-  declined: "bg-secondary-container",
-};
-
-/** Periwinkle text on white misses the contrast bar, so the selected status rings in its color instead. */
-const ringClass: Record<RsvpStatus, string> = {
-  confirmed: "ring-secondary",
-  pending: "ring-tertiary",
-  declined: "ring-secondary-container",
+/** Each status's dot, matching the pills in the table's RSVP column. */
+export const statusDotClass: Record<RsvpStatus, string> = {
+  confirmed: "bg-mint",
+  pending: "bg-butter-deep",
+  declined: "bg-coral",
 };
 
 interface GuestStatsProps {
@@ -33,9 +27,15 @@ interface GuestStatsProps {
   onToggleStatus?: (status: RsvpStatus) => void;
 }
 
+/** Each figure sits in a slot carrying the divider, so a pressed status can still fill its own rounded box. */
+const cellSlot = "flex min-w-[120px] flex-1 px-1";
+const cellClass = "flex flex-1 flex-col items-center justify-center rounded-[20px] px-3 py-2 text-ink";
+const countClass = "flex items-center gap-2 font-playful-display text-[34px] leading-none";
+const labelClass = "font-playful text-xl";
+
 /**
- * The RSVP summary in the page header: one bar split by status, and a legend
- * of counts underneath. Clicking a status filters the guest table by it.
+ * The page's summary strip: how many guests and households, then each RSVP
+ * status. Clicking a status filters the guest table by it.
  */
 export function GuestStats({ guests, activeStatus, onToggleStatus }: GuestStatsProps) {
   const { t } = useTranslation();
@@ -45,64 +45,62 @@ export function GuestStats({ guests, activeStatus, onToggleStatus }: GuestStatsP
     pending: summary.pending,
     declined: summary.declined,
   };
-  const shareOf: Record<RsvpStatus, number> = {
-    confirmed: summary.shareConfirmed,
-    pending: summary.sharePending,
-    declined: summary.shareDeclined,
-  };
-  const isFiltering = activeStatus !== null;
+  const householdCount = new Set(guests.map((guest) => guest.householdId)).size;
+
+  const totals: { labelKey: TranslationKey; count: number }[] = [
+    { labelKey: "guests.tabs.guests", count: guests.length },
+    { labelKey: "guests.tabs.households", count: householdCount },
+  ];
 
   return (
-    <div className="w-full">
-      {/* The legend below says the same in words, so the bar is for the eye only. */}
-      <div aria-hidden="true" className="flex h-2.5 gap-0.5 overflow-hidden rounded-full bg-surface-container-low">
-        {summaryStatuses.map((status) => (
-          <span
-            key={status}
-            data-status={status}
-            className={`h-full transition-opacity ${segmentClass[status]} ${
-              isFiltering && status !== activeStatus ? "opacity-25" : ""
-            }`}
-            style={{ flexGrow: countOf[status] }}
-          />
-        ))}
-      </div>
+    <div
+      role="group"
+      aria-label={t("guests.summary.label")}
+      className="flex flex-wrap divide-ink/40 rounded-[28px] border-[2.5px] border-ink bg-bubblegum p-2 md:flex-nowrap md:divide-x-2"
+    >
+      {totals.map(({ labelKey, count }) => (
+        <div key={labelKey} className={cellSlot}>
+          <div className={cellClass}>
+            <span className={countClass}>{count}</span>{" "}
+            <span className={labelClass}>{t(labelKey)}</span>
+          </div>
+        </div>
+      ))}
 
-      <div role="group" aria-label={t("guests.summary.label")} className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-        {summaryStatuses.map((status) => {
-          const content = (
-            <>
-              <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${segmentClass[status]}`} />
-              <span className="font-headline-md text-title-lg">{countOf[status]}</span>{" "}
-              <span>{t(statusLabelKey[status])}</span>{" "}
-              <span className="tabular-nums text-on-surface-variant">{shareOf[status]}%</span>
-            </>
-          );
-          const itemClass = "-ml-2 flex items-center gap-2 rounded-full px-2 py-1 font-body-sm text-body-sm";
+      {summaryStatuses.map((status) => {
+        const content = (
+          <>
+            <span className={countClass}>
+              <span aria-hidden="true" className={`h-4 w-4 rounded-full border-2 border-ink ${statusDotClass[status]}`} />
+              {countOf[status]}
+            </span>{" "}
+            <span className={labelClass}>{t(statusLabelKey[status])}</span>
+          </>
+        );
 
-          if (onToggleStatus === undefined) {
-            return (
-              <span key={status} className={`${itemClass} text-on-surface`}>
-                {content}
-              </span>
-            );
-          }
-          const isActive = status === activeStatus;
+        if (onToggleStatus === undefined) {
           return (
+            <div key={status} className={cellSlot}>
+              <span className={cellClass}>{content}</span>
+            </div>
+          );
+        }
+        const isActive = status === activeStatus;
+        return (
+          <div key={status} className={cellSlot}>
             <button
-              key={status}
               type="button"
               aria-pressed={isActive}
               onClick={() => onToggleStatus(status)}
-              className={`${itemClass} transition-colors hover:bg-surface-container-low ${
-                isActive ? `bg-surface-container-low ring-2 ring-inset ${ringClass[status]}` : ""
-              } text-on-surface`}
+              className={`${cellClass} transition-colors hover:bg-cream-light/50 ${
+                isActive ? "bg-cream-light ring-[2.5px] ring-inset ring-ink" : ""
+              }`}
             >
               {content}
             </button>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
