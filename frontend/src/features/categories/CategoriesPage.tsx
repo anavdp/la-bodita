@@ -95,7 +95,7 @@ export function CategoriesPage() {
 
   return (
     <>
-      <PageHeader title={t("categories.title")} subtitle={t("categories.subtitle")}>
+      <PageHeader title={t("categories.title")} subtitle={t("categories.subtitle")} art="generic.png">
         <button type="button" onClick={() => setDrawerTarget({ category: null })} className={primaryButton}>
           <ActionIcon name="add" />
           {t("categories.addOpen")}

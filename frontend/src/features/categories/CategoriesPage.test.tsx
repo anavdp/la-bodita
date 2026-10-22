@@ -43,7 +43,8 @@ describe("CategoriesPage", () => {
   it("given categories, when the page loads, then each row shows its icon, color, subcategories and item count", async () => {
     renderWithProviders(<CategoriesPage />, { route: "/categories" });
 
-    expect(await screen.findByRole("heading", { name: "Categories", level: 1 })).toBeInTheDocument();
+    const title = await screen.findByRole("heading", { name: "Categories", level: 1 });
+    expect(title.closest("header")?.querySelector("img")).toHaveAttribute("src", "/icons/generic.png");
     const churchRow = await screen.findByRole("row", { name: /Church/ });
     expect(churchRow.querySelector("img")).toHaveAttribute("src", "/icons/church.png");
     expect(within(churchRow).getByTitle("#624cab")).toHaveStyle({ backgroundColor: "#624cab" });
