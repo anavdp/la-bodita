@@ -17,7 +17,6 @@ const en = {
   "layout.searchPlaceholder": "Search...",
   "layout.searchLabel": "Search guests by name",
   "layout.addTask": "Add Task",
-  "layout.addTaskUnavailable": "Tasks arrive with the Checklist screen",
   "layout.notifications": "Notifications",
   "layout.settings": "Settings",
   "layout.darkMode": "Switch to dark mode",
@@ -249,7 +248,6 @@ const en = {
   "panel.close": "Close",
   "planning.nameRequired": "Give it a name.",
   "tasks.addOpen": "+ Add task",
-  "checklist.add": "+ Add Task",
   "checklist.showLabel": "Show tasks",
 
   "categories.add": "+ Category",
@@ -264,7 +262,6 @@ const en = {
   "emojiPicker.clear": "No emoji",
 
   "items.title": "Items",
-  "items.subtitle": "Vendors, places and everything you're deciding on",
   "items.add": "+ Add Item",
   "items.loading": "Loading items...",
   "items.empty": "No items yet. Add the church, a photographer, a cake shop...",
@@ -275,7 +272,7 @@ const en = {
   "items.category": "Category",
   "items.statusLabel": "Status",
   "items.contactName": "Contact",
-  "items.phone": "Phone / WhatsApp",
+  "items.phone": "Phone",
   "items.email": "Email",
   "items.instagram": "Instagram",
   "items.website": "Website",
@@ -306,7 +303,6 @@ const en = {
   "tasks.none": "No tasks yet.",
 
   "checklist.title": "Checklist",
-  "checklist.subtitle": "Every task from every item, by due date",
   "checklist.loading": "Loading tasks...",
   "checklist.empty": "Nothing to do here. Add a task above.",
   "checklist.toDo": "To do {count}",
@@ -334,7 +330,6 @@ const es: Record<TranslationKey, string> = {
   "layout.searchPlaceholder": "Buscar...",
   "layout.searchLabel": "Buscar invitados por nombre",
   "layout.addTask": "Añadir Tarea",
-  "layout.addTaskUnavailable": "Las tareas llegan con la pantalla Lista de Tareas",
   "layout.notifications": "Notificaciones",
   "layout.settings": "Ajustes",
   "layout.darkMode": "Cambiar a modo oscuro",
@@ -566,7 +561,6 @@ const es: Record<TranslationKey, string> = {
   "panel.close": "Cerrar",
   "planning.nameRequired": "Ponle un nombre.",
   "tasks.addOpen": "+ Añadir tarea",
-  "checklist.add": "+ Añadir tarea",
   "checklist.showLabel": "Mostrar tareas",
 
   "categories.add": "+ Categoría",
@@ -581,7 +575,6 @@ const es: Record<TranslationKey, string> = {
   "emojiPicker.clear": "Sin emoji",
 
   "items.title": "Elementos",
-  "items.subtitle": "Proveedores, lugares y todo lo que están decidiendo",
   "items.add": "+ Añadir",
   "items.loading": "Cargando elementos...",
   "items.empty": "Aún no hay nada. Añade la iglesia, un fotógrafo, una pastelería...",
@@ -592,7 +585,7 @@ const es: Record<TranslationKey, string> = {
   "items.category": "Categoría",
   "items.statusLabel": "Estado",
   "items.contactName": "Contacto",
-  "items.phone": "Teléfono / WhatsApp",
+  "items.phone": "Teléfono",
   "items.email": "Correo",
   "items.instagram": "Instagram",
   "items.website": "Página web",
@@ -623,7 +616,6 @@ const es: Record<TranslationKey, string> = {
   "tasks.none": "Aún no hay tareas.",
 
   "checklist.title": "Lista de Tareas",
-  "checklist.subtitle": "Todas las tareas de todos los elementos, por fecha",
   "checklist.loading": "Cargando tareas...",
   "checklist.empty": "Nada por hacer aquí. Añade una tarea arriba.",
   "checklist.toDo": "Pendientes {count}",

@@ -181,8 +181,8 @@ describe("ItemsPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
     const panel = screen.getByRole("dialog", { name: "New item" });
 
-    expect(within(panel).getByRole("combobox", { name: "Contact type" })).toHaveTextContent("Phone / WhatsApp");
-    expect(within(panel).getByLabelText("Phone / WhatsApp")).toBeInTheDocument();
+    expect(within(panel).getByRole("combobox", { name: "Contact type" })).toHaveTextContent("Phone");
+    expect(within(panel).getByLabelText("Phone")).toBeInTheDocument();
     expect(within(panel).getByRole("combobox", { name: "Category" })).toHaveTextContent("No category");
 
     await userEvent.click(within(panel).getByRole("combobox", { name: "Contact type" }));
@@ -205,7 +205,7 @@ describe("ItemsPage", () => {
     await userEvent.click(within(panel).getByRole("button", { name: "+ Add contact" }));
 
     expect(within(panel).getAllByRole("combobox", { name: "Contact type" }).map((field) => field.textContent)).toEqual([
-      "Phone / WhatsApp",
+      "Phone",
       "Instagram",
       "Email",
       "Website",

@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useSearch } from "../../search/SearchProvider";
 import { useTheme } from "../../theme/ThemeProvider";
@@ -7,6 +9,7 @@ const iconButton =
 
 export function TopBar() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { term, setTerm } = useSearch();
   const { theme, toggleTheme } = useTheme();
   const themeLabel = t(theme === "dark" ? "layout.lightMode" : "layout.darkMode");
@@ -31,13 +34,12 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Tasks, notifications and settings each land with their own issue; the
-            shell shows them in place but does not pretend they work yet. */}
+        {/* A task can be added from any screen; it opens the checklist's new task form.
+            Notifications and settings land with their own issues and stay disabled until then. */}
         <button
           type="button"
-          disabled
-          title={t("layout.addTaskUnavailable")}
-          className="flex items-center rounded-full bg-primary px-4 py-3 sm:px-6 font-label-md text-label-md text-on-primary shadow-sm transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => navigate("/checklist?add=task")}
+          className="flex items-center rounded-full bg-primary px-4 py-3 sm:px-6 font-label-md text-label-md text-on-primary shadow-sm transition-opacity hover:opacity-90"
         >
           <span className="material-symbols-outlined sm:mr-2" aria-hidden="true">
             add

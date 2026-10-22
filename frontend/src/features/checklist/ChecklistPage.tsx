@@ -1,5 +1,6 @@
 import { useId, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import type { Category, Task } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
@@ -77,7 +78,10 @@ export function ChecklistPage() {
 
   const [showing, setShowing] = useState<Showing>("toDo");
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
+  // The top bar's Add Task lands here with ?add=task, so the form follows the address.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isAdding = searchParams.get("add") === "task";
+  const closeAdding = () => setSearchParams({}, { replace: true });
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
 
   const categoriesById = useMemo(() => new Map(categories.map((each) => [each.id, each])), [categories]);
@@ -148,16 +152,11 @@ export function ChecklistPage() {
 
   return (
     <>
-      <PageHeader
-        title={t("checklist.title")}
-        subtitle={t("checklist.subtitle")}
-        actionLabel={t("checklist.add")}
-        onAction={() => setIsAdding(true)}
-      />
+      <PageHeader title={t("checklist.title")} />
 
       {isAdding && (
         <div className="mb-6">
-          <AddTaskForm items={items} onAdd={planning.addTask} onClose={() => setIsAdding(false)} />
+          <AddTaskForm items={items} onAdd={planning.addTask} onClose={closeAdding} />
         </div>
       )}
 

@@ -108,10 +108,9 @@ describe("ChecklistPage", () => {
 
   it("given a new task, when it is added for an item, then it is created for that item", async () => {
     vi.mocked(tasksApi.createTask).mockResolvedValue(aTask());
-    renderWithProviders(<ChecklistPage />, { route: "/checklist" });
+    renderWithProviders(<ChecklistPage />, { route: "/checklist?add=task" });
     await screen.findByText("Bring baptism certificates");
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Task" }));
     await userEvent.type(screen.getByLabelText("Task"), "Book the tasting");
     await userEvent.click(screen.getByRole("combobox", { name: "Item" }));
     await userEvent.type(screen.getByRole("searchbox"), "dulce");
@@ -132,15 +131,31 @@ describe("ChecklistPage", () => {
 
   it("given a task the API refuses, when it is added, then the form says so", async () => {
     vi.mocked(tasksApi.createTask).mockRejectedValue(new Error("offline"));
-    renderWithProviders(<ChecklistPage />, { route: "/checklist" });
+    renderWithProviders(<ChecklistPage />, { route: "/checklist?add=task" });
     await screen.findByText("Bring baptism certificates");
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Task" }));
     await userEvent.type(screen.getByLabelText("Task"), "Buy the veil");
     await userEvent.click(screen.getByRole("button", { name: "Add" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("We could not save that.");
     expect(screen.getByLabelText("Task")).toHaveValue("Buy the veil");
+  });
+
+  it("given the new task form, when it is cancelled, then it closes", async () => {
+    renderWithProviders(<ChecklistPage />, { route: "/checklist?add=task" });
+    await screen.findByText("Bring baptism certificates");
+
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByLabelText("Task")).not.toBeInTheDocument();
+  });
+
+  it("given the checklist, when it opens, then no new task form is in the way", async () => {
+    renderWithProviders(<ChecklistPage />, { route: "/checklist" });
+    await screen.findByText("Bring baptism certificates");
+
+    expect(screen.queryByLabelText("Task")).not.toBeInTheDocument();
+    expect(screen.queryByText("Every task from every item, by due date")).not.toBeInTheDocument();
   });
 
   it("given a search term, when the list shows, then only matching tasks are listed", async () => {
