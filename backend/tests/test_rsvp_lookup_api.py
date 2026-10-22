@@ -103,6 +103,30 @@ def test_given_compound_first_and_last_names_when_part_or_all_of_each_is_typed_t
         assert tokens(lookup(client, typed)) == [ana.household.rsvp_token], typed
 
 
+def test_given_names_typed_in_any_order_with_punctuation_when_looked_up_then_the_guest_is_found(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    alfonsina = Guest(wedding_id=wedding.id, first_name="María Alfonsina", last_name="Altuve Pérez-Gómez")
+    db_session.add(alfonsina)
+    db_session.commit()
+
+    for typed in ("altuve alfonsina", "Alfonsina Altuve.", "maria, altuve", "Alfonsina Perez Gomez", "MARÍA ALTUVE PÉREZ-GÓMEZ"):
+        assert tokens(lookup(client, typed)) == [alfonsina.household.rsvp_token], typed
+
+
+def test_given_one_slip_in_a_long_name_when_looked_up_then_the_guest_is_still_found(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    fernanda = Guest(wedding_id=wedding.id, first_name="Maria Fernanda", last_name="Colmenarez")
+    db_session.add(fernanda)
+    db_session.commit()
+
+    for typed in ("Maria Fernanda Colmenares", "Fernada Colmenarez", "maria colmenarz"):
+        assert tokens(lookup(client, typed)) == [fernanda.household.rsvp_token], typed
+    # Two slips in one word, or a slip in a short name, is another name altogether.
+    assert lookup(client, "Maria Colmenarsa").json() == {"households": []}
+
+
 def test_given_only_a_first_or_only_a_last_name_when_looked_up_then_nobody_is_found(
     client: TestClient, db_session: Session, wedding: Wedding
 ):

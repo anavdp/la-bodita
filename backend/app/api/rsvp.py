@@ -34,17 +34,43 @@ lookup_rate_limit = SlidingWindowRateLimit(max_calls=LOOKUPS_PER_MINUTE, window_
 
 
 def comparable(name: str) -> str:
-    """A name as a guest might type it: any case, accents or not, stray spaces."""
+    """A name as a guest might type it: any case, accents or not, stray spaces and punctuation."""
     without_accents = "".join(
         character
         for character in unicodedata.normalize("NFKD", name)
         if not unicodedata.combining(character)
     )
-    return " ".join(without_accents.casefold().split())
+    # An apostrophe joins ("D'Angelo" or "Dangelo"); any other mark ("Pérez-Gómez", "Altuve.") separates.
+    letters = "".join(
+        character if character.isalnum() else " " for character in without_accents.replace("'", "").replace("’", "")
+    )
+    return " ".join(letters.casefold().split())
 
 
 # Words that join a compound last name: typed alone they would match half the list.
 PARTICLES = {"de", "del", "la", "las", "los", "y", "da", "di", "do", "dos", "van", "von"}
+
+# Names this long forgive one slip (a letter missed, added or swapped: "Colmenares" for
+# "Colmenarez"); shorter ones must be exact, or "Mario" would open Maria's invitation.
+FORGIVING_LENGTH = 6
+
+
+def one_slip_apart(typed: str, stored: str) -> bool:
+    if abs(len(typed) - len(stored)) > 1:
+        return False
+    if len(typed) == len(stored):
+        return sum(a != b for a, b in zip(typed, stored)) == 1
+    shorter, longer = sorted((typed, stored), key=len)
+    slip = next((index for index, (a, b) in enumerate(zip(shorter, longer)) if a != b), len(shorter))
+    return shorter[slip:] == longer[slip + 1 :]
+
+
+def same_word(typed: str, stored: str) -> bool:
+    return typed == stored or (len(stored) >= FORGIVING_LENGTH and one_slip_apart(typed, stored))
+
+
+def all_found(words: set[str], among: set[str]) -> bool:
+    return all(any(same_word(word, other) for other in among) for word in words)
 
 
 def last_name_matches(typed_words: set[str], stored: str) -> bool:
@@ -53,13 +79,15 @@ def last_name_matches(typed_words: set[str], stored: str) -> bool:
     stored_words = set(stored.split())
     if not typed_words - PARTICLES:
         return False
-    return typed_words <= stored_words or stored_words <= typed_words
+    return all_found(typed_words, stored_words) or all_found(stored_words, typed_words)
 
 
 def name_matches(typed: str, first_name: str, last_name: str) -> bool:
-    """At least one of the guest's first names, and the rest of what was typed as their last name."""
-    typed_words, first_names = set(typed.split()), set(first_name.split())
-    return bool(typed_words & first_names) and last_name_matches(typed_words - first_names, last_name)
+    """At least one of the guest's first names, and the rest of what was typed as their last name,
+    in any order."""
+    first_names = set(first_name.split())
+    typed_first = {word for word in typed.split() if any(same_word(word, name) for name in first_names)}
+    return bool(typed_first) and last_name_matches(set(typed.split()) - typed_first, last_name)
 
 
 @router.post("/lookup", response_model=RsvpLookupResult)
