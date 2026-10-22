@@ -294,6 +294,7 @@ const en = {
   "items.status.discarded": "Discarded",
 
   "tasks.heading": "Tasks",
+  "tasks.new": "New task",
   "tasks.title": "Task",
   "tasks.titlePlaceholder": "Add a task or appointment",
   "tasks.date": "Date",
@@ -610,6 +611,7 @@ const es: Record<TranslationKey, string> = {
   "items.status.discarded": "Descartado",
 
   "tasks.heading": "Tareas",
+  "tasks.new": "Nueva tarea",
   "tasks.title": "Tarea",
   "tasks.titlePlaceholder": "Añade una tarea o cita",
   "tasks.date": "Fecha",

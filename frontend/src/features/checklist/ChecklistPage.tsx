@@ -163,11 +163,7 @@ export function ChecklistPage() {
         </button>
       </PageHeader>
 
-      {isAdding && (
-        <div className="mb-6">
-          <AddTaskForm items={items} onAdd={planning.addTask} onClose={closeAdding} />
-        </div>
-      )}
+      {isAdding && <AddTaskForm items={items} onAdd={planning.addTask} onClose={closeAdding} />}
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <div role="group" aria-label={t("checklist.showLabel")} className="mr-4 flex gap-2">

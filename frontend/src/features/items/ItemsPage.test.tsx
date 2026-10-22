@@ -136,13 +136,14 @@ describe("ItemsPage", () => {
     const detail = await screen.findByRole("region", { name: "Iglesia San José" });
 
     await userEvent.click(within(detail).getByRole("button", { name: "+ Add task" }));
-    await userEvent.type(within(detail).getByLabelText("Task"), "Meet the choir");
-    expect(within(detail).getByLabelText("Time")).toBeDisabled();
-    await userEvent.click(within(detail).getByRole("button", { name: "Date" }));
+    const drawer = screen.getByRole("dialog", { name: "New task" });
+    await userEvent.type(within(drawer).getByLabelText("Task"), "Meet the choir");
+    expect(within(drawer).getByLabelText("Time")).toBeDisabled();
+    await userEvent.click(within(drawer).getByRole("button", { name: "Date" }));
     await userEvent.click(screen.getByRole("button", { name: "Next month" }));
     await userEvent.click(screen.getByRole("button", { name: "Monday, November 2, 2026" }));
-    await userEvent.type(within(detail).getByLabelText("Time"), "18:30");
-    await userEvent.click(within(detail).getByRole("button", { name: "Add" }));
+    await userEvent.type(within(drawer).getByLabelText("Time"), "18:30");
+    await userEvent.click(within(drawer).getByRole("button", { name: "Add" }));
 
     await waitFor(() =>
       expect(tasksApi.createTask).toHaveBeenCalledWith(1, {
@@ -160,9 +161,10 @@ describe("ItemsPage", () => {
     const detail = await screen.findByRole("region", { name: "Iglesia San José" });
 
     await userEvent.click(within(detail).getByRole("button", { name: "+ Add task" }));
-    await userEvent.click(within(detail).getByRole("button", { name: "Add" }));
+    const drawer = screen.getByRole("dialog", { name: "New task" });
+    await userEvent.click(within(drawer).getByRole("button", { name: "Add" }));
 
-    expect(within(detail).getByRole("alert")).toHaveTextContent("Give it a name.");
+    expect(within(drawer).getByRole("alert")).toHaveTextContent("Give it a name.");
     expect(tasksApi.createTask).not.toHaveBeenCalled();
   });
 

@@ -170,7 +170,8 @@ describe("ChecklistPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "+ Add Task" }));
 
-    expect(screen.getByLabelText("Task")).toBeInTheDocument();
+    const drawer = screen.getByRole("dialog", { name: "New task" });
+    expect(within(drawer).getByLabelText("Task")).toBeInTheDocument();
     expect(screen.getByText("Every task from every item, by due date")).toBeInTheDocument();
   });
 
