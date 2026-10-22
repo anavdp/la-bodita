@@ -155,7 +155,9 @@ export function ItemsPage() {
     <>
       <PageHeader
         title={t("items.title")}
-        action={{ label: t("items.add"), onClick: () => setDialogTarget({ item: null }) }}
+        subtitle={t("items.subtitle")}
+        actionLabel={t("items.add")}
+        onAction={() => setDialogTarget({ item: null })}
       />
 
       <div className="mb-6 flex flex-wrap items-center gap-2">

@@ -152,7 +152,12 @@ export function ChecklistPage() {
 
   return (
     <>
-      <PageHeader title={t("checklist.title")} />
+      <PageHeader
+        title={t("checklist.title")}
+        subtitle={t("checklist.subtitle")}
+        actionLabel={t("checklist.add")}
+        onAction={() => setSearchParams({ add: "task" })}
+      />
 
       {isAdding && (
         <div className="mb-6">

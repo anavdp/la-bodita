@@ -174,6 +174,15 @@ design system spec (exact color tokens, Quicksand/Be Vietnam Pro type scale,
 specs for stat cards / list rows / nav / inputs). Read it before building
 any screen.
 
+**Design coherence is a rule, not a nicety.** Every screen uses the same
+components for the same job: the page header card (title, description, main
+action), the `Dropdown` in `src/components/form/` for every list (never a
+native `<select>`), the shared button and pill-field styles, `DatePicker` for
+dates, and `SidePanel` for create/edit forms. A change to one of these lands
+on every screen that uses it, or not at all. Don't restyle a component on one
+screen only, and don't add a one-off variant. If a screen seems to need
+something different, raise it with Vicky first.
+
 The sidebar and top bar are shared across every screen and must match
 pixel-for-pixel (see issue #1, which every other frontend screen issue
 depends on). Category color/emoji tags (defined in the Category Manager

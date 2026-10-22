@@ -150,12 +150,15 @@ describe("ChecklistPage", () => {
     expect(screen.queryByLabelText("Task")).not.toBeInTheDocument();
   });
 
-  it("given the checklist, when it opens, then no new task form is in the way", async () => {
+  it("given the checklist, when its own Add Task is pressed, then the new task form opens", async () => {
     renderWithProviders(<ChecklistPage />, { route: "/checklist" });
     await screen.findByText("Bring baptism certificates");
-
     expect(screen.queryByLabelText("Task")).not.toBeInTheDocument();
-    expect(screen.queryByText("Every task from every item, by due date")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "+ Add Task" }));
+
+    expect(screen.getByLabelText("Task")).toBeInTheDocument();
+    expect(screen.getByText("Every task from every item, by due date")).toBeInTheDocument();
   });
 
   it("given a search term, when the list shows, then only matching tasks are listed", async () => {
