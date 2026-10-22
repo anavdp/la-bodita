@@ -1,6 +1,6 @@
 /**
- * Where the hand-drawn icons are served from: a bucket once VITE_ICONS_URL is
- * set, otherwise public/icons. They replace the emoji stand-ins one by one.
+ * Where the hand-drawn icons are served from: public/icons, shipped with the
+ * app, unless VITE_ICONS_URL points somewhere else.
  */
 export function iconUrl(fileName: string): string {
   const iconsUrl = import.meta.env.VITE_ICONS_URL?.replace(/\/+$/, "") ?? "/icons";

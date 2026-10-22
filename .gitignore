@@ -35,5 +35,3 @@ frontend/public/fonts/
 # Local preview servers for Claude: machine-specific paths, kept locally only
 .claude/launch.json
 
-# Hand-drawn icons: served from the icons bucket, kept out of git
-frontend/public/icons/
