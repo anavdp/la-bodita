@@ -31,3 +31,6 @@ frontend/coverage/
 
 # Licensed fonts: served from the photos bucket, kept locally only
 frontend/public/fonts/
+
+# Local preview servers for Claude: machine-specific paths, kept locally only
+.claude/launch.json
