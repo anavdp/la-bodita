@@ -9,6 +9,12 @@ services:
   backend:
     image: vitaledepalma/la-bodita-backend:${LA_BODITA_TAG:-latest}
     restart: unless-stopped
+    # Sign in with Google. The planner and its API share one address on the Pi.
+    environment:
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set GOOGLE_CLIENT_ID in .env}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?set GOOGLE_CLIENT_SECRET in .env}
+      PLANNER_URL: ${PLANNER_URL:?set PLANNER_URL in .env}
+      API_URL: ${PLANNER_URL}
     volumes:
       - data:/data
     healthcheck:
@@ -42,7 +48,7 @@ services:
       - backend
       - backend-public
 
-  # Opens :8081 (guests) and, behind Cloudflare Access, :8080 (the planner) to
+  # Opens :8081 (guests) and :8080 (the planner, behind its own sign-in) to
   # the internet without opening a port on the router.
   tunnel:
     image: cloudflare/cloudflared:latest
