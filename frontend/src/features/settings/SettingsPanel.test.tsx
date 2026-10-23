@@ -23,6 +23,13 @@ describe("SettingsPanel", () => {
     expect(screen.getByText("7 Days to Go")).toBeInTheDocument();
   });
 
+  it("given settings open, when the title band shows, then its sticker is the hand-drawn engagement ring", () => {
+    renderWithProviders(<SettingsPanel onClose={vi.fn()} />);
+
+    const sticker = screen.getByRole("dialog").querySelector("header img");
+    expect(sticker).toHaveAttribute("src", "/icons/engagement.png");
+  });
+
   it("given a new title and date, when they are saved, then the wedding is changed and settings close", async () => {
     const saveWedding = vi.fn(() => Promise.resolve());
     const onClose = vi.fn();

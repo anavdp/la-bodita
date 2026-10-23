@@ -11,8 +11,8 @@ export const panelFooter = "flex flex-wrap justify-end gap-3 border-t-[2.5px] bo
 interface SidePanelProps {
   title: string;
   onClose: () => void;
-  /** A doodle beside the title (an emoji for now, the mockup's illustrations later). */
-  sticker?: string;
+  /** A doodle beside the title: an emoji, or one of the hand-drawn icons. */
+  sticker?: ReactNode;
   /** Room for a table, as the CSV preview needs. */
   wide?: boolean;
   /** Usually a form holding a `panelBody` and a `panelFooter`. */

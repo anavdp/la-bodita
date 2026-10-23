@@ -5,6 +5,7 @@ import { DatePicker } from "../../components/form/DatePicker";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
 import { CountdownSticker } from "../../components/layout/CountdownSticker";
+import { iconUrl } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -49,7 +50,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <SidePanel title={t("layout.settings")} sticker="💍" onClose={onClose}>
+    <SidePanel title={t("layout.settings")} sticker={<img src={iconUrl("engagement.png")} alt="" className="h-9 w-9 object-contain" />} onClose={onClose}>
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div>
