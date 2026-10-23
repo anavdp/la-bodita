@@ -18,8 +18,20 @@ import { useCalendar } from "./useCalendar";
 /** Which drawer is open: an event to edit, or a new one (from a day, or from the header). */
 type FormTarget = { event: CalendarEvent } | { startDate: string | null } | null;
 
-/** A category's color, faded so ink lettering stays readable on it in either theme. */
-const tint = (category: Category | undefined) => (category ? `${category.color}55` : undefined);
+/** Sticky-note paper: the category's color, light enough for dark lettering; classic yellow without one. */
+const paperOf = (category: Category | undefined) =>
+  category ? `color-mix(in srgb, ${category.color} 45%, #fffaf0)` : "#fff1b8";
+
+/** The paper's folded-up corner, a shade darker than the note. */
+const foldOf = (category: Category | undefined) =>
+  `color-mix(in srgb, ${category ? category.color : "#f2cf5b"} 70%, #1f1d2b 12%)`;
+
+/** The bottom-right corner cut away, where the fold sits. */
+const foldedCorner = "polygon(0 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%)";
+
+/** Notes stuck on by hand never sit straight; each keeps its own tilt. */
+const tilts = ["-rotate-[1.5deg]", "rotate-1", "-rotate-[0.5deg]", "rotate-[1.5deg]"];
+const tiltOf = (key: string) => tilts[[...key].reduce((sum, char) => sum + char.charCodeAt(0), 0) % tilts.length];
 
 const navButton =
   "flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-ink bg-accent text-ink transition-colors hover:bg-accent-deep";
@@ -43,45 +55,54 @@ interface EntryChipProps {
 }
 
 /**
- * One thing on a day, tinted with its category's color. Events open their
+ * One thing on a day, as a sticky note in its category's color. Paper stays
+ * paper in dark mode too, so its lettering is always dark. Events open their
  * drawer; tasks are ticked off on the checklist, so here they only show.
- * On a phone the chip shrinks to a colored bar and its words go to screen readers.
+ * On a phone the note shrinks to a strip and its words go to screen readers.
  */
 function EntryChip({ entry, category, showTitle, onOpen }: EntryChipProps) {
-  const chipClass =
-    "flex w-full min-w-0 flex-col items-start overflow-hidden rounded-lg border-2 border-ink/70 bg-cream px-1 py-0.5 text-left text-[13px] leading-tight text-ink";
+  const noteClass =
+    "relative flex w-full min-w-0 flex-col items-start px-1.5 pb-1 pt-0.5 text-left text-[13px] leading-tight text-[#1f1d2b]";
   const content = (
     <>
       {entry.time !== null && showTitle && (
-        <span className="hidden text-xs tabular-nums text-ink/70 sm:block">{formatDueTime(entry.time)}</span>
+        <span className="hidden text-xs tabular-nums text-[#1f1d2b]/70 sm:block">{formatDueTime(entry.time)}</span>
       )}
       <span
         className={`sr-only hyphens-auto break-words ${showTitle ? "sm:not-sr-only" : ""} ${
-          entry.isDone ? "text-ink/50 line-through" : ""
+          entry.isDone ? "text-[#1f1d2b]/50 line-through" : ""
         }`}
       >
         {entry.title}
       </span>
       <span aria-hidden="true" className={`h-1.5 w-full ${showTitle ? "sm:hidden" : "sm:h-[1.125rem]"}`} />
+      <span
+        aria-hidden="true"
+        className="absolute bottom-0 right-0 h-[9px] w-[9px]"
+        style={{ background: `linear-gradient(to bottom right, ${foldOf(category)} 50%, transparent 50%)` }}
+      />
     </>
   );
-  const style = { backgroundColor: tint(category) };
+  const style = { background: paperOf(category), clipPath: foldedCorner };
+  // The shadow goes on a wrapper: the cut corner would clip one drawn on the note itself.
+  const wrapperClass = `block w-full drop-shadow-[1px_2px_0_rgba(31,29,43,0.3)] ${tiltOf(entry.key)} ${
+    entry.isDone ? "opacity-70" : ""
+  }`;
 
   if (entry.kind === "event") {
     return (
-      <button
-        type="button"
-        onClick={() => onOpen(entry.source)}
-        className={`${chipClass} transition-transform hover:-rotate-1`}
-        style={style}
-      >
-        {content}
-      </button>
+      <span className={`${wrapperClass} transition-transform hover:rotate-0`}>
+        <button type="button" onClick={() => onOpen(entry.source)} className={noteClass} style={style}>
+          {content}
+        </button>
+      </span>
     );
   }
   return (
-    <span className={chipClass} style={style}>
-      {content}
+    <span className={wrapperClass}>
+      <span className={noteClass} style={style}>
+        {content}
+      </span>
     </span>
   );
 }
