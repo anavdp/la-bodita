@@ -166,7 +166,7 @@ export function ChecklistPage() {
       {isAdding && <AddTaskForm items={items} onAdd={planning.addTask} onClose={closeAdding} />}
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
-        <div role="group" aria-label={t("checklist.showLabel")} className="mr-4 flex gap-2">
+        <div role="group" aria-label={t("checklist.showLabel")} className="flex gap-2 sm:mr-4">
           <button
             type="button"
             aria-pressed={showing === "toDo"}
