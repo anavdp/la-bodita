@@ -118,6 +118,12 @@ export interface GuestImportRow {
   errors: GuestImportError[];
 }
 
+/** Who the planner is open for, as the top bar shows them. */
+export interface SignedInUser {
+  email: string;
+  displayName: string;
+}
+
 export interface Wedding {
   id: number;
   name: string;

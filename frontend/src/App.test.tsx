@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
 import { AppRoutes } from "./App";
+import { ApiError } from "./api/client";
+import * as authApi from "./api/auth";
 import * as budgetApi from "./api/budget";
 import * as categoriesApi from "./api/categories";
 import * as guestsApi from "./api/guests";
@@ -12,8 +14,11 @@ import * as rsvpApi from "./api/rsvp";
 import * as tasksApi from "./api/tasks";
 import * as weddingsApi from "./api/weddings";
 import { LanguageProvider } from "./i18n/LanguageProvider";
-import { WeddingProvider } from "./wedding/WeddingProvider";
 
+vi.mock("./api/auth", async () => {
+  const actual = await vi.importActual<typeof import("./api/auth")>("./api/auth");
+  return { ...actual, getSignedInUser: vi.fn(), signOut: vi.fn() };
+});
 vi.mock("./api/budget");
 vi.mock("./api/categories");
 vi.mock("./api/guests");
@@ -27,9 +32,7 @@ function renderAt(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <LanguageProvider>
-        <WeddingProvider>
-          <AppRoutes />
-        </WeddingProvider>
+        <AppRoutes />
       </LanguageProvider>
     </MemoryRouter>,
   );
@@ -37,6 +40,7 @@ function renderAt(route: string) {
 
 describe("AppRoutes", () => {
   beforeEach(() => {
+    vi.mocked(authApi.getSignedInUser).mockResolvedValue({ email: "vicky@example.com", displayName: "Vicky" });
     vi.mocked(weddingsApi.listWeddings).mockResolvedValue([
       { id: 1, name: "La Bodita", wedding_date: "2026-10-29" },
     ]);
@@ -108,6 +112,31 @@ describe("AppRoutes", () => {
 
   afterEach(() => {
     vi.resetAllMocks();
+  });
+
+  it("given no session, when a planner screen is visited, then the login page shows and nothing is loaded", async () => {
+    vi.mocked(authApi.getSignedInUser).mockRejectedValue(new ApiError("Sign in", 401));
+
+    renderAt("/guests");
+
+    expect(await screen.findByRole("link", { name: /Sign in with Google/ })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Main navigation" })).not.toBeInTheDocument();
+    expect(weddingsApi.listWeddings).not.toHaveBeenCalled();
+  });
+
+  it("given a guest's RSVP link, when it is visited, then no one is asked to sign in", async () => {
+    vi.mocked(rsvpApi.getInvitation).mockResolvedValue({
+      householdName: "Famiglia Rossi",
+      weddingName: "La Bodita",
+      weddingDate: "2026-10-29",
+      guests: [],
+      greeting: "general",
+    });
+
+    renderAt("/rsvp/abc");
+
+    expect(await screen.findByRole("heading", { name: "La Bodita" })).toBeInTheDocument();
+    expect(authApi.getSignedInUser).not.toHaveBeenCalled();
   });
 
   it("given the guest list route, when it is visited, then the screen is shown inside the shell", async () => {

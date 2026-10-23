@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 
+import { useAuth } from "../../auth/AuthProvider";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { daysUntil } from "./countdown";
@@ -11,6 +12,7 @@ const restingItem = "border-transparent hover:bg-white/15";
 export function Sidebar() {
   const { t, language, toggleLanguage } = useTranslation();
   const { wedding } = useWedding();
+  const { user } = useAuth();
 
   const countdown = (): string => {
     if (!wedding?.wedding_date) {
@@ -65,12 +67,12 @@ export function Sidebar() {
         </button>
         <div className="flex items-center">
           <div
-            className="mr-3 flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-ink bg-accent text-xl"
+            className="mr-3 flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-ink bg-accent font-playful-display text-xl"
             aria-hidden="true"
           >
-            👰
+            {user?.displayName.charAt(0).toUpperCase()}
           </div>
-          <span className="text-lg">{t("layout.user")}</span>
+          <span className="text-lg">{user?.displayName}</span>
         </div>
       </div>
     </aside>

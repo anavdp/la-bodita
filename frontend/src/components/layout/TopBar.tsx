@@ -4,6 +4,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import { useSearch } from "../../search/SearchProvider";
 import { useTheme } from "../../theme/ThemeProvider";
 import { compactButton } from "../playful/styles";
+import { AccountMenu } from "./AccountMenu";
 
 const iconButton =
   "flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
@@ -63,6 +64,7 @@ export function TopBar() {
             settings
           </span>
         </button>
+        <AccountMenu />
       </div>
     </header>
   );

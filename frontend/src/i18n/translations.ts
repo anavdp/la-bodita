@@ -26,7 +26,15 @@ const en = {
   "layout.daysToGo": "{count} Days to Go",
   "layout.today": "Today is the day!",
   "layout.dateToBeDecided": "Date to be decided",
-  "layout.user": "User Name",
+  "layout.account": "Account: {name}",
+  "layout.signOut": "Sign out",
+  "login.welcome": "Welcome back!",
+  "login.body": "This planner is just for the two of you. Sign in with your Google account.",
+  "login.google": "Sign in with Google",
+  "login.error.not_allowed": "That Google account isn't on the guest list for this planner. Try your other one.",
+  "login.error.cancelled": "Sign-in was cancelled. Try again whenever you're ready.",
+  "login.error.failed": "Something went wrong signing in. Please try again.",
+  "login.error.not_configured": "Google sign-in isn't set up yet on this planner.",
 
   "comingSoon.body": "This screen has its own issue and lands in a later slice.",
 
@@ -408,7 +416,15 @@ const es: Record<TranslationKey, string> = {
   "layout.daysToGo": "Faltan {count} días",
   "layout.today": "¡Hoy es el día!",
   "layout.dateToBeDecided": "Fecha por definir",
-  "layout.user": "Nombre de Usuario",
+  "layout.account": "Cuenta: {name}",
+  "layout.signOut": "Cerrar sesión",
+  "login.welcome": "¡Hola de nuevo!",
+  "login.body": "Este planificador es solo para ustedes dos. Entra con tu cuenta de Google.",
+  "login.google": "Entrar con Google",
+  "login.error.not_allowed": "Esa cuenta de Google no está en la lista de este planificador. Prueba con la otra.",
+  "login.error.cancelled": "Cancelaste el inicio de sesión. Inténtalo de nuevo cuando quieras.",
+  "login.error.failed": "Algo salió mal al entrar. Inténtalo de nuevo.",
+  "login.error.not_configured": "El inicio con Google aún no está configurado en este planificador.",
 
   "comingSoon.body": "Esta pantalla tiene su propia incidencia y llega en una fase posterior.",
 

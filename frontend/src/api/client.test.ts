@@ -1,4 +1,4 @@
-import { ApiError, apiUrl, request } from "./client";
+import { ApiError, apiUrl, onUnauthorized, request } from "./client";
 
 function respondWith(body: unknown, init: { status?: number } = {}) {
   const status = init.status ?? 200;
@@ -86,5 +86,26 @@ describe("request", () => {
     expect(failure).toBeInstanceOf(ApiError);
     expect((failure as ApiError).status).toBe(500);
     expect((failure as ApiError).message).toContain("500");
+  });
+
+  it("given the planner on another port in development, when it calls the API, then the session cookie goes along", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => respondWith([]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await request("/api/weddings");
+
+    expect(fetchMock.mock.calls[0][1]?.credentials).toBe("include");
+  });
+
+  it("given a session that has ended, when any call answers 401, then the sign-in listener hears it", async () => {
+    vi.stubGlobal("fetch", () => respondWith({ detail: "Sign in to use the planner" }, { status: 401 }));
+    const listener = vi.fn();
+    const stopListening = onUnauthorized(listener);
+
+    await expect(request("/api/weddings")).rejects.toThrow("Sign in to use the planner");
+    stopListening();
+    await expect(request("/api/weddings")).rejects.toThrow();
+
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 });
