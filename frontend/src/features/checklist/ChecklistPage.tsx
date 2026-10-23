@@ -193,7 +193,7 @@ export function ChecklistPage() {
         </p>
       )}
 
-      <div className={`${outlinedCard} p-6`}>
+      <div className={`${outlinedCard} p-4 sm:p-6`}>
         {listArea()}
       </div>
     </>

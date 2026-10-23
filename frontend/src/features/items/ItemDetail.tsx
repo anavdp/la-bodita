@@ -66,7 +66,7 @@ export function ItemDetail({
   return (
     <section
       aria-labelledby={titleId}
-      className={`flex flex-col gap-6 ${outlinedCard} p-8 font-playful text-ink`}
+      className={`flex flex-col gap-6 ${outlinedCard} p-5 font-playful text-ink sm:p-8`}
     >
       <header className="flex flex-col items-start gap-2">
         {category && (

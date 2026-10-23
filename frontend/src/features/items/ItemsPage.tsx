@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { Item, ItemDraft, ItemStatus, Task } from "../../api/types";
 import { CalendarMark } from "../../components/playful/CalendarMark";
@@ -37,6 +37,9 @@ export function ItemsPage() {
 
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  // On a phone the detail sits under the list, so a tapped item brings it into view.
+  const detailRef = useRef<HTMLDivElement>(null);
+  const [isRevealPending, setIsRevealPending] = useState(false);
   const [dialogTarget, setDialogTarget] = useState<DialogTarget>(null);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
@@ -58,6 +61,15 @@ export function ItemsPage() {
   }, [searched]);
 
   const selected = visible.find((item) => item.id === selectedId) ?? visible[0] ?? null;
+
+  useEffect(() => {
+    if (!isRevealPending) return;
+    setIsRevealPending(false);
+    // From laptop width the detail sits beside the list and is already in view.
+    if (!window.matchMedia("(min-width: 1024px)").matches) {
+      detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [isRevealPending]);
   const selectedTasks = selected ? tasks.filter((task) => task.itemId === selected.id) : [];
 
   /** Runs a change from the list or the panel, reporting a failure above the list. */
@@ -125,7 +137,10 @@ export function ItemsPage() {
           <li key={item.id} className="border-b-2 border-ink/10 last:border-b-0">
             <button
               type="button"
-              onClick={() => setSelectedId(item.id)}
+              onClick={() => {
+                setSelectedId(item.id);
+                setIsRevealPending(true);
+              }}
               aria-current={item.id === selected?.id}
               className={`grid w-full grid-cols-[2.5rem_1fr_auto] items-center gap-3 rounded-2xl px-3 py-4 text-left transition-colors sm:grid-cols-[2.5rem_1fr_8rem_8rem] ${
                 item.id === selected?.id ? "bg-accent/60" : "hover:bg-accent/25"
@@ -198,18 +213,20 @@ export function ItemsPage() {
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className={card}>{listArea()}</div>
         {selected && !isLoading && (
-          <ItemDetail
-            key={selected.id}
-            item={selected}
-            category={selected.categoryId === null ? null : (categoriesById.get(selected.categoryId) ?? null)}
-            tasks={selectedTasks}
-            onChangeStatus={(status: ItemStatus) => void attempt(() => planning.editItem(selected.id, { status }))}
-            onEdit={() => setDialogTarget({ item: selected })}
-            onDelete={() => handleDelete(selected)}
-            onAddTask={planning.addTask}
-            onToggleTask={(task: Task) => void attempt(() => planning.setTaskDone(task.id, !task.isDone))}
-            onDeleteTask={(task: Task) => void attempt(() => planning.removeTask(task.id))}
-          />
+          <div ref={detailRef} className="scroll-mt-24">
+            <ItemDetail
+              key={selected.id}
+              item={selected}
+              category={selected.categoryId === null ? null : (categoriesById.get(selected.categoryId) ?? null)}
+              tasks={selectedTasks}
+              onChangeStatus={(status: ItemStatus) => void attempt(() => planning.editItem(selected.id, { status }))}
+              onEdit={() => setDialogTarget({ item: selected })}
+              onDelete={() => handleDelete(selected)}
+              onAddTask={planning.addTask}
+              onToggleTask={(task: Task) => void attempt(() => planning.setTaskDone(task.id, !task.isDone))}
+              onDeleteTask={(task: Task) => void attempt(() => planning.removeTask(task.id))}
+            />
+          </div>
         )}
       </div>
 
