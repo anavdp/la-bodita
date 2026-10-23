@@ -122,7 +122,51 @@ describe("CategoriesPage", () => {
       name: "Photo & video",
       emoji: "📸",
       color: "#f39237",
+      isPrivate: false,
     });
+  });
+
+  it("given a private category, when the page loads, then its row says only you can see it", async () => {
+    vi.mocked(categoriesApi.listCategories).mockResolvedValue([
+      aCategory({ name: "Wedding dress", isPrivate: true }),
+      photographer,
+    ]);
+    renderWithProviders(<CategoriesPage />, { route: "/categories" });
+
+    expect(within(await screen.findByRole("row", { name: /Wedding dress/ })).getByTitle("Only you can see this")).toBeInTheDocument();
+    expect(within(rowOf("Photographer")).queryByTitle("Only you can see this")).not.toBeInTheDocument();
+  });
+
+  it("given the add drawer, when Only me is switched on, then the category is created private", async () => {
+    vi.mocked(categoriesApi.createCategory).mockResolvedValue(aCategory({ name: "Wedding dress" }));
+    renderWithProviders(<CategoriesPage />, { route: "/categories" });
+    await screen.findByRole("row", { name: /Church/ });
+
+    await userEvent.click(screen.getByRole("button", { name: "Add category" }));
+    const drawer = screen.getByRole("dialog", { name: "New category" });
+    await userEvent.type(within(drawer).getByLabelText("Name"), "Wedding dress");
+    await userEvent.click(within(drawer).getByRole("switch", { name: "Only me" }));
+    await userEvent.click(within(drawer).getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(categoriesApi.createCategory).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ name: "Wedding dress", isPrivate: true }),
+      ),
+    );
+  });
+
+  it("given a shared category someone else made, when it is edited, then who sees it cannot be changed", async () => {
+    vi.mocked(categoriesApi.listCategories).mockResolvedValue([aCategory({ name: "Church", isMine: false })]);
+    renderWithProviders(<CategoriesPage />, { route: "/categories" });
+    await screen.findByRole("row", { name: /Church/ });
+
+    await userEvent.click(within(rowOf("Church")).getByRole("button", { name: "Actions for Church" }));
+    await userEvent.click(screen.getByRole("button", { name: "Edit" }));
+
+    const drawer = screen.getByRole("dialog", { name: "Edit category" });
+    expect(within(drawer).getByRole("switch", { name: "Only me" })).toBeDisabled();
+    expect(drawer).toHaveTextContent("Only the person who made it can change this.");
   });
 
   it("given a category with items, when it is deleted, then it asks first and says its items stay", async () => {

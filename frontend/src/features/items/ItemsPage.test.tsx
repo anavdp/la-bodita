@@ -258,9 +258,37 @@ describe("ItemsPage", () => {
         instagramUrl: "https://instagram.com/dulcerosa",
         websiteUrl: null,
         notes: null,
+        isPrivate: false,
       }),
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("given a surprise, when it is added with Only me on, then it is created private", async () => {
+    vi.mocked(itemsApi.createItem).mockResolvedValue(anItem());
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+    await screen.findByRole("button", { name: /Iglesia San José/ });
+
+    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    const dialog = screen.getByRole("dialog", { name: "New item" });
+    await userEvent.type(within(dialog).getByLabelText("Name"), "Atelier Novias");
+    expect(dialog).toHaveTextContent("You both see it.");
+    await userEvent.click(within(dialog).getByRole("switch", { name: "Only me" }));
+    expect(dialog).toHaveTextContent("Only you will see it, and its tasks.");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(itemsApi.createItem).toHaveBeenCalledWith(1, expect.objectContaining({ isPrivate: true })),
+    );
+  });
+
+  it("given a private item, when the list shows, then its row says only you can see it", async () => {
+    vi.mocked(itemsApi.listItems).mockResolvedValue([anItem({ name: "Atelier Novias", isPrivate: true }), luz]);
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    const row = await screen.findByRole("button", { name: /Atelier Novias/ });
+    expect(within(row).getByTitle("Only you can see this")).toBeInTheDocument();
+    expect(within(screen.getByRole("button", { name: /Luz de Agua/ })).queryByTitle("Only you can see this")).toBeNull();
   });
 
   it("given an item with no name, when it is saved, then the dialog asks for one", async () => {
@@ -349,6 +377,7 @@ describe("ItemsPage", () => {
         name: "Cake",
         emoji: "cake",
         color: expect.stringMatching(/^#[0-9a-f]{6}$/),
+        isPrivate: false,
       }),
     );
   });

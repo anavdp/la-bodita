@@ -4,7 +4,16 @@ let nextId = 1;
 
 /** A plausible category; each test overrides only the fields it is about. */
 export function aCategory(overrides: Partial<Category> = {}): Category {
-  return { id: nextId++, name: "Church", emoji: "⛪", color: "#624cab", subcategories: [], ...overrides };
+  return {
+    id: nextId++,
+    name: "Church",
+    emoji: "⛪",
+    color: "#624cab",
+    subcategories: [],
+    isPrivate: false,
+    isMine: true,
+    ...overrides,
+  };
 }
 
 export function anItem(overrides: Partial<Item> = {}): Item {
@@ -23,6 +32,8 @@ export function anItem(overrides: Partial<Item> = {}): Item {
     taskCount: 0,
     doneTaskCount: 0,
     nextTask: null,
+    isPrivate: false,
+    isMine: true,
     ...overrides,
   };
 }

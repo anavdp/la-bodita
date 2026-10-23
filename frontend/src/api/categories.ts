@@ -15,6 +15,8 @@ interface CategoryPayload {
   emoji: string | null;
   color: string;
   subcategories: SubcategoryPayload[];
+  is_private: boolean;
+  is_mine: boolean;
 }
 
 function toSubcategory(payload: SubcategoryPayload): Subcategory {
@@ -28,7 +30,20 @@ function toSubcategory(payload: SubcategoryPayload): Subcategory {
 }
 
 function toCategory(payload: CategoryPayload): Category {
-  return { ...payload, subcategories: payload.subcategories.map(toSubcategory) };
+  return {
+    id: payload.id,
+    name: payload.name,
+    emoji: payload.emoji,
+    color: payload.color,
+    subcategories: payload.subcategories.map(toSubcategory),
+    isPrivate: payload.is_private,
+    isMine: payload.is_mine,
+  };
+}
+
+/** Only the fields named, in API terms. */
+function toPayload({ isPrivate, ...rest }: Partial<CategoryDraft>): Record<string, unknown> {
+  return isPrivate === undefined ? rest : { ...rest, is_private: isPrivate };
 }
 
 const categoriesUrl = (weddingId: number) => `/api/weddings/${weddingId}/categories`;
@@ -40,7 +55,7 @@ export async function listCategories(weddingId: number): Promise<Category[]> {
 }
 
 export async function createCategory(weddingId: number, draft: CategoryDraft): Promise<Category> {
-  const payload = await request<CategoryPayload>(categoriesUrl(weddingId), { method: "POST", body: draft });
+  const payload = await request<CategoryPayload>(categoriesUrl(weddingId), { method: "POST", body: toPayload(draft) });
   return toCategory(payload);
 }
 
@@ -52,7 +67,7 @@ export async function updateCategory(
 ): Promise<Category> {
   const payload = await request<CategoryPayload>(`${categoriesUrl(weddingId)}/${categoryId}`, {
     method: "PATCH",
-    body: changes,
+    body: toPayload(changes),
   });
   return toCategory(payload);
 }

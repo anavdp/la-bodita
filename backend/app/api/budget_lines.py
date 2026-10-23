@@ -6,6 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from app.api.guests import SessionDependency, WeddingDependency
 from app.api.requirements import find_item
+from app.auth import CurrentUser
 from app.models import BudgetLine, BudgetLineStatus
 from app.schemas import BudgetLineCreate, BudgetLineRead, BudgetLineUpdate
 
@@ -59,10 +60,12 @@ def list_budget_lines(wedding: WeddingDependency, session: SessionDependency) ->
 
 @router.post("", response_model=BudgetLineRead, status_code=status.HTTP_201_CREATED)
 def create_budget_line(
-    payload: BudgetLineCreate, wedding: WeddingDependency, session: SessionDependency
+    payload: BudgetLineCreate, wedding: WeddingDependency, session: SessionDependency, account: CurrentUser
 ) -> BudgetLineRead:
     fields = payload.model_dump()
-    line = BudgetLine(wedding_id=wedding.id, item=find_item(session, wedding, fields.pop("item_id")), **fields)
+    line = BudgetLine(
+        wedding_id=wedding.id, item=find_item(session, wedding, account, fields.pop("item_id")), **fields
+    )
     require_an_amount_once_on(line)
     session.add(line)
     session.commit()
@@ -72,11 +75,15 @@ def create_budget_line(
 
 @router.patch("/{line_id}", response_model=BudgetLineRead)
 def update_budget_line(
-    payload: BudgetLineUpdate, line: BudgetLineDependency, wedding: WeddingDependency, session: SessionDependency
+    payload: BudgetLineUpdate,
+    line: BudgetLineDependency,
+    wedding: WeddingDependency,
+    session: SessionDependency,
+    account: CurrentUser,
 ) -> BudgetLineRead:
     changes = payload.model_dump(exclude_unset=True)
     if "item_id" in changes:
-        line.item = find_item(session, wedding, changes.pop("item_id"))
+        line.item = find_item(session, wedding, account, changes.pop("item_id"))
     for field, value in changes.items():
         setattr(line, field, value)
     try:

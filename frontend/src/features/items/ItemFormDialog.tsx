@@ -9,6 +9,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { categoryLabel } from "../planning/CategoryChips";
+import { PrivacySwitch } from "../planning/Privacy";
 import { itemStatuses } from "./itemStatus";
 
 interface ItemFormDialogProps {
@@ -83,6 +84,7 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
     setContacts((current) => current.map((row, at) => (at === index ? { ...row, ...change } : row)));
   };
   const [notes, setNotes] = useState(item?.notes ?? "");
+  const [isPrivate, setIsPrivate] = useState(item?.isPrivate ?? false);
   const [error, setError] = useState<TranslationKey | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -119,6 +121,7 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
         instagramUrl: contactValue("instagramUrl"),
         websiteUrl: contactValue("websiteUrl"),
         notes: blankToNull(notes),
+        isPrivate,
       });
     } catch {
       setError("planning.saveFailed");
@@ -229,6 +232,12 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
               className={textArea}
             />
           </div>
+          <PrivacySwitch
+            isPrivate={isPrivate}
+            canChange={item?.isMine ?? true}
+            hiddenHintKey="privacy.itemHidden"
+            onChange={setIsPrivate}
+          />
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
               {t(error)}

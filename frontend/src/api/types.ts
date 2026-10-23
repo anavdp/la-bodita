@@ -139,6 +139,10 @@ export interface Category {
   /** "#rrggbb", lowercase. */
   color: string;
   subcategories: Subcategory[];
+  /** Seen only by whoever made it. */
+  isPrivate: boolean;
+  /** Made by the signed-in user (or before sign-in existed): theirs to make private or shared. */
+  isMine: boolean;
 }
 
 /** A finer tag inside a category: its own emoji, always its category's color. */
@@ -154,6 +158,7 @@ export interface CategoryDraft {
   name: string;
   emoji: string | null;
   color: string;
+  isPrivate: boolean;
 }
 
 /** Where things stand with a vendor or place, mirrored from `app/models/item.py`. */
@@ -183,9 +188,12 @@ export interface Item {
   taskCount: number;
   doneTaskCount: number;
   nextTask: NextTask | null;
+  /** Seen only by whoever made it; an item in a private category is hidden too. */
+  isPrivate: boolean;
+  isMine: boolean;
 }
 
-export type ItemDraft = Omit<Item, "id" | "taskCount" | "doneTaskCount" | "nextTask">;
+export type ItemDraft = Omit<Item, "id" | "taskCount" | "doneTaskCount" | "nextTask" | "isMine">;
 
 /** A checklist task; with a date and a time it is an appointment. */
 export interface Task {

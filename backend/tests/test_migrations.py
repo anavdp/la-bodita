@@ -367,7 +367,9 @@ def test_given_an_empty_database_when_migrations_run_then_the_category_tables_ex
 
     inspector = inspect(create_engine(database_url))
     category_columns = {column["name"] for column in inspector.get_columns("category")}
-    assert category_columns == {"id", "wedding_id", "name", "emoji", "color", "created_at", "updated_at"}
+    assert category_columns == {
+        "id", "wedding_id", "name", "emoji", "color", "created_at", "updated_at", "created_by_id", "is_private"
+    }
     subcategory_columns = {column["name"] for column in inspector.get_columns("subcategory")}
     assert subcategory_columns == {"id", "wedding_id", "category_id", "name", "emoji", "created_at", "updated_at"}
     subcategory_foreign_keys = {key["name"]: key["referred_table"] for key in inspector.get_foreign_keys("subcategory")}
@@ -409,6 +411,8 @@ def test_given_an_empty_database_when_migrations_run_then_the_item_table_holds_v
         "notes",
         "created_at",
         "updated_at",
+        "created_by_id",
+        "is_private",
     }
     foreign_keys = {key["name"]: key for key in inspector.get_foreign_keys("item")}
     assert foreign_keys["fk_item_category_id_category"]["options"]["ondelete"] == "SET NULL"

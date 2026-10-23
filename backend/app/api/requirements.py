@@ -1,11 +1,13 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.guests import SessionDependency, WeddingDependency
-from app.models import Item, Requirement, Wedding
+from app.auth import CurrentUser
+from app.models import Item, Requirement, UserAccount, Wedding
+from app.privacy import can_see_item, visible_item
 from app.schemas import RequirementCreate, RequirementRead, RequirementUpdate
 
 router = APIRouter(prefix="/api/weddings/{wedding_id}/requirements", tags=["requirements"])
@@ -25,9 +27,12 @@ def to_read(task: Requirement) -> RequirementRead:
     )
 
 
-def get_scoped_requirement(requirement_id: int, wedding: WeddingDependency, session: SessionDependency) -> Requirement:
+def get_scoped_requirement(
+    requirement_id: int, wedding: WeddingDependency, session: SessionDependency, account: CurrentUser
+) -> Requirement:
+    """A task under an item hidden from this user is hidden with it."""
     task = session.get(Requirement, requirement_id)
-    if task is None or task.wedding_id != wedding.id:
+    if task is None or task.wedding_id != wedding.id or (task.item and not can_see_item(task.item, account)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
     return task
 
@@ -35,12 +40,12 @@ def get_scoped_requirement(requirement_id: int, wedding: WeddingDependency, sess
 RequirementDependency = Annotated[Requirement, Depends(get_scoped_requirement)]
 
 
-def find_item(session: Session, wedding: Wedding, item_id: int | None) -> Item | None:
-    """An item named in a request body: a bad id is a bad payload, hence 422."""
+def find_item(session: Session, wedding: Wedding, account: UserAccount | None, item_id: int | None) -> Item | None:
+    """An item named in a request body: a bad id (or a hidden item) is a bad payload, hence 422."""
     if item_id is None:
         return None
     item = session.get(Item, item_id)
-    if item is None or item.wedding_id != wedding.id:
+    if item is None or item.wedding_id != wedding.id or not can_see_item(item, account):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Item not found")
     return item
 
@@ -49,6 +54,7 @@ def find_item(session: Session, wedding: Wedding, item_id: int | None) -> Item |
 def list_requirements(
     wedding: WeddingDependency,
     session: SessionDependency,
+    account: CurrentUser,
     item_id: int | None = None,
     category_id: int | None = None,
     is_done: bool | None = None,
@@ -56,7 +62,8 @@ def list_requirements(
     """Soonest first; undated tasks last."""
     statement = (
         select(Requirement)
-        .where(Requirement.wedding_id == wedding.id)
+        .outerjoin(Item)
+        .where(Requirement.wedding_id == wedding.id, or_(Requirement.item_id.is_(None), visible_item(account)))
         .options(selectinload(Requirement.item))
         .order_by(
             Requirement.due_date.is_(None),
@@ -69,7 +76,7 @@ def list_requirements(
     if item_id is not None:
         statement = statement.where(Requirement.item_id == item_id)
     if category_id is not None:
-        statement = statement.join(Item).where(Item.category_id == category_id)
+        statement = statement.where(Item.category_id == category_id)
     if is_done is not None:
         statement = statement.where(Requirement.is_done == is_done)
     return [to_read(task) for task in session.scalars(statement)]
@@ -77,10 +84,12 @@ def list_requirements(
 
 @router.post("", response_model=RequirementRead, status_code=status.HTTP_201_CREATED)
 def create_requirement(
-    payload: RequirementCreate, wedding: WeddingDependency, session: SessionDependency
+    payload: RequirementCreate, wedding: WeddingDependency, session: SessionDependency, account: CurrentUser
 ) -> RequirementRead:
     fields = payload.model_dump()
-    task = Requirement(wedding_id=wedding.id, item=find_item(session, wedding, fields.pop("item_id")), **fields)
+    task = Requirement(
+        wedding_id=wedding.id, item=find_item(session, wedding, account, fields.pop("item_id")), **fields
+    )
     session.add(task)
     session.commit()
     session.refresh(task)
@@ -89,11 +98,15 @@ def create_requirement(
 
 @router.patch("/{requirement_id}", response_model=RequirementRead)
 def update_requirement(
-    payload: RequirementUpdate, task: RequirementDependency, wedding: WeddingDependency, session: SessionDependency
+    payload: RequirementUpdate,
+    task: RequirementDependency,
+    wedding: WeddingDependency,
+    session: SessionDependency,
+    account: CurrentUser,
 ) -> RequirementRead:
     changes = payload.model_dump(exclude_unset=True)
     if "item_id" in changes:
-        task.item = find_item(session, wedding, changes.pop("item_id"))
+        task.item = find_item(session, wedding, account, changes.pop("item_id"))
     for field, value in changes.items():
         setattr(task, field, value)
     # A time only means something on a day: clearing the date clears it.

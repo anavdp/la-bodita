@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from enum import Enum
 
-from sqlalchemy import DateTime, ForeignKey, func
+from sqlalchemy import DateTime, ForeignKey, false, func
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column
 
@@ -68,3 +68,19 @@ def stored_as_text(enum_type: type[Enum], name: str) -> SQLEnum:
         validate_strings=True,
         values_callable=lambda members: [member.value for member in members],
     )
+
+
+class PrivacyMixin:
+    """Who made a row, and whether only they may see it.
+
+    Only categories and items carry it: the couple shares everything else. A row
+    made before sign-in existed has no maker and stays shared until someone
+    makes it private, which makes it theirs.
+    """
+
+    @declared_attr
+    def created_by_id(cls) -> Mapped[int | None]:
+        # A user taken off the list leaves their rows behind, unclaimed.
+        return mapped_column(ForeignKey("user_account.id", ondelete="SET NULL"), index=True, default=None)
+
+    is_private: Mapped[bool] = mapped_column(default=False, server_default=false())

@@ -6,6 +6,7 @@ import { isIconName } from "../../components/playful/iconCatalog";
 import { menuItem, menuPanel } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { NotSpecified } from "../guests/NotSpecified";
+import { PrivateMark } from "../planning/Privacy";
 
 interface CategoryTableProps {
   categories: Category[];
@@ -83,6 +84,7 @@ export function CategoryTable({ categories, itemCounts, onEdit, onDelete }: Cate
                       )}
                     </span>
                     <span>{category.name}</span>
+                    {category.isPrivate && <PrivateMark />}
                   </span>
                 </td>
                 <td className={cell}>
