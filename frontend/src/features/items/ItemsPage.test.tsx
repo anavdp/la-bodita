@@ -107,6 +107,31 @@ describe("ItemsPage", () => {
     expect(within(detail).getByRole("checkbox", { name: "Send Pinterest board" })).toBeInTheDocument();
   });
 
+  it("given a phone, when an item is tapped, then its panel below the list is scrolled into view", async () => {
+    const scrollIntoView = vi.spyOn(Element.prototype, "scrollIntoView");
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    await userEvent.click(await screen.findByRole("button", { name: /Luz de Agua Fotografía/ }));
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.contexts[0]).toContainElement(
+      screen.getByRole("heading", { name: "Luz de Agua Fotografía" }),
+    );
+  });
+
+  it("given a laptop, when an item is clicked, then the page stays put since its panel is beside the list", async () => {
+    const scrollIntoView = vi.spyOn(Element.prototype, "scrollIntoView");
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query) => ({ matches: query.includes("min-width"), addEventListener: () => {}, removeEventListener: () => {} }) as unknown as MediaQueryList,
+    );
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    await userEvent.click(await screen.findByRole("button", { name: /Luz de Agua Fotografía/ }));
+
+    expect(screen.getByRole("region", { name: "Luz de Agua Fotografía" })).toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
   it("given an open task, when it is ticked, then it is saved as done", async () => {
     vi.mocked(tasksApi.updateTask).mockResolvedValue({ ...certificates, isDone: true });
     renderWithProviders(<ItemsPage />, { route: "/items" });

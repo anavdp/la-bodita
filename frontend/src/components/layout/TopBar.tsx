@@ -8,7 +8,13 @@ import { compactButton } from "../playful/styles";
 const iconButton =
   "flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
 
-export function TopBar() {
+interface TopBarProps {
+  isMenuOpen?: boolean;
+  /** Opens the phone's menu drawer; the button only shows below tablet width. */
+  onOpenMenu?: () => void;
+}
+
+export function TopBar({ isMenuOpen = false, onOpenMenu }: TopBarProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { term, setTerm } = useSearch();
@@ -16,7 +22,21 @@ export function TopBar() {
   const themeLabel = t(theme === "dark" ? "layout.lightMode" : "layout.darkMode");
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-10 flex h-20 items-center justify-between gap-4 border-b-2 border-ink/15 bg-cream px-margin-mobile font-playful md:left-[260px] md:px-margin-desktop">
+    <header className="fixed top-0 right-0 left-0 z-10 flex h-20 items-center justify-between gap-2 border-b-2 border-ink/15 bg-cream px-margin-mobile font-playful md:left-[260px] md:px-margin-desktop">
+      {onOpenMenu !== undefined && (
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          aria-label={t("layout.menu")}
+          aria-expanded={isMenuOpen}
+          aria-controls="main-menu"
+          className={`${iconButton} shrink-0 md:hidden`}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">
+            menu
+          </span>
+        </button>
+      )}
       <div className="relative w-full max-w-[560px]">
         <span
           className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-ink"
@@ -34,7 +54,7 @@ export function TopBar() {
         />
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-3">
         {/* A task can be added from any screen; it opens the checklist's new task form.
             Notifications and settings land with their own issues and stay disabled until then. */}
         <button
@@ -53,12 +73,13 @@ export function TopBar() {
             {theme === "dark" ? "light_mode" : "dark_mode"}
           </span>
         </button>
-        <button type="button" disabled aria-label={t("layout.notifications")} title={t("layout.unavailable")} className={iconButton}>
+        {/* Both are placeholders, so a phone's narrow bar leaves them out. */}
+        <button type="button" disabled aria-label={t("layout.notifications")} title={t("layout.unavailable")} className={`${iconButton} max-sm:hidden`}>
           <span className="material-symbols-outlined" aria-hidden="true">
             notifications
           </span>
         </button>
-        <button type="button" disabled aria-label={t("layout.settings")} title={t("layout.unavailable")} className={iconButton}>
+        <button type="button" disabled aria-label={t("layout.settings")} title={t("layout.unavailable")} className={`${iconButton} max-sm:hidden`}>
           <span className="material-symbols-outlined" aria-hidden="true">
             settings
           </span>

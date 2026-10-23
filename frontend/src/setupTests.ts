@@ -11,6 +11,10 @@ if (window.matchMedia === undefined) {
   })) as unknown as typeof window.matchMedia;
 }
 
+// jsdom has no scrolling either; Items brings a tapped item's detail into view.
+// Tests that care spy on it.
+Element.prototype.scrollIntoView ??= () => {};
+
 // A theme toggled in one test must not leak into the next.
 afterEach(() => {
   localStorage.clear();
