@@ -1,3 +1,4 @@
+from app.schemas.auth import SignedInUser
 from app.schemas.budget_line import BudgetLineCreate, BudgetLineRead, BudgetLineUpdate
 from app.schemas.category import (
     CategoryCreate,
@@ -58,6 +59,7 @@ __all__ = [
     "RsvpLookupMember",
     "RsvpLookupResult",
     "RsvpReply",
+    "SignedInUser",
     "SubcategoryCreate",
     "SubcategoryRead",
     "SubcategoryUpdate",

@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from app.auth import require_user
 from app.database import Base, get_session
 from app.main import app
 from app.models import Wedding
@@ -42,8 +43,13 @@ def wedding(db_session: Session) -> Wedding:
 
 @pytest.fixture
 def client(db_session: Session) -> Generator[TestClient, None, None]:
-    """The API driven against the test session, so a request sees fixture data."""
+    """The API driven against the test session, so a request sees fixture data.
+
+    Signed in: these tests are about what the planner does, and test_auth_api
+    covers the sign-in itself, including that every route refuses a stranger.
+    """
     app.dependency_overrides[get_session] = lambda: db_session
+    app.dependency_overrides[require_user] = lambda: None
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
