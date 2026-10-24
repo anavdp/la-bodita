@@ -161,7 +161,7 @@ describe("RsvpLookupPage", () => {
     expect(screen.getByText("Gerardo y Vicky")).toBeInTheDocument();
     const steps = within(screen.getByRole("list")).getAllByRole("listitem");
     expect(steps[0]).toHaveTextContent("Confirmen aquí antes del 1 de Enero de 2027");
-    expect(steps[0]).toHaveTextContent("…o asumiremos que no vienen 😄");
+    expect(steps[0]).toHaveTextContent("…tanto si vienen, como si no 👀");
     expect(steps[1]).toHaveTextContent("Les enviaremos la invitación completa con todos los detalles");
     expect(steps[2]).toHaveTextContent("Nos vemos en Araure, Venezuela, el 14 · 08 · 2027");
     expect(screen.getByRole("textbox", { name: "Escribe tu nombre y apellido" })).toHaveAttribute("placeholder", "Ej.: Ana García");
@@ -197,7 +197,7 @@ describe("RsvpLookupPage", () => {
     expect(steps).toHaveLength(3);
     expect(steps[0]).toHaveTextContent("Let us know here by January 1, 2027");
     expect(within(steps[0]).getByText("January 1, 2027").tagName).toBe("STRONG");
-    expect(within(steps[0]).getByText("…or we'll assume you're not coming 😄")).toHaveClass("text-on-surface-variant");
+    expect(within(steps[0]).getByText("…whether you're coming or not 👀")).toHaveClass("text-on-surface-variant");
     expect(steps[1]).toHaveTextContent("We'll send you the full invitation with all the details");
     expect(steps[2]).toHaveTextContent("See you in Araure, Venezuela, on 14 · 08 · 2027");
     expect(within(steps[2]).getByText("Araure, Venezuela").tagName).toBe("STRONG");
