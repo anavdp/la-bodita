@@ -61,22 +61,20 @@ describe("AppLayout", () => {
     expect(menuButton).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("given a laptop, when the menu button is clicked, then the sidebar folds down to its icons and back", async () => {
+  it("given a laptop, when the sidebar's own fold button is clicked, then it folds down to its icons and back", async () => {
     onALaptop();
     const user = userEvent.setup();
     renderWithProviders(<AppLayout />);
-    const menuButton = screen.getByRole("button", { name: "Menu" });
-    expect(menuButton).toHaveAttribute("aria-expanded", "true");
+    const sidebar = screen.getByRole("complementary");
 
-    await user.click(menuButton);
+    await user.click(within(sidebar).getByRole("button", { name: "Collapse menu" }));
 
-    expect(menuButton).toHaveAttribute("aria-expanded", "false");
     const navigation = screen.getByRole("navigation", { name: "Main navigation" });
     expect(within(navigation).getByRole("link", { name: "Checklist" })).toHaveAttribute("title", "Checklist");
     expect(screen.queryByText("La Bodita")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Menu" })).not.toBeInTheDocument();
 
-    await user.click(menuButton);
-    expect(menuButton).toHaveAttribute("aria-expanded", "true");
+    await user.click(within(sidebar).getByRole("button", { name: "Expand menu" }));
     expect(screen.getByText("La Bodita")).toBeInTheDocument();
   });
 
@@ -84,11 +82,20 @@ describe("AppLayout", () => {
     onALaptop();
     const user = userEvent.setup();
     const { unmount } = renderWithProviders(<AppLayout />);
-    await user.click(screen.getByRole("button", { name: "Menu" }));
+    await user.click(screen.getByRole("button", { name: "Collapse menu" }));
     unmount();
 
     renderWithProviders(<AppLayout />);
 
-    expect(screen.getByRole("button", { name: "Menu" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Expand menu" })).toBeInTheDocument();
+  });
+
+  it("given a phone, when the menu drawer is out, then it has no fold button", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppLayout />);
+
+    await user.click(screen.getByRole("button", { name: "Menu" }));
+
+    expect(screen.queryByRole("button", { name: "Collapse menu" })).not.toBeInTheDocument();
   });
 });

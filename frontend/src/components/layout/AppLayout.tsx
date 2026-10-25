@@ -18,9 +18,9 @@ const readCollapsed = (): boolean => {
 };
 
 /**
- * The shell every screen sits in: fixed sidebar, top bar, fluid canvas. The top
- * bar's menu button folds the sidebar down to its icons on a laptop (remembered
- * on this browser), and slides it in as a drawer on a phone.
+ * The shell every screen sits in: fixed sidebar, top bar, fluid canvas. On a
+ * laptop the sidebar's own button folds it down to its icons (remembered on this
+ * browser); on a phone the top bar's menu button slides it in as a drawer.
  */
 export function AppLayout() {
   const hasSidebar = useHasSidebar();
@@ -28,11 +28,7 @@ export function AppLayout() {
   const [isCollapsed, setIsCollapsed] = useState(readCollapsed);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
-  const handleMenu = () => {
-    if (!hasSidebar) {
-      setIsMenuOpen(true);
-      return;
-    }
+  const toggleCollapsed = () => {
     const next = !isCollapsed;
     setIsCollapsed(next);
     try {
@@ -46,16 +42,21 @@ export function AppLayout() {
     <ThemeProvider>
       <SearchProvider>
         <div className="flex min-h-screen bg-cream text-on-background">
-          <Sidebar isOpen={isMenuOpen} isCollapsed={hasSidebar && isCollapsed} onClose={closeMenu} />
+          <Sidebar
+            isOpen={isMenuOpen}
+            isCollapsed={hasSidebar && isCollapsed}
+            onToggleCollapsed={hasSidebar ? toggleCollapsed : undefined}
+            onClose={closeMenu}
+          />
           {/* `min-w-0`: a flex item defaults to min-width:auto and would otherwise
               refuse to shrink below the table's own width, widening the page. */}
           <main
             className={`min-h-screen min-w-0 flex-1 pb-12 transition-[margin] ${isCollapsed ? "md:ml-[88px]" : "md:ml-[260px]"}`}
           >
             <TopBar
-              isMenuOpen={hasSidebar ? !isCollapsed : isMenuOpen}
+              isMenuOpen={isMenuOpen}
               isSidebarCollapsed={isCollapsed}
-              onMenu={handleMenu}
+              onOpenMenu={hasSidebar ? undefined : () => setIsMenuOpen(true)}
             />
             <div className="mx-auto max-w-[1440px] px-margin-mobile pt-28 md:px-margin-desktop">
               <Outlet />

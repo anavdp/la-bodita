@@ -13,15 +13,15 @@ const iconButton =
   "flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
 
 interface TopBarProps {
-  /** Whether the menu shows: the drawer out on a phone, the sidebar unfolded on a laptop. */
+  /** Whether the phone's menu drawer is out. */
   isMenuOpen?: boolean;
   /** Whether the laptop's sidebar is folded to its icons, so the bar starts where it ends. */
   isSidebarCollapsed?: boolean;
-  /** Slides the phone's drawer in, or folds and unfolds the laptop's sidebar. */
-  onMenu?: () => void;
+  /** Slides the phone's menu drawer in; left out where the sidebar sits beside the page. */
+  onOpenMenu?: () => void;
 }
 
-export function TopBar({ isMenuOpen = false, isSidebarCollapsed = false, onMenu }: TopBarProps) {
+export function TopBar({ isMenuOpen = false, isSidebarCollapsed = false, onOpenMenu }: TopBarProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { term, setTerm } = useSearch();
@@ -34,14 +34,14 @@ export function TopBar({ isMenuOpen = false, isSidebarCollapsed = false, onMenu 
       <header className={`fixed top-0 right-0 left-0 z-10 flex h-20 items-center justify-between gap-2 border-b-2 border-ink/15 bg-cream px-margin-mobile font-playful md:px-margin-desktop ${
           isSidebarCollapsed ? "md:left-[88px]" : "md:left-[260px]"
         }`}>
-        {onMenu !== undefined && (
+        {onOpenMenu !== undefined && (
           <button
             type="button"
-            onClick={onMenu}
+            onClick={onOpenMenu}
             aria-label={t("layout.menu")}
             aria-expanded={isMenuOpen}
             aria-controls="main-menu"
-            className={`${iconButton} shrink-0`}
+            className={`${iconButton} shrink-0 md:hidden`}
           >
             <span className="material-symbols-outlined" aria-hidden="true">
               menu

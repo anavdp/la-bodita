@@ -15,12 +15,14 @@ interface SidebarProps {
   isOpen?: boolean;
   /** A laptop's sidebar folded to a strip of icons, each still named by a tooltip. */
   isCollapsed?: boolean;
+  /** Folds and unfolds a laptop's sidebar; left out for the phone's drawer. */
+  onToggleCollapsed?: () => void;
   onClose?: () => void;
 }
 
 const stayOpen = () => {};
 
-export function Sidebar({ isOpen = false, isCollapsed = false, onClose = stayOpen }: SidebarProps) {
+export function Sidebar({ isOpen = false, isCollapsed = false, onToggleCollapsed, onClose = stayOpen }: SidebarProps) {
   const { t, language, toggleLanguage } = useTranslation();
   const { wedding } = useWedding();
   const { user } = useAuth();
@@ -42,6 +44,22 @@ export function Sidebar({ isOpen = false, isCollapsed = false, onClose = stayOpe
           isOpen ? "z-50 flex" : "hidden"
         }`}
       >
+        {onToggleCollapsed !== undefined && (
+          <div className={`-mt-3 mb-1 flex px-3 ${isCollapsed ? "justify-center" : "justify-end"}`}>
+            <button
+              type="button"
+              onClick={onToggleCollapsed}
+              aria-label={t(isCollapsed ? "layout.expandMenu" : "layout.collapseMenu")}
+              aria-expanded={!isCollapsed}
+              title={t(isCollapsed ? "layout.expandMenu" : "layout.collapseMenu")}
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/15"
+            >
+              <span className="material-symbols-outlined text-[26px]" aria-hidden="true">
+                {isCollapsed ? "left_panel_open" : "left_panel_close"}
+              </span>
+            </button>
+          </div>
+        )}
         {!isCollapsed && (
           <div className="mb-6 px-6">
             {/* The confetti dashes and the sticker's hearts are the mockup's doodles, kept as plain marks. */}

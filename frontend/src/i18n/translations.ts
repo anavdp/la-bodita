@@ -15,6 +15,8 @@ const en = {
 
   "layout.mainNavigation": "Main navigation",
   "layout.menu": "Menu",
+  "layout.collapseMenu": "Collapse menu",
+  "layout.expandMenu": "Expand menu",
   "layout.searchPlaceholder": "Search...",
   "layout.searchLabel": "Search guests by name",
   "layout.addTask": "Add Task",
@@ -465,6 +467,8 @@ const es: Record<TranslationKey, string> = {
 
   "layout.mainNavigation": "Navegación principal",
   "layout.menu": "Menú",
+  "layout.collapseMenu": "Contraer el menú",
+  "layout.expandMenu": "Expandir el menú",
   "layout.searchPlaceholder": "Buscar...",
   "layout.searchLabel": "Buscar invitados por nombre",
   "layout.addTask": "Añadir Tarea",
