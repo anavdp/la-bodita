@@ -12,6 +12,15 @@ export async function getSignedInUser(): Promise<SignedInUser> {
   return { email: payload.email, displayName: payload.display_name };
 }
 
+/** Renames the signed-in user. Only the name: the email is their Google sign-in. */
+export async function updateDisplayName(displayName: string): Promise<SignedInUser> {
+  const payload = await request<SignedInUserPayload>("/api/auth/me", {
+    method: "PATCH",
+    body: { display_name: displayName },
+  });
+  return { email: payload.email, displayName: payload.display_name };
+}
+
 export function signOut(): Promise<void> {
   return request<void>("/api/auth/logout", { method: "POST" });
 }

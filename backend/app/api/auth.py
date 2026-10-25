@@ -34,7 +34,7 @@ from app.google_sign_in import (
     read_claims,
 )
 from app.models import UserAccount
-from app.schemas import SignedInUser
+from app.schemas import SignedInUser, SignedInUserUpdate
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -115,6 +115,15 @@ def finish(response: RedirectResponse) -> RedirectResponse:
 
 @router.get("/me", response_model=SignedInUser)
 def read_signed_in_user(account: CurrentUser) -> UserAccount:
+    return account
+
+
+@router.patch("/me", response_model=SignedInUser)
+def update_signed_in_user(payload: SignedInUserUpdate, account: CurrentUser, session: SessionDependency) -> UserAccount:
+    """Rename yourself: the name the top bar and the papers table show."""
+    account.display_name = payload.display_name
+    session.commit()
+    session.refresh(account)
     return account
 
 

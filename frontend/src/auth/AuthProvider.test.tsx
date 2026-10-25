@@ -9,10 +9,13 @@ import { AuthProvider, RequireSignIn, useAuth } from "./AuthProvider";
 vi.mock("../api/auth");
 
 function Planner() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, saveDisplayName } = useAuth();
   return (
     <>
       <p>planner for {user?.displayName}</p>
+      <button type="button" onClick={() => void saveDisplayName("Vicky De Palma")}>
+        rename
+      </button>
       <button type="button" onClick={() => void signOut()}>
         out
       </button>
@@ -77,6 +80,17 @@ describe("AuthProvider", () => {
 
     expect(authApi.signOut).toHaveBeenCalled();
     expect(await screen.findByText("login page")).toBeInTheDocument();
+  });
+
+  it("given a signed-in user, when they save a new name, then the planner greets them by it", async () => {
+    vi.mocked(authApi.getSignedInUser).mockResolvedValue({ email: "vicky@example.com", displayName: "Vicky" });
+    vi.mocked(authApi.updateDisplayName).mockResolvedValue({ email: "vicky@example.com", displayName: "Vicky De Palma" });
+    renderAt("/guests");
+
+    await userEvent.click(await screen.findByRole("button", { name: "rename" }));
+
+    expect(authApi.updateDisplayName).toHaveBeenCalledWith("Vicky De Palma");
+    expect(await screen.findByText("planner for Vicky De Palma")).toBeInTheDocument();
   });
 
   it("given a session that runs out mid-visit, when a call answers 401, then the login page shows", async () => {

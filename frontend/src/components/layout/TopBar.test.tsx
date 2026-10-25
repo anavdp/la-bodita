@@ -91,6 +91,18 @@ describe("TopBar", () => {
     expect(signOut).toHaveBeenCalled();
   });
 
+  it("given the account menu, when the profile is chosen, then the profile drawer opens and the menu closes", async () => {
+    renderWithProviders(<TopBar />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Account: Vicky" }));
+    await userEvent.click(screen.getByRole("menuitem", { name: /Edit profile/ }));
+
+    expect(screen.getByRole("dialog", { name: "Your profile" })).toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: /Sign out/ })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("dialog", { name: "Your profile" })).not.toBeInTheDocument();
+  });
+
   it("given the account menu is open, when it is pressed again, then it closes", async () => {
     renderWithProviders(<TopBar />);
     const account = screen.getByRole("button", { name: "Account: Vicky" });
