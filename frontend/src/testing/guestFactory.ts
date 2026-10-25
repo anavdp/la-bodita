@@ -17,6 +17,7 @@ export function aGuest(overrides: Partial<Guest> = {}): Guest {
     relationshipType: "family",
     side: "italy",
     rsvpStatus: "confirmed",
+    rsvpAnsweredAt: "2026-10-01T12:00:00Z",
     phone: null,
     email: null,
     ...overrides,

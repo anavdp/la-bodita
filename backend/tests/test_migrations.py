@@ -114,6 +114,7 @@ def test_given_an_empty_database_when_migrations_run_then_the_guest_table_exists
         "relationship_type",
         "side",
         "rsvp_status",
+        "rsvp_answered_at",
         "phone",
         "email",
         "created_at",
@@ -514,3 +515,35 @@ def test_given_migrations_at_head_when_the_calendar_table_is_inspected_then_even
         "fk_calendar_event_item_id_item": "item",
         "fk_calendar_event_wedding_id_wedding": "wedding",
     }
+
+
+def test_given_guests_who_answered_before_the_stamp_existed_when_migrated_then_their_last_update_stands_in(
+    tmp_path,
+):
+    """Only answered guests get a stamp: a pending guest has not answered yet."""
+    database_url = f"sqlite:///{tmp_path / 'guest_answered_at_backfill_check.db'}"
+    config = build_alembic_config(database_url)
+    command.upgrade(config, "68428ff00a7d")
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("insert into wedding (id, name) values (1, 'La Bodita')")
+        connection.exec_driver_sql(
+            "insert into household (id, wedding_id, name, rsvp_token) values (1, 1, 'Rossi', 'token')"
+        )
+        for first_name, status in (("Maria", "confirmed"), ("Paolo", "declined"), ("Anna", "pending")):
+            connection.exec_driver_sql(
+                "insert into guest (wedding_id, household_id, first_name, last_name, rsvp_status, updated_at) "
+                f"values (1, 1, '{first_name}', 'Rossi', '{status}', '2026-10-20 09:15:00')"
+            )
+
+    command.upgrade(config, "head")
+
+    with engine.connect() as connection:
+        rows = connection.exec_driver_sql(
+            "select first_name, rsvp_answered_at from guest order by id"
+        ).all()
+    assert [(name, answered_at and answered_at[:19]) for name, answered_at in rows] == [
+        ("Maria", "2026-10-20 09:15:00"),
+        ("Paolo", "2026-10-20 09:15:00"),
+        ("Anna", None),
+    ]

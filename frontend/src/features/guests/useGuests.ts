@@ -103,21 +103,24 @@ export function useGuests(weddingId: number | null): GuestsState {
   );
 
   /** An RSVP moves nobody, so only that row changes, at once, with no reload; the
-   * summary bar and status filter read the same list, so they follow. If the API
+   * summary bar and status filter read the same list, so they follow. The answer
+   * is stamped now and corrected to the API's own stamp once it replies. If the API
    * refuses, the row goes back to what it was. */
   const setRsvpStatus = useCallback(
     async (guestId: number, rsvpStatus: RsvpStatus) => {
       if (weddingId === null) return;
-      const withStatus = (status: RsvpStatus) =>
-        setGuests((current) =>
-          current.map((guest) => (guest.id === guestId ? { ...guest, rsvpStatus: status } : guest)),
-        );
-      const previous = guests.find((guest) => guest.id === guestId)?.rsvpStatus;
-      withStatus(rsvpStatus);
+      const withAnswer = (answer: Pick<Guest, "rsvpStatus" | "rsvpAnsweredAt">) =>
+        setGuests((current) => current.map((guest) => (guest.id === guestId ? { ...guest, ...answer } : guest)));
+      const previous = guests.find((guest) => guest.id === guestId);
+      withAnswer({
+        rsvpStatus,
+        rsvpAnsweredAt: rsvpStatus === "pending" ? null : new Date().toISOString(),
+      });
       try {
-        await updateGuest(weddingId, guestId, { rsvpStatus });
+        const saved = await updateGuest(weddingId, guestId, { rsvpStatus });
+        withAnswer({ rsvpStatus: saved.rsvpStatus, rsvpAnsweredAt: saved.rsvpAnsweredAt });
       } catch (error) {
-        if (previous !== undefined) withStatus(previous);
+        if (previous !== undefined) withAnswer(previous);
         throw error;
       }
     },

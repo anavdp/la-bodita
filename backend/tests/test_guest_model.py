@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 from sqlalchemy import inspect, text
@@ -44,6 +44,7 @@ def test_given_a_guest_when_optional_fields_are_omitted_then_they_default(db_ses
     assert guest.gender is None
     assert guest.phone is None
     assert guest.email is None
+    assert guest.rsvp_answered_at is None
 
 
 def test_given_a_guest_when_every_field_is_supplied_then_each_one_round_trips(db_session: Session, wedding: Wedding):
@@ -144,6 +145,7 @@ def test_given_the_guest_table_when_it_is_inspected_then_it_carries_only_this_sl
         "relationship_type",
         "side",
         "rsvp_status",
+        "rsvp_answered_at",
         "phone",
         "email",
         "created_at",
@@ -171,5 +173,77 @@ def test_given_the_guest_model_when_required_fields_are_inspected_then_only_the_
     assert inspected.primary_key[0].name == "id"
     for required in ("household_id", "first_name", "last_name", "is_child", "rsvp_status"):
         assert columns[required].nullable is False, required
-    for optional in ("gender", "relationship_type", "side", "phone", "email"):
+    for optional in ("gender", "relationship_type", "side", "rsvp_answered_at", "phone", "email"):
         assert columns[optional].nullable is True, optional
+
+
+def test_given_a_pending_guest_when_they_confirm_then_the_moment_they_answered_is_stamped(
+    db_session: Session, wedding: Wedding
+):
+    guest = build_guest(wedding)
+    db_session.add(guest)
+    db_session.commit()
+    before = datetime.now(timezone.utc)
+
+    guest.rsvp_status = RsvpStatus.CONFIRMED
+    db_session.commit()
+
+    assert guest.rsvp_answered_at is not None
+    assert guest.rsvp_answered_at.replace(tzinfo=timezone.utc) >= before
+
+
+def test_given_a_guest_added_as_already_answered_when_saved_then_they_are_stamped_too(
+    db_session: Session, wedding: Wedding
+):
+    guest = build_guest(wedding, rsvp_status=RsvpStatus.DECLINED)
+
+    db_session.add(guest)
+    db_session.commit()
+
+    assert guest.rsvp_answered_at is not None
+
+
+def test_given_a_guest_who_answered_when_the_same_answer_comes_again_then_the_first_moment_is_kept(
+    db_session: Session, wedding: Wedding
+):
+    answered_at = datetime(2026, 10, 1, 12, 30, tzinfo=timezone.utc)
+    guest = build_guest(wedding, rsvp_status=RsvpStatus.CONFIRMED)
+    db_session.add(guest)
+    db_session.commit()
+    guest.rsvp_answered_at = answered_at
+    db_session.commit()
+
+    guest.rsvp_status = RsvpStatus.CONFIRMED
+    guest.phone = "+58 412 000 0000"
+    db_session.commit()
+
+    assert guest.rsvp_answered_at.replace(tzinfo=timezone.utc) == answered_at
+
+
+def test_given_a_guest_who_answered_when_they_change_their_mind_then_the_new_answer_is_stamped(
+    db_session: Session, wedding: Wedding
+):
+    answered_at = datetime(2026, 10, 1, 12, 30, tzinfo=timezone.utc)
+    guest = build_guest(wedding, rsvp_status=RsvpStatus.CONFIRMED)
+    db_session.add(guest)
+    db_session.commit()
+    guest.rsvp_answered_at = answered_at
+    db_session.commit()
+
+    guest.rsvp_status = RsvpStatus.DECLINED
+    db_session.commit()
+
+    assert guest.rsvp_answered_at.replace(tzinfo=timezone.utc) > answered_at
+
+
+def test_given_a_guest_who_answered_when_they_are_set_back_to_pending_then_the_stamp_is_cleared(
+    db_session: Session, wedding: Wedding
+):
+    guest = build_guest(wedding, rsvp_status=RsvpStatus.CONFIRMED)
+    db_session.add(guest)
+    db_session.commit()
+
+    guest.rsvp_status = RsvpStatus.PENDING
+    db_session.commit()
+
+    assert guest.rsvp_answered_at is None

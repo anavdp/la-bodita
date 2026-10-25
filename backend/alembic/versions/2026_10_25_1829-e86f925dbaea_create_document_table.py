@@ -1,7 +1,7 @@
 """create document table
 
 Revision ID: e86f925dbaea
-Revises: 68428ff00a7d
+Revises: b7d3e91f4a20
 Create Date: 2026-10-25 18:29:28.532736
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'e86f925dbaea'
-down_revision: Union[str, Sequence[str], None] = '68428ff00a7d'
+down_revision: Union[str, Sequence[str], None] = 'b7d3e91f4a20'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

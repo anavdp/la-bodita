@@ -65,6 +65,8 @@ def test_given_a_household_when_it_answers_then_each_member_gets_their_own_yes_o
     db_session.refresh(paolo)
     assert maria.rsvp_status == RsvpStatus.CONFIRMED
     assert paolo.rsvp_status == RsvpStatus.DECLINED
+    assert maria.rsvp_answered_at is not None
+    assert paolo.rsvp_answered_at is not None
 
 
 def test_given_an_answer_for_someone_outside_the_household_when_it_is_sent_then_nothing_is_saved(

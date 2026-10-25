@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, StringConstraints, model_validator
+from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator, model_validator
 
 from app.models.guest import GuestGender, GuestRelationshipType, GuestSide, RsvpStatus
 
@@ -78,7 +78,16 @@ class GuestRead(BaseModel):
     relationship_type: GuestRelationshipType | None
     side: GuestSide | None
     rsvp_status: RsvpStatus
+    rsvp_answered_at: datetime | None
     phone: str | None
     email: str | None
     created_at: datetime
     updated_at: datetime
+
+    @field_validator("rsvp_answered_at")
+    @classmethod
+    def read_as_utc(cls, answered_at: datetime | None) -> datetime | None:
+        """SQLite hands datetimes back without their zone; every stamp is written in UTC."""
+        if answered_at is None or answered_at.tzinfo is not None:
+            return answered_at
+        return answered_at.replace(tzinfo=timezone.utc)
