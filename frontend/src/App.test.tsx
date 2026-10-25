@@ -8,6 +8,7 @@ import * as authApi from "./api/auth";
 import * as budgetApi from "./api/budget";
 import * as calendarApi from "./api/calendar";
 import * as categoriesApi from "./api/categories";
+import * as documentsApi from "./api/documents";
 import * as guestsApi from "./api/guests";
 import * as householdsApi from "./api/households";
 import * as itemsApi from "./api/items";
@@ -23,6 +24,7 @@ vi.mock("./api/auth", async () => {
 vi.mock("./api/budget");
 vi.mock("./api/calendar");
 vi.mock("./api/categories");
+vi.mock("./api/documents");
 vi.mock("./api/guests");
 vi.mock("./api/households");
 vi.mock("./api/items");
@@ -52,6 +54,9 @@ describe("AppRoutes", () => {
     vi.mocked(itemsApi.listItems).mockResolvedValue([]);
     vi.mocked(tasksApi.listTasks).mockResolvedValue([]);
     vi.mocked(budgetApi.listBudgetLines).mockResolvedValue([]);
+    vi.mocked(documentsApi.listDocuments).mockResolvedValue([]);
+    vi.mocked(documentsApi.listPaperRequests).mockResolvedValue([]);
+    vi.mocked(documentsApi.listPeople).mockResolvedValue([]);
     vi.mocked(calendarApi.listCalendarEvents).mockResolvedValue([]);
   });
 
@@ -190,10 +195,17 @@ describe("AppRoutes", () => {
     expect(await screen.findByText(/Nothing on the calendar ahead/)).toBeInTheDocument();
   });
 
-  it("given a screen that is not built yet, when it is visited, then it says it is coming", async () => {
-    renderAt("/documents");
+  it("given the documents routes, when each is visited, then its tab of the documents is shown", async () => {
+    renderAt("/documents/all");
 
-    expect(await screen.findByRole("heading", { name: "Documents" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Documents", level: 1 })).toBeInTheDocument();
+    expect(await screen.findByText(/No files yet/)).toBeInTheDocument();
+  });
+
+  it("given a screen that is not built yet, when it is visited, then it says it is coming", async () => {
+    renderAt("/dashboard");
+
+    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
     expect(screen.getByText(/lands in a later slice/)).toBeInTheDocument();
   });
 

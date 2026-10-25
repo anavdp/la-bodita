@@ -33,3 +33,11 @@ export const menuPanel =
   "absolute z-10 mt-2 flex w-max flex-col gap-1 rounded-2xl border-2 border-ink bg-cream-light p-2 font-playful shadow-[4px_4px_0_rgba(31,29,43,0.15)]";
 export const menuItem =
   "flex items-center gap-2 rounded-xl px-3 py-2 text-left text-lg text-ink transition-colors hover:bg-accent/60";
+
+/** Folder tabs side by side, as NavLink classes; the open one is pink. `edge` rounds the outer corners. */
+export const folderTab =
+  (edge: string) =>
+  ({ isActive }: { isActive: boolean }) =>
+    `border-[2.5px] border-ink px-10 py-2 font-playful text-[22px] text-ink transition-colors ${edge} ${
+      isActive ? "bg-accent" : "bg-cream-light hover:bg-accent/40"
+    }`;

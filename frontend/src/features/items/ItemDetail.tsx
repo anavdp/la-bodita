@@ -22,6 +22,8 @@ interface ItemDetailProps {
   onAddTask: (draft: TaskDraft) => Promise<void>;
   onToggleTask: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
+  /** More sections under the tasks: the item's papers and files. */
+  children?: ReactNode;
 }
 
 /** "https://instagram.com/luzdeagua" (or "@luzdeagua") as "@luzdeagua", linking to the profile. */
@@ -53,6 +55,7 @@ export function ItemDetail({
   onAddTask,
   onToggleTask,
   onDeleteTask,
+  children,
 }: ItemDetailProps) {
   const { t, language } = useTranslation();
   const titleId = useId();
@@ -179,6 +182,8 @@ export function ItemDetail({
           </button>
         )}
       </div>
+
+      {children}
 
       {item.notes && (
         <p className="whitespace-pre-line rounded-[20px] border-2 border-dashed border-ink/40 bg-butter/40 p-4 text-lg text-ink">

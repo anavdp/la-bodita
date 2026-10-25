@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import type { Item, ItemDraft, ItemStatus, Task } from "../../api/types";
 import { CalendarMark } from "../../components/playful/CalendarMark";
@@ -10,6 +11,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
+import { ItemPapers } from "../documents/ItemPapers";
 import { CategoryChips } from "../planning/CategoryChips";
 import { CategoryFormDialog } from "../planning/CategoryFormDialog";
 import { formatDueDate } from "../planning/schedule";
@@ -36,7 +38,12 @@ export function ItemsPage() {
   const { categories, items, tasks, isLoading, hasLoadError } = planning;
 
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  // `?item=7`: the documents screen links straight to the item waiting on a paper.
+  const [searchParams] = useSearchParams();
+  const [selectedId, setSelectedId] = useState<number | null>(() => {
+    const linked = Number(searchParams.get("item"));
+    return Number.isInteger(linked) && linked > 0 ? linked : null;
+  });
   const [dialogTarget, setDialogTarget] = useState<DialogTarget>(null);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
@@ -209,7 +216,9 @@ export function ItemsPage() {
             onAddTask={planning.addTask}
             onToggleTask={(task: Task) => void attempt(() => planning.setTaskDone(task.id, !task.isDone))}
             onDeleteTask={(task: Task) => void attempt(() => planning.removeTask(task.id))}
-          />
+          >
+            {wedding && <ItemPapers weddingId={wedding.id} item={selected} items={items} />}
+          </ItemDetail>
         )}
       </div>
 

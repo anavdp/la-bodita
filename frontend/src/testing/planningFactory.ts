@@ -1,4 +1,13 @@
-import type { BudgetLine, CalendarEvent, Category, Item, Task } from "../api/types";
+import type {
+  BudgetLine,
+  CalendarEvent,
+  Category,
+  Item,
+  PaperRequest,
+  Person,
+  Task,
+  WeddingDocument,
+} from "../api/types";
 
 let nextId = 1;
 
@@ -82,4 +91,47 @@ export function aCalendarEvent(overrides: Partial<CalendarEvent> = {}): Calendar
     categoryId: null,
     ...overrides,
   };
+}
+
+export function aDocument(overrides: Partial<WeddingDocument> = {}): WeddingDocument {
+  return {
+    id: nextId++,
+    title: "Passport",
+    kind: "paper",
+    fileName: "passport.pdf",
+    contentType: "application/pdf",
+    sizeBytes: 120_000,
+    itemId: null,
+    itemName: null,
+    categoryId: null,
+    requirementId: null,
+    requirementTitle: null,
+    personId: null,
+    issuedOn: null,
+    expiresOn: null,
+    uploadedById: null,
+    createdAt: "2026-10-25T18:00:00",
+    ...overrides,
+  };
+}
+
+export function aPaperRequest(overrides: Partial<PaperRequest> = {}): PaperRequest {
+  return {
+    id: nextId++,
+    name: "Baptism certificate",
+    itemId: 1,
+    itemName: "Iglesia San José",
+    categoryId: null,
+    requirementId: null,
+    requirementTitle: null,
+    personId: null,
+    documentId: null,
+    documentTitle: null,
+    isMissing: true,
+    ...overrides,
+  };
+}
+
+export function aPerson(overrides: Partial<Person> = {}): Person {
+  return { id: nextId++, displayName: "Vicky", ...overrides };
 }

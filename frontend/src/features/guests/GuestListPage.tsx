@@ -14,7 +14,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { ActionIcon, PageHeader } from "../../components/playful/PageHeader";
-import { outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { folderTab, outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
@@ -37,14 +37,6 @@ type HouseholdDialog =
   | null;
 
 export type GuestListTab = "guests" | "households";
-
-/** Two folder tabs side by side; the open one is pink. */
-const tabLink =
-  (edge: string) =>
-  ({ isActive }: { isActive: boolean }) =>
-    `border-[2.5px] border-ink px-10 py-2 font-playful text-[22px] text-ink transition-colors ${edge} ${
-      isActive ? "bg-accent" : "bg-cream-light hover:bg-accent/40"
-    }`;
 
 /**
  * The guest list, in two tabs that share the header and the RSVP cards: the
@@ -261,10 +253,10 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
       />
 
       <nav aria-label={t("guests.tabs.label")} className="mb-5 mt-7 flex">
-        <NavLink to="/guests" end className={tabLink("rounded-l-[18px]")}>
+        <NavLink to="/guests" end className={folderTab("rounded-l-[18px]")}>
           {t("guests.tabs.guests")}
         </NavLink>
-        <NavLink to="/guests/households" className={tabLink("-ml-[2.5px] rounded-r-[18px]")}>
+        <NavLink to="/guests/households" className={folderTab("-ml-[2.5px] rounded-r-[18px]")}>
           {t("guests.tabs.households")}
         </NavLink>
       </nav>

@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import * as categoriesApi from "../../api/categories";
+import * as documentsApi from "../../api/documents";
 import * as itemsApi from "../../api/items";
 import * as tasksApi from "../../api/tasks";
 import { aCategory, anItem, aTask } from "../../testing/planningFactory";
@@ -9,6 +10,7 @@ import { renderWithProviders } from "../../testing/renderWithProviders";
 import { ItemsPage } from "./ItemsPage";
 
 vi.mock("../../api/categories");
+vi.mock("../../api/documents");
 vi.mock("../../api/items");
 vi.mock("../../api/tasks");
 
@@ -38,6 +40,17 @@ describe("ItemsPage", () => {
     vi.mocked(categoriesApi.listCategories).mockResolvedValue([church, photographer]);
     vi.mocked(itemsApi.listItems).mockResolvedValue([iglesia, luz]);
     vi.mocked(tasksApi.listTasks).mockResolvedValue([certificates, reserved, moodboard]);
+    vi.mocked(documentsApi.listDocuments).mockResolvedValue([]);
+    vi.mocked(documentsApi.listPaperRequests).mockResolvedValue([]);
+    vi.mocked(documentsApi.listPeople).mockResolvedValue([]);
+  });
+
+  it("given a link to one item, when the page loads, then that item is open with its papers", async () => {
+    renderWithProviders(<ItemsPage />, { route: `/items?item=${luz.id}` });
+
+    expect(await screen.findByRole("heading", { name: "Luz de Agua Fotografía", level: 2 })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "Papers they need" })).toBeInTheDocument();
+    expect(documentsApi.listPaperRequests).toHaveBeenCalledWith(1, { itemId: luz.id });
   });
 
   afterEach(() => {

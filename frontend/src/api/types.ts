@@ -274,3 +274,75 @@ export type CalendarEventDraft = Omit<CalendarEvent, "id" | "itemName" | "catego
 
 /** A PATCH changes only what it names. */
 export type CalendarEventChanges = Partial<CalendarEventDraft>;
+
+/** What a file is, mirrored from `app/models/document.py`: photos are looked at, papers are handed in. */
+export type DocumentKind = "photo" | "paper";
+
+/** An uploaded photo or paper, on an item, on one of its tasks, or on its own. */
+export interface WeddingDocument {
+  id: number;
+  title: string;
+  kind: DocumentKind;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  itemId: number | null;
+  itemName: string | null;
+  categoryId: number | null;
+  requirementId: number | null;
+  requirementTitle: string | null;
+  /** Whose paper it is; null for both of us, or for a photo. */
+  personId: number | null;
+  /** ISO dates. */
+  issuedOn: string | null;
+  expiresOn: string | null;
+  uploadedById: number | null;
+  /** ISO timestamp. */
+  createdAt: string;
+}
+
+/** What goes with a file when it is uploaded; the title defaults to the file's name. */
+export interface DocumentUpload {
+  title?: string | null;
+  kind?: DocumentKind | null;
+  itemId?: number | null;
+  requirementId?: number | null;
+  personId?: number | null;
+  expiresOn?: string | null;
+}
+
+/** A PATCH changes only what it names; the file itself never changes. */
+export type DocumentChanges = Partial<
+  Pick<WeddingDocument, "title" | "kind" | "itemId" | "requirementId" | "personId" | "issuedOn" | "expiresOn">
+>;
+
+/** A paper an item needs ("the church wants baptism certificates"), and the file that answers it. */
+export interface PaperRequest {
+  id: number;
+  name: string;
+  itemId: number;
+  itemName: string;
+  categoryId: number | null;
+  requirementId: number | null;
+  requirementTitle: string | null;
+  /** Whose paper; null for one paper for both of us. */
+  personId: number | null;
+  documentId: number | null;
+  documentTitle: string | null;
+  isMissing: boolean;
+}
+
+export interface PaperRequestDraft {
+  name: string;
+  itemId: number | null;
+  requirementId?: number | null;
+  personId: number | null;
+}
+
+export type PaperRequestChanges = Partial<Pick<PaperRequest, "name" | "requirementId" | "personId" | "documentId">>;
+
+/** One of the two of us, as a column of the papers table. */
+export interface Person {
+  id: number;
+  displayName: string;
+}

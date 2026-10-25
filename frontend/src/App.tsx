@@ -8,6 +8,7 @@ import { BudgetPage } from "./features/budget/BudgetPage";
 import { CalendarPage } from "./features/calendar/CalendarPage";
 import { CategoriesPage } from "./features/categories/CategoriesPage";
 import { ChecklistPage } from "./features/checklist/ChecklistPage";
+import { DocumentsPage } from "./features/documents/DocumentsPage";
 import { GuestListPage } from "./features/guests/GuestListPage";
 import { ItemsPage } from "./features/items/ItemsPage";
 import { RsvpLookupPage } from "./features/rsvp/RsvpLookupPage";
@@ -19,7 +20,7 @@ import { WeddingProvider } from "./wedding/WeddingProvider";
 /**
  * Every planner screen sits in the shared shell, behind sign-in: the wedding
  * itself is only loaded once someone is signed in. The guest list, items,
- * checklist, calendar, budget and categories are built; the rest each have their own issue and show a
+ * checklist, calendar, budget, documents and categories are built; the rest each have their own issue and show a
  * placeholder until then.
  * The RSVP pages are the guests' side, so they stand outside the shell: /rsvp
  * finds a household by name, /rsvp/:token is that household's invitation, and
@@ -67,7 +68,8 @@ export function AppRoutes() {
               <Route path="/checklist" element={<ChecklistPage />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/budget" element={<BudgetPage />} />
-              <Route path="/documents" element={<ComingSoon titleKey="nav.documents" art="title-documents.png" />} />
+              <Route path="/documents" element={<DocumentsPage tab="papers" />} />
+              <Route path="/documents/all" element={<DocumentsPage tab="all" />} />
               <Route path="/categories" element={<CategoriesPage />} />
               <Route path="*" element={<Navigate to="/guests" replace />} />
           </Route>
