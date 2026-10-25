@@ -1,11 +1,10 @@
 import { useId, useMemo, useState } from "react";
 
 import type { CalendarEvent, CalendarEventDraft, Category } from "../../api/types";
-import { CategoryIcon } from "../../components/playful/IconPicker";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
 import { compactButton, outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { Language, TranslationKey } from "../../i18n/translations";
+import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { CategoryChips } from "../planning/CategoryChips";
@@ -13,6 +12,7 @@ import { formatDueTime } from "../planning/schedule";
 import { CalendarEventForm } from "./CalendarEventForm";
 import { entriesOn, fromIso, monthWeeks, toEntries, toIso, upcoming } from "./calendarMath";
 import type { CalendarEntry } from "./calendarMath";
+import { ComingUpCard, NextUpCard } from "./Upcoming";
 import { useCalendar } from "./useCalendar";
 
 /** Which drawer is open: an event to edit, or a new one (from a day, or from the header). */
@@ -35,16 +35,6 @@ const tiltOf = (key: string) => tilts[[...key].reduce((sum, char) => sum + char.
 
 const navButton =
   "flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-ink bg-accent text-ink transition-colors hover:bg-accent-deep";
-
-/** "Fri, Oct 23" or "Sun, Nov 1 – Sun, Nov 8", with a time when it has one. */
-function whenOf(entry: CalendarEntry, language: Language): string {
-  const short = new Intl.DateTimeFormat(language, { weekday: "short", month: "short", day: "numeric" });
-  const days =
-    entry.startDate === entry.endDate
-      ? short.format(fromIso(entry.startDate))
-      : `${short.format(fromIso(entry.startDate))} – ${short.format(fromIso(entry.endDate))}`;
-  return entry.time === null ? days : `${days} · ${formatDueTime(entry.time)}`;
-}
 
 interface EntryChipProps {
   entry: CalendarEntry;
@@ -107,28 +97,6 @@ function EntryChip({ entry, category, showTitle, onOpen }: EntryChipProps) {
   );
 }
 
-interface UpcomingRowProps {
-  entry: CalendarEntry;
-  category: Category | undefined;
-}
-
-function UpcomingRow({ entry, category }: UpcomingRowProps) {
-  const { language } = useTranslation();
-  return (
-    <li className="flex items-center gap-3 border-t-2 border-ink/10 py-3 first:border-t-0">
-      <span
-        aria-hidden="true"
-        className="h-3.5 w-3.5 shrink-0 rounded-full border-2 border-ink"
-        style={{ backgroundColor: category?.color ?? "transparent" }}
-      />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-lg">{[entry.title, entry.itemName].filter(Boolean).join(" · ")}</span>
-        <span className="block text-base text-ink/70">{whenOf(entry, language)}</span>
-      </span>
-    </li>
-  );
-}
-
 interface DayRowProps {
   entry: CalendarEntry;
   category: Category | undefined;
@@ -182,9 +150,7 @@ export function CalendarPage() {
   const { term } = useSearch();
   const calendar = useCalendar(wedding?.id ?? null);
   const { categories, items, tasks, events, isLoading, hasLoadError } = calendar;
-  const nextUpId = useId();
   const pickedDayId = useId();
-  const comingUpId = useId();
 
   const todayIso = toIso(new Date());
   const [month, setMonth] = useState(() => {
@@ -435,44 +401,8 @@ export function CalendarPage() {
               )}
             </section>
           )}
-          <section
-            aria-labelledby={nextUpId}
-            className="-rotate-1 rounded-[28px] border-[2.5px] border-ink bg-accent px-6 py-5"
-          >
-            <h2 id={nextUpId} className="font-playful-display text-base uppercase tracking-wide">
-              {t("calendar.nextUp")}
-            </h2>
-            {nextUp === null ? (
-              <p className="mt-2 text-lg">{t("calendar.nothingNext")}</p>
-            ) : (
-              <>
-                <p className="mt-1 flex items-center gap-2 font-playful-display text-2xl leading-tight">
-                  <CategoryIcon value={categoryOf(nextUp)?.emoji} className="h-8 w-8 shrink-0" />
-                  {nextUp.title}
-                </p>
-                <p className="mt-1 text-lg">
-                  {[whenOf(nextUp, language), nextUp.itemName].filter(Boolean).join(" · ")}
-                </p>
-              </>
-            )}
-          </section>
-          <section aria-labelledby={comingUpId} className={`${outlinedCard} px-6 py-5`}>
-            <h2
-              id={comingUpId}
-              className="mb-1 inline-block -rotate-1 rounded-md border-2 border-ink bg-butter px-3 py-0.5 font-playful-display text-base uppercase tracking-wide"
-            >
-              {t("calendar.comingUp")}
-            </h2>
-            {comingUp.length === 0 ? (
-              <p className="mt-2 text-lg text-ink/70">{t("calendar.nothingSoon")}</p>
-            ) : (
-              <ul>
-                {comingUp.map((entry) => (
-                  <UpcomingRow key={entry.key} entry={entry} category={categoryOf(entry)} />
-                ))}
-              </ul>
-            )}
-          </section>
+          <NextUpCard entry={nextUp} category={nextUp === null ? undefined : categoryOf(nextUp)} />
+          <ComingUpCard entries={comingUp} categoryOf={categoryOf} />
         </aside>
       </div>
 

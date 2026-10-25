@@ -161,10 +161,10 @@ describe("AppRoutes", () => {
     expect(screen.getByRole("link", { name: "Households" })).toHaveAttribute("aria-current", "page");
   });
 
-  it("given the root, when it is visited, then the guest list is where the app opens", async () => {
+  it("given the root, when it is visited, then the app opens on the dashboard", async () => {
     renderAt("/");
 
-    expect(await screen.findByRole("heading", { name: "Guest List" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Dashboard", level: 1 })).toBeInTheDocument();
   });
 
   it("given the items route, when it is visited, then the items screen is shown inside the shell", async () => {
@@ -202,16 +202,16 @@ describe("AppRoutes", () => {
     expect(await screen.findByText(/No files yet/)).toBeInTheDocument();
   });
 
-  it("given a screen that is not built yet, when it is visited, then it says it is coming", async () => {
+  it("given the dashboard route, when it is visited, then the dashboard is shown inside the shell", async () => {
     renderAt("/dashboard");
 
-    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
-    expect(screen.getByText(/lands in a later slice/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Dashboard", level: 1 })).toBeInTheDocument();
+    expect(await screen.findByText("Nothing needs you right now. Enjoy it!")).toBeInTheDocument();
   });
 
-  it("given an unknown route, when it is visited, then the app falls back to the guest list", async () => {
+  it("given an unknown route, when it is visited, then the app falls back to the dashboard", async () => {
     renderAt("/nowhere");
 
-    expect(await screen.findByRole("heading", { name: "Guest List" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Dashboard", level: 1 })).toBeInTheDocument();
   });
 });
