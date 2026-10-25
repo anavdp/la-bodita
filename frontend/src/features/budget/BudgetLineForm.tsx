@@ -5,6 +5,7 @@ import type { BudgetLine, BudgetLineDraft, Item } from "../../api/types";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField, textArea } from "../../components/form/styles";
+import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -96,7 +97,7 @@ export function BudgetLineForm({ line, items, defaultCurrency, onSave, onDelete,
   };
 
   return (
-    <SidePanel title={t(line === null ? "budget.new" : "budget.editTitle")} sticker="💸" onClose={onClose}>
+    <SidePanel title={t(line === null ? "budget.new" : "budget.editTitle")} icon={screenIcons.budget} onClose={onClose}>
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div>

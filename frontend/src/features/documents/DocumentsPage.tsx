@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import type { WeddingDocument } from "../../api/types";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { screenIcons } from "../../components/playful/icons";
 import { folderTab, outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -116,7 +117,7 @@ export function DocumentsPage({ tab }: { tab: DocumentsTab }) {
       <PageHeader
         title={t("documents.title")}
         subtitle={t(tab === "papers" ? "documents.subtitle.papers" : "documents.subtitle.all")}
-        art="title-documents.png"
+        art={screenIcons.documents}
       >
         {/* On a phone the camera button in the bottom bar does this. */}
         <div className="hidden md:block">

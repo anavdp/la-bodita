@@ -6,6 +6,7 @@ import { DatePicker } from "../../components/form/DatePicker";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField, textArea } from "../../components/form/styles";
+import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -75,7 +76,7 @@ export function CalendarEventForm({ event, startDate = null, items, onSave, onDe
   };
 
   return (
-    <SidePanel title={t(event === null ? "calendar.new" : "calendar.editTitle")} sticker="🗓️" onClose={onClose}>
+    <SidePanel title={t(event === null ? "calendar.new" : "calendar.editTitle")} icon={screenIcons.calendar} onClose={onClose}>
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div>

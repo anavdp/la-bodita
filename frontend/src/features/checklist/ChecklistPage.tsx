@@ -6,6 +6,7 @@ import type { Category, Task } from "../../api/types";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { isIconName } from "../../components/playful/iconCatalog";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { screenIcons } from "../../components/playful/icons";
 import { outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -170,7 +171,7 @@ export function ChecklistPage() {
 
   return (
     <>
-      <PageHeader title={t("checklist.title")} subtitle={t("checklist.subtitle")} art="title-checklist.png">
+      <PageHeader title={t("checklist.title")} subtitle={t("checklist.subtitle")} art={screenIcons.checklist}>
         <HeaderAction icon="add" label={t("checklist.add")} onClick={() => setSearchParams({ add: "task" })} />
       </PageHeader>
 

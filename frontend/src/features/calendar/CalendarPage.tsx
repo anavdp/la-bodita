@@ -3,6 +3,7 @@ import { useId, useMemo, useState } from "react";
 import type { CalendarEvent, CalendarEventDraft, Category } from "../../api/types";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { screenIcons } from "../../components/playful/icons";
 import { compactButton, outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { Language, TranslationKey } from "../../i18n/translations";
@@ -366,7 +367,7 @@ export function CalendarPage() {
 
   return (
     <>
-      <PageHeader title={t("calendar.title")} subtitle={t("calendar.subtitle")} art="title-calendar.png">
+      <PageHeader title={t("calendar.title")} subtitle={t("calendar.subtitle")} art={screenIcons.calendar}>
         <HeaderAction icon="add" label={t("calendar.add")} onClick={() => setFormTarget({ startDate: null })} />
       </PageHeader>
 

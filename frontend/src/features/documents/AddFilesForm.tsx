@@ -7,6 +7,7 @@ import { DatePicker } from "../../components/form/DatePicker";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
+import { screenIcons } from "../../components/playful/icons";
 import { compactButton, primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -161,7 +162,7 @@ export function AddFilesForm({
   return (
     <SidePanel
       title={t(isEditing ? "documents.form.edit" : "documents.form.add")}
-      sticker="📎"
+      icon={screenIcons.documents}
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">

@@ -5,6 +5,7 @@ import type { Category, CategoryDraft } from "../../api/types";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
 import { IconPicker } from "../../components/playful/IconPicker";
+import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -50,7 +51,7 @@ export function CategoryFormDialog({ category = null, existingCount, onSave, onC
   };
 
   return (
-    <SidePanel title={t(category === null ? "categories.new" : "categories.edit")} sticker="🏷️" onClose={onClose}>
+    <SidePanel title={t(category === null ? "categories.new" : "categories.edit")} icon={screenIcons.categories} onClose={onClose}>
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div>

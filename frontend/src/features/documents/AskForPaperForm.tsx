@@ -5,6 +5,7 @@ import type { Item, PaperRequestDraft, Person } from "../../api/types";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
+import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -61,7 +62,7 @@ export function AskForPaperForm({ weddingId, items, people, item, onSave, onClos
   };
 
   return (
-    <SidePanel title={t("documents.ask.title")} sticker="📋" onClose={onClose}>
+    <SidePanel title={t("documents.ask.title")} icon={screenIcons.documents} onClose={onClose}>
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div>

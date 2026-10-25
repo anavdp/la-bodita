@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import type { Category, CategoryDraft } from "../../api/types";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { screenIcons } from "../../components/playful/icons";
 import { outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -95,7 +96,7 @@ export function CategoriesPage() {
 
   return (
     <>
-      <PageHeader title={t("categories.title")} subtitle={t("categories.subtitle")} art="generic.png">
+      <PageHeader title={t("categories.title")} subtitle={t("categories.subtitle")} art={screenIcons.categories}>
         <HeaderAction icon="add" label={t("categories.addOpen")} onClick={() => setDrawerTarget({ category: null })} />
       </PageHeader>
 

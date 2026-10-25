@@ -2,6 +2,7 @@ import { useId } from "react";
 import type { ReactNode } from "react";
 
 import { useTranslation } from "../../i18n/LanguageProvider";
+import { iconUrl } from "../playful/icons";
 import { useCloseOnEscape } from "../../features/households/dialogStyles";
 
 /** The scrolling middle of a panel, and the bar that keeps its buttons at the bottom. */
@@ -11,8 +12,8 @@ export const panelFooter = "flex flex-wrap justify-end gap-3 border-t-[2.5px] bo
 interface SidePanelProps {
   title: string;
   onClose: () => void;
-  /** A doodle beside the title: an emoji, or one of the hand-drawn icons. */
-  sticker?: ReactNode;
+  /** The hand-drawn icon beside the title: its screen's, from `screenIcons`. */
+  icon: string;
   /** Room for a table, as the CSV preview needs. */
   wide?: boolean;
   /** Usually a form holding a `panelBody` and a `panelFooter`. */
@@ -23,7 +24,7 @@ interface SidePanelProps {
  * Forms slide in from the right, beside the list they change, the way the item
  * detail does, instead of covering the page. On a phone they fill the screen.
  */
-export function SidePanel({ title, sticker, wide = false, onClose, children }: SidePanelProps) {
+export function SidePanel({ title, icon, wide = false, onClose, children }: SidePanelProps) {
   const { t } = useTranslation();
   const titleId = useId();
   useCloseOnEscape(onClose);
@@ -46,14 +47,9 @@ export function SidePanel({ title, sticker, wide = false, onClose, children }: S
       >
         <header className="flex items-center justify-between gap-4 border-b-[2.5px] border-ink bg-accent px-5 py-5 sm:px-8">
           <div className="flex items-center gap-3">
-            {sticker !== undefined && (
-              <span
-                aria-hidden="true"
-                className="flex h-12 w-12 -rotate-6 items-center justify-center rounded-xl border-[2.5px] border-ink bg-butter text-2xl"
-              >
-                {sticker}
-              </span>
-            )}
+            <span className="flex h-12 w-12 shrink-0 -rotate-6 items-center justify-center rounded-xl border-[2.5px] border-ink bg-butter">
+              <img src={iconUrl(icon)} alt="" className="h-10 w-10 object-contain" />
+            </span>
             <h2
               id={titleId}
               className="playful-outline font-playful-display text-[32px] uppercase leading-none tracking-wide text-title"

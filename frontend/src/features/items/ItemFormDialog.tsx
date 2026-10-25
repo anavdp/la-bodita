@@ -5,6 +5,7 @@ import type { Category, Item, ItemDraft, ItemStatus } from "../../api/types";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField, textArea } from "../../components/form/styles";
+import { screenIcons } from "../../components/playful/icons";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
@@ -130,7 +131,7 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
   };
 
   return (
-    <SidePanel title={t(item === null ? "items.new" : "items.editTitle")} onClose={onClose}>
+    <SidePanel title={t(item === null ? "items.new" : "items.editTitle")} icon={screenIcons.items} onClose={onClose}>
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div>

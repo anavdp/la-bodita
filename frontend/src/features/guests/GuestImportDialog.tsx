@@ -5,6 +5,7 @@ import { ApiError } from "../../api/client";
 import { guestImportTemplateUrl, previewGuestImport } from "../../api/guests";
 import type { GuestImportDraft, GuestImportRow } from "../../api/types";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
+import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -201,7 +202,7 @@ export function GuestImportDialog({ weddingId, onImport, onClose }: GuestImportD
     );
 
   return (
-    <SidePanel title={t("guests.import.title")} sticker="📋" wide onClose={onClose}>
+    <SidePanel title={t("guests.import.title")} icon={screenIcons.guests} wide onClose={onClose}>
       <div className={panelBody}>
         {rows === null ? filePicker : preview(rows)}
 

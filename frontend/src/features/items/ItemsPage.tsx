@@ -6,6 +6,7 @@ import { CalendarMark } from "../../components/playful/CalendarMark";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { isIconName } from "../../components/playful/iconCatalog";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { screenIcons } from "../../components/playful/icons";
 import { outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -190,7 +191,7 @@ export function ItemsPage() {
 
   return (
     <>
-      <PageHeader title={t("items.title")} subtitle={t("items.subtitle")} art="title-car.png">
+      <PageHeader title={t("items.title")} subtitle={t("items.subtitle")} art={screenIcons.items}>
         <HeaderAction icon="add" label={t("items.add")} onClick={() => setDialogTarget({ item: null })} />
       </PageHeader>
 
