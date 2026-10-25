@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from app.models.budget_line import BudgetLine
     from app.models.calendar_event import CalendarEvent
     from app.models.document import Document
+    from app.models.paper_request import PaperRequest
     from app.models.requirement import Requirement
 
 
@@ -68,6 +69,12 @@ class Item(PrivacyMixin, WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Ba
     documents: Mapped[list["Document"]] = relationship(
         back_populates="item",
         order_by="Document.id",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    paper_requests: Mapped[list["PaperRequest"]] = relationship(
+        back_populates="item",
+        order_by="PaperRequest.id",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )

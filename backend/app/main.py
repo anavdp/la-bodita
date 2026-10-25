@@ -10,6 +10,7 @@ from app.api import (
     guests,
     households,
     items,
+    paper_requests,
     requirements,
     rsvp,
     weddings,
@@ -46,6 +47,7 @@ def create_app(guest_only: bool = False) -> FastAPI:
             budget_lines,
             calendar_events,
             documents,
+            paper_requests,
         )
         for planner_router in planner_routers:
             app.include_router(planner_router.router, dependencies=signed_in)

@@ -13,6 +13,7 @@ from app.schemas.document import DocumentRead, DocumentUpdate
 from app.schemas.guest import GuestCreate, GuestRead, GuestUpdate
 from app.schemas.guest_import import GuestImportGuest, GuestImportPreview, GuestImportRow, GuestImportRowError
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate, NextTask
+from app.schemas.paper_request import PaperRequestCreate, PaperRequestRead, PaperRequestUpdate
 from app.schemas.requirement import RequirementCreate, RequirementRead, RequirementUpdate
 from app.schemas.household import (
     HouseholdCreate,
@@ -55,6 +56,9 @@ __all__ = [
     "ItemRead",
     "ItemUpdate",
     "NextTask",
+    "PaperRequestCreate",
+    "PaperRequestRead",
+    "PaperRequestUpdate",
     "RequirementCreate",
     "RequirementRead",
     "RequirementUpdate",

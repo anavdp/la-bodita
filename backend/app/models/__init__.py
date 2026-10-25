@@ -11,6 +11,7 @@ from app.models.guest import (
 )
 from app.models.household import Household
 from app.models.item import Item, ItemStatus
+from app.models.paper_request import PaperRequest
 from app.models.requirement import Requirement
 from app.models.user_account import UserAccount, UserSession
 from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin
@@ -30,6 +31,7 @@ __all__ = [
     "Household",
     "Item",
     "ItemStatus",
+    "PaperRequest",
     "PrimaryKeyMixin",
     "Requirement",
     "RsvpStatus",
