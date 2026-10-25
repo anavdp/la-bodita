@@ -9,7 +9,23 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, Outlet: () => <p>the current screen</p> };
 });
 
+/** Answers media queries as a laptop-width screen would. */
+const onALaptop = () =>
+  vi.spyOn(window, "matchMedia").mockImplementation(
+    (query) =>
+      ({
+        matches: query.includes("min-width"),
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }) as unknown as MediaQueryList,
+  );
+
 describe("AppLayout", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("given any screen, when it is rendered, then it sits inside the shared sidebar and top bar", () => {
     renderWithProviders(<AppLayout />);
 
@@ -43,5 +59,36 @@ describe("AppLayout", () => {
     await user.click(menuButton);
     await user.keyboard("{Escape}");
     expect(menuButton).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("given a laptop, when the menu button is clicked, then the sidebar folds down to its icons and back", async () => {
+    onALaptop();
+    const user = userEvent.setup();
+    renderWithProviders(<AppLayout />);
+    const menuButton = screen.getByRole("button", { name: "Menu" });
+    expect(menuButton).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(menuButton);
+
+    expect(menuButton).toHaveAttribute("aria-expanded", "false");
+    const navigation = screen.getByRole("navigation", { name: "Main navigation" });
+    expect(within(navigation).getByRole("link", { name: "Checklist" })).toHaveAttribute("title", "Checklist");
+    expect(screen.queryByText("La Bodita")).not.toBeInTheDocument();
+
+    await user.click(menuButton);
+    expect(menuButton).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("La Bodita")).toBeInTheDocument();
+  });
+
+  it("given the sidebar folded on a laptop, when the planner is opened again, then it stays folded", async () => {
+    onALaptop();
+    const user = userEvent.setup();
+    const { unmount } = renderWithProviders(<AppLayout />);
+    await user.click(screen.getByRole("button", { name: "Menu" }));
+    unmount();
+
+    renderWithProviders(<AppLayout />);
+
+    expect(screen.getByRole("button", { name: "Menu" })).toHaveAttribute("aria-expanded", "false");
   });
 });

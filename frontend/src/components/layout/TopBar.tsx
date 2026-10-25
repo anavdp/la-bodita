@@ -13,12 +13,15 @@ const iconButton =
   "flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
 
 interface TopBarProps {
+  /** Whether the menu shows: the drawer out on a phone, the sidebar unfolded on a laptop. */
   isMenuOpen?: boolean;
-  /** Opens the phone's menu drawer; the button only shows below tablet width. */
-  onOpenMenu?: () => void;
+  /** Whether the laptop's sidebar is folded to its icons, so the bar starts where it ends. */
+  isSidebarCollapsed?: boolean;
+  /** Slides the phone's drawer in, or folds and unfolds the laptop's sidebar. */
+  onMenu?: () => void;
 }
 
-export function TopBar({ isMenuOpen = false, onOpenMenu }: TopBarProps) {
+export function TopBar({ isMenuOpen = false, isSidebarCollapsed = false, onMenu }: TopBarProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { term, setTerm } = useSearch();
@@ -28,15 +31,17 @@ export function TopBar({ isMenuOpen = false, onOpenMenu }: TopBarProps) {
 
   return (
     <>
-      <header className="fixed top-0 right-0 left-0 z-10 flex h-20 items-center justify-between gap-2 border-b-2 border-ink/15 bg-cream px-margin-mobile font-playful md:left-[260px] md:px-margin-desktop">
-        {onOpenMenu !== undefined && (
+      <header className={`fixed top-0 right-0 left-0 z-10 flex h-20 items-center justify-between gap-2 border-b-2 border-ink/15 bg-cream px-margin-mobile font-playful md:px-margin-desktop ${
+          isSidebarCollapsed ? "md:left-[88px]" : "md:left-[260px]"
+        }`}>
+        {onMenu !== undefined && (
           <button
             type="button"
-            onClick={onOpenMenu}
+            onClick={onMenu}
             aria-label={t("layout.menu")}
             aria-expanded={isMenuOpen}
             aria-controls="main-menu"
-            className={`${iconButton} shrink-0 md:hidden`}
+            className={`${iconButton} shrink-0`}
           >
             <span className="material-symbols-outlined" aria-hidden="true">
               menu
@@ -66,7 +71,8 @@ export function TopBar({ isMenuOpen = false, onOpenMenu }: TopBarProps) {
           <button
             type="button"
             onClick={() => navigate("/checklist?add=task")}
-            className={compactButton}
+            aria-label={t("layout.addTask")}
+            className={`${compactButton} max-sm:h-10 max-sm:w-10 max-sm:px-0`}
           >
             <span className="material-symbols-outlined" aria-hidden="true">
               add

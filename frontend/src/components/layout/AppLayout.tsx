@@ -5,21 +5,58 @@ import { SearchProvider } from "../../search/SearchProvider";
 import { ThemeProvider } from "../../theme/ThemeProvider";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
+import { useHasSidebar } from "./useIsPhone";
 
-/** The shell every screen sits in: fixed sidebar, top bar, fluid canvas. On a phone the sidebar is a menu drawer. */
+const collapsedStorageKey = "la-bodita.sidebarCollapsed";
+
+const readCollapsed = (): boolean => {
+  try {
+    return localStorage.getItem(collapsedStorageKey) === "true";
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * The shell every screen sits in: fixed sidebar, top bar, fluid canvas. The top
+ * bar's menu button folds the sidebar down to its icons on a laptop (remembered
+ * on this browser), and slides it in as a drawer on a phone.
+ */
 export function AppLayout() {
+  const hasSidebar = useHasSidebar();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(readCollapsed);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
+  const handleMenu = () => {
+    if (!hasSidebar) {
+      setIsMenuOpen(true);
+      return;
+    }
+    const next = !isCollapsed;
+    setIsCollapsed(next);
+    try {
+      localStorage.setItem(collapsedStorageKey, String(next));
+    } catch {
+      // Without storage it simply opens unfolded next time.
+    }
+  };
 
   return (
     <ThemeProvider>
       <SearchProvider>
         <div className="flex min-h-screen bg-cream text-on-background">
-          <Sidebar isOpen={isMenuOpen} onClose={closeMenu} />
+          <Sidebar isOpen={isMenuOpen} isCollapsed={hasSidebar && isCollapsed} onClose={closeMenu} />
           {/* `min-w-0`: a flex item defaults to min-width:auto and would otherwise
               refuse to shrink below the table's own width, widening the page. */}
-          <main className="min-h-screen min-w-0 flex-1 pb-12 md:ml-[260px]">
-            <TopBar isMenuOpen={isMenuOpen} onOpenMenu={() => setIsMenuOpen(true)} />
+          <main
+            className={`min-h-screen min-w-0 flex-1 pb-12 transition-[margin] ${isCollapsed ? "md:ml-[88px]" : "md:ml-[260px]"}`}
+          >
+            <TopBar
+              isMenuOpen={hasSidebar ? !isCollapsed : isMenuOpen}
+              isSidebarCollapsed={isCollapsed}
+              onMenu={handleMenu}
+            />
             <div className="mx-auto max-w-[1440px] px-margin-mobile pt-28 md:px-margin-desktop">
               <Outlet />
             </div>
