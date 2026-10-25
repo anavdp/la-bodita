@@ -148,6 +148,8 @@ const en = {
   "guests.household.copyLink": "Copy RSVP link for {label}",
   "guests.household.copied": "RSVP link copied",
   "guests.column.household": "Household",
+  "guests.sort.byAnswer": "Show the newest answers first",
+  "guests.sort.byName": "Back to sorting by name",
   "guests.form.household": "Household",
   "guests.form.householdNew": "On their own",
 
@@ -579,6 +581,8 @@ const es: Record<TranslationKey, string> = {
   "guests.household.copyLink": "Copiar el enlace de confirmación de {label}",
   "guests.household.copied": "Enlace de confirmación copiado",
   "guests.column.household": "Familia",
+  "guests.sort.byAnswer": "Ver primero las respuestas más recientes",
+  "guests.sort.byName": "Volver a ordenar por nombre",
   "guests.form.household": "Familia",
   "guests.form.householdNew": "Por su cuenta",
 

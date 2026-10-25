@@ -6,6 +6,7 @@ import { avatarTones, menuItem, menuPanel } from "../../components/playful/style
 import { fullName } from "./filtering";
 import { statusDotClass } from "./GuestStats";
 import { NotSpecified } from "./NotSpecified";
+import type { GuestSortOrder } from "./sorting";
 import {
   relationshipLabelKey,
   rsvpLabelKey,
@@ -19,6 +20,10 @@ interface GuestTableProps {
   guests: Guest[];
   /** Names the household column. Someone on their own shows blank: their household is just them. */
   households?: Household[];
+  /** "answered" shows when each guest answered, under their RSVP. */
+  sortOrder: GuestSortOrder;
+  /** The RSVP header switches between name order and newest answers first. */
+  onToggleSort: () => void;
   onEdit: (guest: Guest) => void;
   onDelete: (guest: Guest) => void;
   onChangeRsvp: (guest: Guest, status: RsvpStatus) => void;
@@ -45,8 +50,19 @@ export function initialsOf(guest: Guest): string {
 const headerCell = "px-4 py-4 font-normal";
 const cell = "px-4 py-3";
 
-export function GuestTable({ guests, households = [], onEdit, onDelete, onChangeRsvp }: GuestTableProps) {
-  const { t } = useTranslation();
+export function GuestTable({
+  guests,
+  households = [],
+  sortOrder,
+  onToggleSort,
+  onEdit,
+  onDelete,
+  onChangeRsvp,
+}: GuestTableProps) {
+  const { t, language } = useTranslation();
+  const isByAnswer = sortOrder === "answered";
+  const answeredDay = new Intl.DateTimeFormat(language, { month: "short", day: "numeric" });
+  const answeredMoment = new Intl.DateTimeFormat(language, { dateStyle: "long", timeStyle: "short" });
   const householdNames = new Map(
     households
       .filter((household) => household.guestIds.length > 1)
@@ -83,7 +99,19 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
             <th className={headerCell}>{t("guests.column.type")}</th>
             <th className={headerCell}>{t("guests.column.relationship")}</th>
             <th className={headerCell}>{t("guests.column.side")}</th>
-            <th className={`${headerCell} text-center`}>{t("guests.column.rsvp")}</th>
+            <th className={`${headerCell} text-center`} aria-sort={isByAnswer ? "descending" : undefined}>
+              <button
+                type="button"
+                onClick={onToggleSort}
+                title={t(isByAnswer ? "guests.sort.byName" : "guests.sort.byAnswer")}
+                className="inline-flex items-center gap-1 uppercase tracking-wider transition-colors hover:text-ink/70"
+              >
+                {t("guests.column.rsvp")}
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  {isByAnswer ? "arrow_downward" : "swap_vert"}
+                </span>
+              </button>
+            </th>
             <th className={`${headerCell} pr-6 text-right`}>{t("guests.column.actions")}</th>
           </tr>
         </thead>
@@ -158,6 +186,15 @@ export function GuestTable({ guests, households = [], onEdit, onDelete, onChange
                       />
                       {statusLabel}
                     </button>
+                    {isByAnswer && guest.rsvpAnsweredAt !== null && (
+                      <time
+                        dateTime={guest.rsvpAnsweredAt}
+                        title={answeredMoment.format(new Date(guest.rsvpAnsweredAt))}
+                        className="mt-1 block text-sm text-ink/60"
+                      >
+                        {answeredDay.format(new Date(guest.rsvpAnsweredAt))}
+                      </time>
+                    )}
 
                     {isOpen(guest, "rsvp") && (
                       <div className={`${menuPanel} right-0`}>

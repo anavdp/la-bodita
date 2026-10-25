@@ -23,6 +23,8 @@ export interface Guest {
   relationshipType: GuestRelationshipType | null;
   side: GuestSide | null;
   rsvpStatus: RsvpStatus;
+  /** When the current answer was given (ISO, UTC); null while pending. Set by the API, never sent. */
+  rsvpAnsweredAt: string | null;
   phone: string | null;
   email: string | null;
 }
@@ -32,7 +34,7 @@ export interface Guest {
  * "a new household of one" on create and "unchanged" on edit; null on edit
  * splits the guest off on their own.
  */
-export type GuestDraft = Omit<Guest, "id" | "weddingId" | "householdId"> & {
+export type GuestDraft = Omit<Guest, "id" | "weddingId" | "householdId" | "rsvpAnsweredAt"> & {
   householdId?: number | null;
 };
 

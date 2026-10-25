@@ -519,3 +519,62 @@ describe("GuestListPage filtering by RSVP", () => {
     expect(screen.queryByRole("button", { name: /^\d+ Confirmed/ })).not.toBeInTheDocument();
   });
 });
+
+describe("GuestListPage sorting by answer", () => {
+  const earlier = aGuest({ firstName: "Anna", lastName: "Bianchi", rsvpAnsweredAt: "2026-10-20T09:00:00Z" });
+  const later = aGuest({ firstName: "Sofia", lastName: "Mendoza", rsvpAnsweredAt: "2026-10-24T09:00:00Z" });
+  const waiting = aGuest({ firstName: "Carlos", lastName: "Mendoza", rsvpStatus: "pending", rsvpAnsweredAt: null });
+  const rowNames = () =>
+    screen
+      .getAllByRole("row")
+      .slice(1)
+      .map((row) => within(row).getByText(/Bianchi|Mendoza/).textContent);
+
+  beforeEach(() => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([earlier, waiting, later]);
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("given the guest list, when the RSVP header is clicked, then the newest answers come first, and clicking again goes back to names", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Anna Bianchi");
+
+    await userEvent.click(screen.getByRole("button", { name: "RSVP Status" }));
+    expect(rowNames()).toEqual(["Sofia Mendoza", "Anna Bianchi", "Carlos Mendoza"]);
+
+    await userEvent.click(screen.getByRole("button", { name: "RSVP Status" }));
+    expect(rowNames()).toEqual(["Anna Bianchi", "Carlos Mendoza", "Sofia Mendoza"]);
+  });
+
+  it("given the newest answers first, when a pending guest is confirmed in place, then they move to the top", async () => {
+    vi.mocked(guestsApi.updateGuest).mockResolvedValue({
+      ...waiting,
+      rsvpStatus: "confirmed",
+      rsvpAnsweredAt: "2026-10-25T18:00:00Z",
+    });
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Anna Bianchi");
+    await userEvent.click(screen.getByRole("button", { name: "RSVP Status" }));
+
+    await userEvent.click(screen.getByRole("button", { name: /Carlos Mendoza — Pending/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark as Confirmed" }));
+
+    await waitFor(() => expect(rowNames()).toEqual(["Carlos Mendoza", "Sofia Mendoza", "Anna Bianchi"]));
+  });
+
+  it("given a confirmed guest, when they are set back to pending in place, then they drop to the unanswered", async () => {
+    vi.mocked(guestsApi.updateGuest).mockResolvedValue({ ...later, rsvpStatus: "pending", rsvpAnsweredAt: null });
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Anna Bianchi");
+    await userEvent.click(screen.getByRole("button", { name: "RSVP Status" }));
+
+    await userEvent.click(screen.getByRole("button", { name: /Sofia Mendoza — Confirmed/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark as Pending" }));
+
+    expect(rowNames()).toEqual(["Anna Bianchi", "Carlos Mendoza", "Sofia Mendoza"]);
+  });
+});

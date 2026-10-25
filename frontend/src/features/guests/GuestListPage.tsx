@@ -25,6 +25,8 @@ import { GuestFormDialog } from "./GuestFormDialog";
 import { GuestImportDialog } from "./GuestImportDialog";
 import { GuestStats } from "./GuestStats";
 import { GuestTable } from "./GuestTable";
+import { sortGuests } from "./sorting";
+import type { GuestSortOrder } from "./sorting";
 import { useGuests } from "./useGuests";
 
 /** Which guest the dialog is open for: a guest to edit, or null to create one. */
@@ -83,10 +85,17 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   /** The RSVP status picked in the header summary, if any: the table shows only those guests. */
   const [rsvpFilter, setRsvpFilter] = useState<RsvpStatus | null>(null);
 
+  /** Name order by default; the RSVP header flips it to newest answers first. */
+  const [sortOrder, setSortOrder] = useState<GuestSortOrder>("name");
+
   const searchedGuests = useMemo(() => filterGuestsByName(guests, term), [guests, term]);
   const visibleGuests = useMemo(
-    () => (rsvpFilter === null ? searchedGuests : searchedGuests.filter((guest) => guest.rsvpStatus === rsvpFilter)),
-    [searchedGuests, rsvpFilter],
+    () =>
+      sortGuests(
+        rsvpFilter === null ? searchedGuests : searchedGuests.filter((guest) => guest.rsvpStatus === rsvpFilter),
+        sortOrder,
+      ),
+    [searchedGuests, rsvpFilter, sortOrder],
   );
   const visibleHouseholds = useMemo(() => {
     const needle = term.trim().toLowerCase();
@@ -210,6 +219,8 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
         <GuestTable
           guests={visibleGuests}
           households={households}
+          sortOrder={sortOrder}
+          onToggleSort={() => setSortOrder((current) => (current === "name" ? "answered" : "name"))}
           onEdit={(guest) => setDialogTarget({ guest })}
           onDelete={handleDelete}
           onChangeRsvp={handleChangeRsvp}

@@ -6,6 +6,7 @@ import { aGuest } from "../../testing/guestFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { LanguageProvider } from "../../i18n/LanguageProvider";
 import { GuestTable } from "./GuestTable";
+import type { GuestSortOrder } from "./sorting";
 
 const noop = () => {};
 
@@ -13,12 +14,16 @@ interface Handlers {
   onEdit: (guest: Guest) => void;
   onDelete: (guest: Guest) => void;
   onChangeRsvp: (guest: Guest, status: Guest["rsvpStatus"]) => void;
+  onToggleSort: () => void;
+  sortOrder: GuestSortOrder;
 }
 
 function renderTable(guests: Guest[], handlers: Partial<Handlers> = {}) {
   return renderWithProviders(
     <GuestTable
       guests={guests}
+      sortOrder={handlers.sortOrder ?? "name"}
+      onToggleSort={handlers.onToggleSort ?? noop}
       onEdit={handlers.onEdit ?? noop}
       onDelete={handlers.onDelete ?? noop}
       onChangeRsvp={handlers.onChangeRsvp ?? noop}
@@ -30,7 +35,13 @@ describe("GuestTable", () => {
   it("given guests, when the table is rendered, then RSVP sits just before the actions column", () => {
     renderTable([aGuest()]);
 
-    expect(screen.getAllByRole("columnheader").map((header) => header.textContent)).toEqual([
+    const withoutIcons = (header: HTMLElement) =>
+      [...header.childNodes]
+        .flatMap((node) => (node instanceof HTMLButtonElement ? [...node.childNodes] : [node]))
+        .filter((node) => !(node instanceof HTMLElement && node.getAttribute("aria-hidden") === "true"))
+        .map((node) => node.textContent)
+        .join("");
+    expect(screen.getAllByRole("columnheader").map(withoutIcons)).toEqual([
       "Name",
       "Household",
       "Type",
@@ -234,6 +245,8 @@ describe("GuestTable households", () => {
     const carlos = aGuest({ firstName: "Carlos", lastName: "Mendoza", householdId: 20 });
     renderWithProviders(
       <GuestTable
+        sortOrder="name"
+        onToggleSort={noop}
         guests={[maria, carlos]}
         households={[
           { id: 10, name: "Famiglia Rossi", rsvpToken: "a", broadcastList: null, guestIds: [maria.id, 99] },
@@ -256,6 +269,8 @@ describe("GuestTable one-person households", () => {
     const carlos = aGuest({ firstName: "Carlos", lastName: "Mendoza", householdId: 20 });
     renderWithProviders(
       <GuestTable
+        sortOrder="name"
+        onToggleSort={noop}
         guests={[carlos]}
         households={[{ id: 20, name: "Carlos Mendoza", rsvpToken: "b", broadcastList: null, guestIds: [carlos.id] }]}
         onEdit={noop}
@@ -274,6 +289,8 @@ describe("GuestTable relationships", () => {
     renderWithProviders(
       <LanguageProvider initialLanguage="es">
         <GuestTable
+          sortOrder="name"
+          onToggleSort={noop}
           guests={[aGuest({ firstName: "Pino", lastName: "Rossi", relationshipType: "plus_one" })]}
           onEdit={noop}
           onDelete={noop}
@@ -290,6 +307,8 @@ describe("GuestTable sides", () => {
   it("given a guest from the United States, when the row is rendered, then their side reads US", () => {
     renderWithProviders(
       <GuestTable
+        sortOrder="name"
+        onToggleSort={noop}
         guests={[aGuest({ firstName: "Sarah", lastName: "Rizzo", side: "usa" })]}
         onEdit={noop}
         onDelete={noop}
@@ -299,5 +318,35 @@ describe("GuestTable sides", () => {
 
     const row = screen.getByRole("row", { name: /Sarah Rizzo/ });
     expect(within(row).getByRole("img", { name: "United States" })).toHaveTextContent("US");
+  });
+
+  it("given the name order, when the RSVP header is clicked, then it asks for the newest answers first", async () => {
+    const onToggleSort = vi.fn();
+    renderTable([aGuest()], { onToggleSort });
+
+    expect(screen.getByRole("columnheader", { name: /RSVP Status/ })).not.toHaveAttribute("aria-sort");
+    await userEvent.click(screen.getByRole("button", { name: "RSVP Status" }));
+
+    expect(onToggleSort).toHaveBeenCalledTimes(1);
+  });
+
+  it("given the answer order, when the table is rendered, then the RSVP column says it sorts and shows when each guest answered", () => {
+    renderTable(
+      [
+        aGuest({ firstName: "Maria", rsvpAnsweredAt: "2026-10-25T12:00:00Z" }),
+        aGuest({ firstName: "Carlos", rsvpStatus: "pending", rsvpAnsweredAt: null }),
+      ],
+      { sortOrder: "answered" },
+    );
+
+    expect(screen.getByRole("columnheader", { name: /RSVP Status/ })).toHaveAttribute("aria-sort", "descending");
+    expect(within(screen.getByRole("row", { name: /Maria/ })).getByText("Oct 25")).toBeInTheDocument();
+    expect(within(screen.getByRole("row", { name: /Carlos/ })).queryByText(/Oct/)).not.toBeInTheDocument();
+  });
+
+  it("given the name order, when the table is rendered, then answer dates stay out of the way", () => {
+    renderTable([aGuest({ rsvpAnsweredAt: "2026-10-25T12:00:00Z" })]);
+
+    expect(screen.queryByText("Oct 25")).not.toBeInTheDocument();
   });
 });

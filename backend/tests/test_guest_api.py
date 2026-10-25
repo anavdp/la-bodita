@@ -183,6 +183,8 @@ def test_given_an_rsvp_reply_when_the_guest_is_patched_then_only_that_field_chan
     assert updated["rsvp_status"] == "confirmed"
     assert updated["first_name"] == "Carlos"
     assert updated["last_name"] == "Mendoza"
+    # SQLite forgets the zone it was given; the API says UTC so the browser shows local time.
+    assert updated["rsvp_answered_at"].endswith("Z")
 
 
 def test_given_an_optional_field_when_it_is_patched_to_null_then_it_is_cleared(
@@ -429,3 +431,16 @@ def test_given_a_guest_from_the_united_states_when_created_then_their_side_is_st
 
     assert response.status_code == 201
     assert response.json()["side"] == "usa"
+
+
+def test_given_a_guest_who_answered_when_the_list_is_requested_then_their_answer_time_comes_in_utc(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    add_guest(db_session, wedding, rsvp_status="confirmed")
+    add_guest(db_session, wedding, first_name="Paolo")
+
+    response = client.get(GUESTS_URL.format(wedding_id=wedding.id))
+
+    answered = [guest["rsvp_answered_at"] for guest in response.json()]
+    assert answered[0].endswith("Z")
+    assert answered[1] is None

@@ -13,11 +13,12 @@ interface GuestPayload {
   relationship_type: Guest["relationshipType"];
   side: Guest["side"];
   rsvp_status: Guest["rsvpStatus"];
+  rsvp_answered_at: string | null;
   phone: string | null;
   email: string | null;
 }
 
-type GuestDraftPayload = Omit<GuestPayload, "id" | "wedding_id" | "household_id">;
+type GuestDraftPayload = Omit<GuestPayload, "id" | "wedding_id" | "household_id" | "rsvp_answered_at">;
 
 type GuestImportDraftPayload = GuestDraftPayload & { household: string | null };
 
@@ -47,6 +48,7 @@ function toGuest(payload: GuestPayload): Guest {
     id: payload.id,
     weddingId: payload.wedding_id,
     householdId: payload.household_id,
+    rsvpAnsweredAt: payload.rsvp_answered_at,
   };
 }
 

@@ -1,11 +1,13 @@
 from enum import Enum
 
-from sqlalchemy import ForeignKey, event, false
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, event, false
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database import Base
 from app.models.household import Household
-from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin, stored_as_text
+from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin, stored_as_text, utc_now
 
 
 class GuestGender(str, Enum):
@@ -70,8 +72,23 @@ class Guest(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
         default=RsvpStatus.PENDING,
         server_default=RsvpStatus.PENDING.value,
     )
+    # When the current answer was given, so the newest answers can be listed first.
+    # Kept up to date by `stamp_rsvp_answer`, never set by hand.
+    rsvp_answered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     phone: Mapped[str | None] = mapped_column(default=None)
     email: Mapped[str | None] = mapped_column(default=None)
+
+
+@event.listens_for(Guest.rsvp_status, "set", active_history=True)
+def stamp_rsvp_answer(guest: Guest, value: RsvpStatus, old_value, initiator) -> None:
+    """A new answer is stamped with the moment it was given; back to pending, the stamp goes.
+
+    Hooked on the attribute so the RSVP pages, the planner and an import all
+    follow the same rule. Giving the same answer again keeps the first moment.
+    """
+    if value == old_value:
+        return
+    guest.rsvp_answered_at = None if value == RsvpStatus.PENDING else utc_now()
 
 
 def household_of_one(guest: Guest) -> Household:
