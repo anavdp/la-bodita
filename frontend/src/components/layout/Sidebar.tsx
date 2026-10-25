@@ -44,22 +44,6 @@ export function Sidebar({ isOpen = false, isCollapsed = false, onToggleCollapsed
           isOpen ? "z-50 flex" : "hidden"
         }`}
       >
-        {onToggleCollapsed !== undefined && (
-          <div className={`-mt-3 mb-1 flex px-3 ${isCollapsed ? "justify-center" : "justify-end"}`}>
-            <button
-              type="button"
-              onClick={onToggleCollapsed}
-              aria-label={t(isCollapsed ? "layout.expandMenu" : "layout.collapseMenu")}
-              aria-expanded={!isCollapsed}
-              title={t(isCollapsed ? "layout.expandMenu" : "layout.collapseMenu")}
-              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/15"
-            >
-              <span className="material-symbols-outlined text-[26px]" aria-hidden="true">
-                {isCollapsed ? "left_panel_open" : "left_panel_close"}
-              </span>
-            </button>
-          </div>
-        )}
         {!isCollapsed && (
           <div className="mb-6 px-6">
             {/* The confetti dashes and the sticker's hearts are the mockup's doodles, kept as plain marks. */}
@@ -94,17 +78,34 @@ export function Sidebar({ isOpen = false, isCollapsed = false, onToggleCollapsed
         </nav>
 
         <div className={`mt-2 border-t-2 ${isCollapsed ? "mx-3" : "mx-4"} border-ink/70 pt-3`}>
-          <button
-            type="button"
-            onClick={toggleLanguage}
-            aria-label={t("layout.language", { code: language.toUpperCase() })}
-            className={`mb-3 flex items-center gap-2 rounded-full px-2 py-1 text-lg ${isCollapsed ? "mx-auto" : ""} transition-colors hover:bg-white/15`}
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">
-              language
-            </span>
-            {language.toUpperCase()}
-          </button>
+          {/* Folding sits beside the language: both are about how the sidebar reads. Folded, they stack. */}
+          <div className={`mb-3 flex items-center ${isCollapsed ? "flex-col gap-1" : "justify-between"}`}>
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              aria-label={t("layout.language", { code: language.toUpperCase() })}
+              className="flex items-center gap-2 rounded-full px-2 py-1 text-lg transition-colors hover:bg-white/15"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">
+                language
+              </span>
+              {language.toUpperCase()}
+            </button>
+            {onToggleCollapsed !== undefined && (
+              <button
+                type="button"
+                onClick={onToggleCollapsed}
+                aria-label={t(isCollapsed ? "layout.expandMenu" : "layout.collapseMenu")}
+                aria-expanded={!isCollapsed}
+                title={t(isCollapsed ? "layout.expandMenu" : "layout.collapseMenu")}
+                className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/15"
+              >
+                <span className="material-symbols-outlined text-[26px]" aria-hidden="true">
+                  {isCollapsed ? "left_panel_open" : "left_panel_close"}
+                </span>
+              </button>
+            )}
+          </div>
           <div className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}>
             <div
               className="flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-ink bg-accent font-playful-display text-xl"
