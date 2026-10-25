@@ -13,7 +13,9 @@ from app import models  # noqa: F401
 config = context.config
 
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    # Leave the app's own loggers on: migrations run inside the same process in
+    # tests (and could at startup), and a silenced logger hides every warning.
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 if not config.get_main_option("sqlalchemy.url", None):
     config.set_main_option("sqlalchemy.url", settings.database_url)

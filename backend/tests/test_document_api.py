@@ -433,7 +433,5 @@ def test_given_the_row_cannot_be_saved_when_a_file_is_uploaded_then_the_file_lea
 
     monkeypatch.setattr(db_session, "commit", fail)
 
-    with pytest.raises(RuntimeError):
-        upload(client, wedding)
-
+    assert upload(client, wedding).status_code == 500
     assert bucket.objects == {}
