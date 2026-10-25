@@ -36,12 +36,17 @@ class CategoryRead(BaseModel):
     emoji: str | None
     color: str
     subcategories: list[SubcategoryRead]
+    # Private: only its maker sees it. Mine: made by the signed-in user (or by
+    # no one yet), so they may make it private or shared.
+    is_private: bool
+    is_mine: bool = False
 
 
 class CategoryCreate(BaseModel):
     name: RequiredText
     emoji: Emoji | None = None
     color: HexColor
+    is_private: bool = False
 
 
 class CategoryUpdate(BaseModel):
@@ -50,10 +55,11 @@ class CategoryUpdate(BaseModel):
     name: RequiredText | None = None
     emoji: Emoji | None = None
     color: HexColor | None = None
+    is_private: bool | None = None
 
     @model_validator(mode="after")
     def reject_nulls_for_required_fields(self) -> "CategoryUpdate":
-        reject_cleared(self, ("name", "color"))
+        reject_cleared(self, ("name", "color", "is_private"))
         return self
 
 

@@ -10,6 +10,20 @@ export class ApiError extends Error {
   }
 }
 
+type UnauthorizedListener = () => void;
+const unauthorizedListeners = new Set<UnauthorizedListener>();
+
+/**
+ * Hear about any call answered 401: the session ended (signed out elsewhere, or
+ * expired) and the planner should go back to its login page. Returns the way to stop.
+ */
+export function onUnauthorized(listener: UnauthorizedListener): () => void {
+  unauthorizedListeners.add(listener);
+  return () => {
+    unauthorizedListeners.delete(listener);
+  };
+}
+
 interface RequestOptions {
   method?: string;
   body?: unknown;
@@ -47,8 +61,15 @@ function encodeBody(body: unknown): RequestInit {
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const response = await fetch(apiUrl(path), {
     method: options.method ?? "GET",
+    // The session cookie. Same-origin on the Pi; in development the planner and
+    // the API sit on two localhost ports, which the browser treats as cross-origin.
+    credentials: "include",
     ...encodeBody(options.body),
   });
+
+  if (response.status === 401) {
+    unauthorizedListeners.forEach((listener) => listener());
+  }
 
   if (!response.ok) {
     throw new ApiError(await describeFailure(response), response.status);

@@ -8,6 +8,7 @@ import { IconPicker } from "../../components/playful/IconPicker";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
+import { PrivacySwitch } from "./Privacy";
 
 /** Soft colors that read well behind dark text, offered in turn as a new category's default. */
 const palette = ["#624cab", "#7189ff", "#f39237", "#e56399", "#3fa796", "#c49b2e"];
@@ -28,6 +29,7 @@ export function CategoryFormDialog({ category = null, existingCount, onSave, onC
   const [name, setName] = useState(category?.name ?? "");
   const [emoji, setEmoji] = useState(category?.emoji ?? "");
   const [color, setColor] = useState(category?.color ?? palette[existingCount % palette.length]);
+  const [isPrivate, setIsPrivate] = useState(category?.isPrivate ?? false);
   const [error, setError] = useState<TranslationKey | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -40,7 +42,7 @@ export function CategoryFormDialog({ category = null, existingCount, onSave, onC
     setError(null);
     setIsSaving(true);
     try {
-      await onSave({ name: name.trim(), emoji: emoji.trim() || null, color });
+      await onSave({ name: name.trim(), emoji: emoji.trim() || null, color, isPrivate });
     } catch {
       setError("planning.saveFailed");
       setIsSaving(false);
@@ -74,6 +76,12 @@ export function CategoryFormDialog({ category = null, existingCount, onSave, onC
               />
             </div>
           </div>
+          <PrivacySwitch
+            isPrivate={isPrivate}
+            canChange={category?.isMine ?? true}
+            hiddenHintKey="privacy.categoryHidden"
+            onChange={setIsPrivate}
+          />
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
               {t(error)}

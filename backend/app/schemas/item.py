@@ -24,6 +24,7 @@ class ItemFields(BaseModel):
     instagram_url: Link | None = None
     website_url: Link | None = None
     notes: Notes | None = None
+    is_private: bool = False
 
 
 class ItemCreate(ItemFields):
@@ -43,10 +44,11 @@ class ItemUpdate(BaseModel):
     instagram_url: Link | None = None
     website_url: Link | None = None
     notes: Notes | None = None
+    is_private: bool | None = None
 
     @model_validator(mode="after")
     def reject_nulls_for_required_fields(self) -> "ItemUpdate":
-        reject_cleared(self, ("name", "status"))
+        reject_cleared(self, ("name", "status", "is_private"))
         return self
 
 
@@ -74,3 +76,6 @@ class ItemRead(BaseModel):
     task_count: int
     done_task_count: int
     next_task: NextTask | None
+    # As on categories: private means only its maker sees it.
+    is_private: bool
+    is_mine: bool

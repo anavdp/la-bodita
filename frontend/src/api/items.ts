@@ -16,6 +16,8 @@ interface ItemPayload {
   task_count: number;
   done_task_count: number;
   next_task: { id: number; title: string; due_date: string; due_time: string | null } | null;
+  is_private: boolean;
+  is_mine: boolean;
 }
 
 const payloadKeys: Record<keyof ItemDraft, string> = {
@@ -29,6 +31,7 @@ const payloadKeys: Record<keyof ItemDraft, string> = {
   instagramUrl: "instagram_url",
   websiteUrl: "website_url",
   notes: "notes",
+  isPrivate: "is_private",
 };
 
 function toItem(payload: ItemPayload): Item {
@@ -52,6 +55,8 @@ function toItem(payload: ItemPayload): Item {
       dueDate: payload.next_task.due_date,
       dueTime: payload.next_task.due_time,
     },
+    isPrivate: payload.is_private,
+    isMine: payload.is_mine,
   };
 }
 

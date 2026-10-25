@@ -1,12 +1,14 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
 
 from app.api.guests import SessionDependency, WeddingDependency
 from app.api.requirements import find_item
-from app.models import CalendarEvent
+from app.auth import CurrentUser
+from app.models import CalendarEvent, Item
+from app.privacy import can_see_item, visible_item
 from app.schemas import CalendarEventCreate, CalendarEventRead, CalendarEventUpdate
 
 router = APIRouter(prefix="/api/weddings/{wedding_id}/calendar-events", tags=["calendar"])
@@ -26,9 +28,12 @@ def to_read(event: CalendarEvent) -> CalendarEventRead:
     )
 
 
-def get_scoped_event(event_id: int, wedding: WeddingDependency, session: SessionDependency) -> CalendarEvent:
+def get_scoped_event(
+    event_id: int, wedding: WeddingDependency, session: SessionDependency, account: CurrentUser
+) -> CalendarEvent:
+    """An event under an item hidden from this user is hidden with it."""
     event = session.get(CalendarEvent, event_id)
-    if event is None or event.wedding_id != wedding.id:
+    if event is None or event.wedding_id != wedding.id or (event.item and not can_see_item(event.item, account)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
     return event
 
@@ -37,11 +42,14 @@ CalendarEventDependency = Annotated[CalendarEvent, Depends(get_scoped_event)]
 
 
 @router.get("", response_model=list[CalendarEventRead])
-def list_calendar_events(wedding: WeddingDependency, session: SessionDependency) -> list[CalendarEventRead]:
+def list_calendar_events(
+    wedding: WeddingDependency, session: SessionDependency, account: CurrentUser
+) -> list[CalendarEventRead]:
     """Soonest first; on the same day, untimed ones before timed ones, then by time."""
     statement = (
         select(CalendarEvent)
-        .where(CalendarEvent.wedding_id == wedding.id)
+        .outerjoin(Item)
+        .where(CalendarEvent.wedding_id == wedding.id, or_(CalendarEvent.item_id.is_(None), visible_item(account)))
         .options(selectinload(CalendarEvent.item))
         .order_by(
             CalendarEvent.start_date,
@@ -55,10 +63,12 @@ def list_calendar_events(wedding: WeddingDependency, session: SessionDependency)
 
 @router.post("", response_model=CalendarEventRead, status_code=status.HTTP_201_CREATED)
 def create_calendar_event(
-    payload: CalendarEventCreate, wedding: WeddingDependency, session: SessionDependency
+    payload: CalendarEventCreate, wedding: WeddingDependency, session: SessionDependency, account: CurrentUser
 ) -> CalendarEventRead:
     fields = payload.model_dump()
-    event = CalendarEvent(wedding_id=wedding.id, item=find_item(session, wedding, fields.pop("item_id")), **fields)
+    event = CalendarEvent(
+        wedding_id=wedding.id, item=find_item(session, wedding, account, fields.pop("item_id")), **fields
+    )
     session.add(event)
     session.commit()
     session.refresh(event)
@@ -67,11 +77,15 @@ def create_calendar_event(
 
 @router.patch("/{event_id}", response_model=CalendarEventRead)
 def update_calendar_event(
-    payload: CalendarEventUpdate, event: CalendarEventDependency, wedding: WeddingDependency, session: SessionDependency
+    payload: CalendarEventUpdate,
+    event: CalendarEventDependency,
+    wedding: WeddingDependency,
+    session: SessionDependency,
+    account: CurrentUser,
 ) -> CalendarEventRead:
     changes = payload.model_dump(exclude_unset=True)
     if "item_id" in changes:
-        event.item = find_item(session, wedding, changes.pop("item_id"))
+        event.item = find_item(session, wedding, account, changes.pop("item_id"))
     for field, value in changes.items():
         setattr(event, field, value)
     # Moving only one end can still turn a range around.

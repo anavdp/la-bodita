@@ -1,8 +1,8 @@
 # One web server, two doors.
 #
-# :8080 is the whole planner. The tunnel reaches it as planner.<domain>, which
-# Cloudflare Access puts behind a login for the two of you. The app has no login
-# of its own yet, so that hostname must never exist without the Access policy.
+# :8080 is the whole planner. The tunnel reaches it as planner.<domain>. Every
+# planner API route needs a signed-in session (Sign in with Google, two allowed
+# accounts); Cloudflare Access may sit in front of it too, as a second lock.
 #
 # :8081 is the door the Cloudflare Tunnel opens to the internet. It serves only
 # what a guest's RSVP needs and answers 404 to everything else. Its API calls go

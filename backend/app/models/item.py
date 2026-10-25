@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.models.category import Category, Subcategory
-from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin, stored_as_text
+from app.models.mixins import PrivacyMixin, PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin, stored_as_text
 
 if TYPE_CHECKING:
     from app.models.budget_line import BudgetLine
@@ -24,7 +24,7 @@ class ItemStatus(str, Enum):
     DISCARDED = "discarded"
 
 
-class Item(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
+class Item(PrivacyMixin, WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     """The planning hub: a vendor, the church, a venue candidate, a flight, the dress...
 
     It is the only table that carries a category, so tasks, appointments, costs and

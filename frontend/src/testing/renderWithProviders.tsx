@@ -3,13 +3,17 @@ import type { RenderResult } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
-import type { Wedding } from "../api/types";
+import type { SignedInUser, Wedding } from "../api/types";
+import { AuthContext } from "../auth/AuthProvider";
+import type { AuthContextValue } from "../auth/AuthProvider";
 import { LanguageProvider } from "../i18n/LanguageProvider";
 import type { Language } from "../i18n/translations";
 import { SearchProvider } from "../search/SearchProvider";
 import { ThemeProvider } from "../theme/ThemeProvider";
 import { WeddingContext } from "../wedding/WeddingProvider";
 import type { WeddingContextValue } from "../wedding/WeddingProvider";
+
+export const aSignedInUser: SignedInUser = { email: "vicky@example.com", displayName: "Vicky" };
 
 export const aWedding: Wedding = {
   id: 1,
@@ -25,10 +29,18 @@ interface Options {
   /** Seeds the top bar's search box, which screens below it filter by. */
   searchTerm?: string;
   language?: Language;
+  /** Who is signed in; Vicky unless a test says otherwise. */
+  auth?: Partial<AuthContextValue>;
 }
 
 export function renderWithProviders(ui: ReactElement, options: Options = {}): RenderResult {
-  const { route = "/guests", path, wedding = {}, searchTerm = "", language = "en" } = options;
+  const { route = "/guests", path, wedding = {}, searchTerm = "", language = "en", auth = {} } = options;
+  const authValue: AuthContextValue = {
+    status: "signedIn",
+    user: aSignedInUser,
+    signOut: () => Promise.resolve(),
+    ...auth,
+  };
   const weddingValue: WeddingContextValue = {
     wedding: aWedding,
     isLoading: false,
@@ -48,11 +60,13 @@ export function renderWithProviders(ui: ReactElement, options: Options = {}): Re
   return render(
     <MemoryRouter initialEntries={[route]}>
       <LanguageProvider initialLanguage={language}>
-        <WeddingContext.Provider value={weddingValue}>
-          <ThemeProvider>
-            <SearchProvider initialTerm={searchTerm}>{wrapped}</SearchProvider>
-          </ThemeProvider>
-        </WeddingContext.Provider>
+        <AuthContext.Provider value={authValue}>
+          <WeddingContext.Provider value={weddingValue}>
+            <ThemeProvider>
+              <SearchProvider initialTerm={searchTerm}>{wrapped}</SearchProvider>
+            </ThemeProvider>
+          </WeddingContext.Provider>
+        </AuthContext.Provider>
       </LanguageProvider>
     </MemoryRouter>,
   );

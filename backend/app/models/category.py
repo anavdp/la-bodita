@@ -2,10 +2,10 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin
+from app.models.mixins import PrivacyMixin, PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin
 
 
-class Category(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
+class Category(PrivacyMixin, WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     """A user-made tag (Church, Photographer, Dress...) that colors items across the app.
 
     There is no seed list: each couple builds their own.

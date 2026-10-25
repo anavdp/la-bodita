@@ -13,9 +13,10 @@ There are two locks on the guest side. Caddy's `:8081` door only serves the RSVP
 pages, their images and `/api/rsvp/…`, and the API behind it runs with
 `GUEST_ONLY=true`, so the planner's routes don't exist there at all.
 
-The planner side has one lock, the Cloudflare login (Cloudflare Access). The app
-has no login of its own yet, so step 4 sets up the login **before** the planner
-gets its address. Never add a hostname that points at `web:8080` without it.
+The planner has its own login: Sign in with Google, open only to the accounts
+on its list (step 9). Every planner API route answers 401 to anyone else. The
+Cloudflare login (step 4) was the planner's only lock before the app had one;
+step 9 says when it can go.
 
 ## What you need
 
@@ -151,8 +152,51 @@ docker compose restart backend backend-public
 
 - `https://labodita.gerardoyvicky.com` shows the "find your invitation" page.
 - `https://labodita.gerardoyvicky.com/guests` and `…/api/weddings` give a 404.
-- `https://planner.gerardoyvicky.com` asks for your email, then opens the planner.
+- `https://planner.gerardoyvicky.com` asks you to sign in, then opens the planner.
+- `https://planner.gerardoyvicky.com/api/weddings` in a private window answers 401.
 - The planner's "copy link" button gives links on `labodita.gerardoyvicky.com`.
+
+## 9. Sign in with Google
+
+The app's own login. Set it up while the Cloudflare login is still on, so the
+planner is never open.
+
+**Create the Google client.** In [Google Cloud Console](https://console.cloud.google.com),
+pick the project that holds the photos bucket and open **Google Auth Platform**.
+
+1. If it asks you to get started: app name `La Bodita`, your email as support and
+   contact email, audience **External**.
+2. **Audience → Test users → Add users**: both of your Google emails. Leave the
+   app in Testing: only these two accounts can even reach the consent screen.
+3. **Clients → Create client**, type **Web application**, name `La Bodita planner`,
+   and under **Authorized redirect URIs** add
+   `https://planner.gerardoyvicky.com/api/auth/google/callback`
+   (and `http://localhost:8000/api/auth/google/callback` to try it on a laptop).
+4. **Create**, and copy the client ID and secret.
+
+**On the Pi**, add to `.env`:
+
+```
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+PLANNER_URL=https://planner.gerardoyvicky.com
+```
+
+then take the new `docker-compose.yml` and run `docker compose up -d`. Once the
+new images are running, put the two of you on the list:
+
+```bash
+docker compose exec backend python -m app.users add --email you@gmail.com --name Vicky
+docker compose exec backend python -m app.users add --email him@gmail.com --name Gerardo
+docker compose exec backend python -m app.users list
+```
+
+`remove --email …` takes someone off the list and signs them out everywhere.
+
+**Retiring the Cloudflare login.** Only after both of you have signed in with
+Google on the live planner, and a third Google account was refused: in
+Cloudflare, **Zero Trust → Access controls → Applications**, delete
+`La Bodita planner`. Leave the tunnel and its `planner` route as they are.
 
 ## Updating
 

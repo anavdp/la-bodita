@@ -258,9 +258,72 @@ describe("ItemsPage", () => {
         instagramUrl: "https://instagram.com/dulcerosa",
         websiteUrl: null,
         notes: null,
+        isPrivate: false,
       }),
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("given a surprise, when it is added with Only me on, then it is created private", async () => {
+    vi.mocked(itemsApi.createItem).mockResolvedValue(anItem());
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+    await screen.findByRole("button", { name: /Iglesia San José/ });
+
+    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    const dialog = screen.getByRole("dialog", { name: "New item" });
+    await userEvent.type(within(dialog).getByLabelText("Name"), "Atelier Novias");
+    expect(dialog).toHaveTextContent("You both see it.");
+    await userEvent.click(within(dialog).getByRole("switch", { name: "Only me" }));
+    expect(dialog).toHaveTextContent("Only you will see it, and its tasks.");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(itemsApi.createItem).toHaveBeenCalledWith(1, expect.objectContaining({ isPrivate: true })),
+    );
+  });
+
+  it("given an item in a private category, when the list shows, then its row carries the lock too", async () => {
+    const dress = aCategory({ name: "Wedding dress", isPrivate: true });
+    vi.mocked(categoriesApi.listCategories).mockResolvedValue([dress]);
+    vi.mocked(itemsApi.listItems).mockResolvedValue([anItem({ name: "Atelier Novias", categoryId: dress.id })]);
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    const row = await screen.findByRole("button", { name: /Atelier Novias/ });
+    expect(within(row).getByTitle("Only you can see this")).toBeInTheDocument();
+  });
+
+  it("given a private category, when it is picked for an item, then the item is shown hidden with it", async () => {
+    const dress = aCategory({ name: "Wedding dress", emoji: "👗", isPrivate: true });
+    vi.mocked(categoriesApi.listCategories).mockResolvedValue([church, dress]);
+    vi.mocked(itemsApi.createItem).mockResolvedValue(anItem());
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+    await screen.findByRole("button", { name: /Iglesia San José/ });
+
+    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    const dialog = screen.getByRole("dialog", { name: "New item" });
+    await userEvent.type(within(dialog).getByLabelText("Name"), "Atelier Novias");
+    await userEvent.click(within(dialog).getByRole("combobox", { name: "Category" }));
+    await userEvent.click(within(dialog).getByRole("option", { name: "👗 Wedding dress" }));
+
+    const onlyMe = within(dialog).getByRole("switch", { name: "Only me" });
+    expect(onlyMe).toBeChecked();
+    expect(onlyMe).toBeDisabled();
+    expect(dialog).toHaveTextContent("Hidden with its category: only you will see it.");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
+
+    // Its own switch stays as it was, so moving it to a shared category later is a choice, not a surprise.
+    await waitFor(() =>
+      expect(itemsApi.createItem).toHaveBeenCalledWith(1, expect.objectContaining({ categoryId: dress.id, isPrivate: false })),
+    );
+  });
+
+  it("given a private item, when the list shows, then its row says only you can see it", async () => {
+    vi.mocked(itemsApi.listItems).mockResolvedValue([anItem({ name: "Atelier Novias", isPrivate: true }), luz]);
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    const row = await screen.findByRole("button", { name: /Atelier Novias/ });
+    expect(within(row).getByTitle("Only you can see this")).toBeInTheDocument();
+    expect(within(screen.getByRole("button", { name: /Luz de Agua/ })).queryByTitle("Only you can see this")).toBeNull();
   });
 
   it("given an item with no name, when it is saved, then the dialog asks for one", async () => {
@@ -349,6 +412,7 @@ describe("ItemsPage", () => {
         name: "Cake",
         emoji: "cake",
         color: expect.stringMatching(/^#[0-9a-f]{6}$/),
+        isPrivate: false,
       }),
     );
   });

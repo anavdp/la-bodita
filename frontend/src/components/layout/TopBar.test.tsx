@@ -79,4 +79,25 @@ describe("TopBar", () => {
 
     expect(screen.getByTestId("term")).toHaveTextContent("Rossi");
   });
+
+  it("given a signed-in user, when the account button is opened, then it shows who they are and offers sign-out", async () => {
+    const signOut = vi.fn().mockResolvedValue(undefined);
+    renderWithProviders(<TopBar />, { auth: { signOut } });
+
+    await userEvent.click(screen.getByRole("button", { name: "Account: Vicky" }));
+
+    expect(screen.getByText("vicky@example.com")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("menuitem", { name: /Sign out/ }));
+    expect(signOut).toHaveBeenCalled();
+  });
+
+  it("given the account menu is open, when it is pressed again, then it closes", async () => {
+    renderWithProviders(<TopBar />);
+    const account = screen.getByRole("button", { name: "Account: Vicky" });
+
+    await userEvent.click(account);
+    await userEvent.click(account);
+
+    expect(screen.queryByRole("menuitem", { name: /Sign out/ })).not.toBeInTheDocument();
+  });
 });

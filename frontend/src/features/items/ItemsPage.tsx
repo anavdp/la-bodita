@@ -17,6 +17,7 @@ import { usePlanning } from "../planning/usePlanning";
 import { ItemDetail, instagramHandle } from "./ItemDetail";
 import { ItemFormDialog } from "./ItemFormDialog";
 import { statusPill } from "./itemStatus";
+import { PrivateMark } from "../planning/Privacy";
 
 /** Which item dialog is open: an item to edit, or null to create one. */
 type DialogTarget = { item: Item | null } | null;
@@ -134,7 +135,12 @@ export function ItemsPage() {
                 {isIconName(markOf(item)) ? <CategoryIcon value={markOf(item)} className="h-10 w-10" /> : (markOf(item) ?? "•")}
               </span>
               <span className="min-w-0">
-                <span className="block truncate font-playful text-xl text-ink">{item.name}</span>
+                <span className="flex items-center gap-1 font-playful text-xl text-ink">
+                  <span className="truncate">{item.name}</span>
+                  {(item.isPrivate || (item.categoryId !== null && categoriesById.get(item.categoryId)?.isPrivate)) && (
+                    <PrivateMark />
+                  )}
+                </span>
                 <span className="block truncate font-playful text-base text-ink/70">
                   {sublineOf(item)}
                 </span>

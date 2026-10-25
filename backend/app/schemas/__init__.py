@@ -1,3 +1,4 @@
+from app.schemas.auth import SignedInUser
 from app.schemas.budget_line import BudgetLineCreate, BudgetLineRead, BudgetLineUpdate
 from app.schemas.calendar_event import CalendarEventCreate, CalendarEventRead, CalendarEventUpdate
 from app.schemas.category import (
@@ -62,6 +63,7 @@ __all__ = [
     "RsvpLookupMember",
     "RsvpLookupResult",
     "RsvpReply",
+    "SignedInUser",
     "SubcategoryCreate",
     "SubcategoryRead",
     "SubcategoryUpdate",

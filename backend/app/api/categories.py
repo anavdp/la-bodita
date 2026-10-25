@@ -5,7 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.api.guests import SessionDependency, WeddingDependency
+from app.auth import CurrentUser
 from app.models import Category, Subcategory
+from app.privacy import account_id, can_see, change_privacy, is_mine, visible
 from app.schemas import (
     CategoryCreate,
     CategoryRead,
@@ -18,9 +20,18 @@ from app.schemas import (
 router = APIRouter(prefix="/api/weddings/{wedding_id}/categories", tags=["categories"])
 
 
-def get_scoped_category(category_id: int, wedding: WeddingDependency, session: SessionDependency) -> Category:
+def to_read(category: Category, account: CurrentUser) -> CategoryRead:
+    read = CategoryRead.model_validate(category)
+    read.is_mine = is_mine(category, account)
+    return read
+
+
+def get_scoped_category(
+    category_id: int, wedding: WeddingDependency, session: SessionDependency, account: CurrentUser
+) -> Category:
+    """Someone else's private category answers 404, like one that does not exist."""
     category = session.get(Category, category_id)
-    if category is None or category.wedding_id != wedding.id:
+    if category is None or category.wedding_id != wedding.id or not can_see(category, account):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
     return category
 
@@ -42,32 +53,41 @@ SubcategoryDependency = Annotated[Subcategory, Depends(get_scoped_subcategory)]
 
 
 @router.get("", response_model=list[CategoryRead])
-def list_categories(wedding: WeddingDependency, session: SessionDependency) -> list[Category]:
+def list_categories(
+    wedding: WeddingDependency, session: SessionDependency, account: CurrentUser
+) -> list[CategoryRead]:
     statement = (
         select(Category)
-        .where(Category.wedding_id == wedding.id)
+        .where(Category.wedding_id == wedding.id, visible(Category, account))
         .options(selectinload(Category.subcategories))
         .order_by(Category.name, Category.id)
     )
-    return list(session.scalars(statement))
+    return [to_read(category, account) for category in session.scalars(statement)]
 
 
 @router.post("", response_model=CategoryRead, status_code=status.HTTP_201_CREATED)
-def create_category(payload: CategoryCreate, wedding: WeddingDependency, session: SessionDependency) -> Category:
-    category = Category(wedding_id=wedding.id, **payload.model_dump())
+def create_category(
+    payload: CategoryCreate, wedding: WeddingDependency, session: SessionDependency, account: CurrentUser
+) -> CategoryRead:
+    category = Category(wedding_id=wedding.id, created_by_id=account_id(account), **payload.model_dump())
     session.add(category)
     session.commit()
     session.refresh(category)
-    return category
+    return to_read(category, account)
 
 
 @router.patch("/{category_id}", response_model=CategoryRead)
-def update_category(payload: CategoryUpdate, category: CategoryDependency, session: SessionDependency) -> Category:
-    for field, value in payload.model_dump(exclude_unset=True).items():
+def update_category(
+    payload: CategoryUpdate, category: CategoryDependency, session: SessionDependency, account: CurrentUser
+) -> CategoryRead:
+    changes = payload.model_dump(exclude_unset=True)
+    if "is_private" in changes:
+        change_privacy(category, changes.pop("is_private"), account)
+    for field, value in changes.items():
         setattr(category, field, value)
     session.commit()
     session.refresh(category)
-    return category
+    return to_read(category, account)
 
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)

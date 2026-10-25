@@ -76,4 +76,10 @@ describe("Sidebar", () => {
     expect(screen.getByRole("link", { name: "Lista de Invitados" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Idioma: ES" })).toBeInTheDocument();
   });
+
+  it("given a signed-in user, when the sidebar is rendered, then it names them at the foot", () => {
+    renderWithProviders(<Sidebar />, { auth: { user: { email: "gerardo@example.com", displayName: "Gerardo" } } });
+
+    expect(screen.getByText("Gerardo")).toBeInTheDocument();
+  });
 });

@@ -16,6 +16,8 @@ const categoryPayload = {
   emoji: "📸",
   color: "#f39237",
   subcategories: [{ id: 5, category_id: 2, name: "Video", emoji: "🎥", color: "#f39237" }],
+  is_private: true,
+  is_mine: true,
 };
 
 const itemPayload = {
@@ -33,6 +35,8 @@ const itemPayload = {
   task_count: 2,
   done_task_count: 1,
   next_task: { id: 9, title: "Video call", due_date: "2026-10-27", due_time: "19:00:00" },
+  is_private: false,
+  is_mine: false,
 };
 
 const taskPayload = {
@@ -66,17 +70,24 @@ describe("the planning API", () => {
       emoji: "🎥",
       color: "#f39237",
     });
+    expect(categories[0].isPrivate).toBe(true);
+    expect(categories[0].isMine).toBe(true);
   });
 
   it("given a name, emoji and color, when a category is created, then it is posted", async () => {
     const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse(categoryPayload, 201));
     vi.stubGlobal("fetch", fetchMock);
 
-    const category = await createCategory(3, { name: "Photographer", emoji: "📸", color: "#f39237" });
+    const category = await createCategory(3, { name: "Photographer", emoji: "📸", color: "#f39237", isPrivate: true });
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(init.method).toBe("POST");
-    expect(JSON.parse(init.body as string)).toEqual({ name: "Photographer", emoji: "📸", color: "#f39237" });
+    expect(JSON.parse(init.body as string)).toEqual({
+      name: "Photographer",
+      emoji: "📸",
+      color: "#f39237",
+      is_private: true,
+    });
     expect(category.name).toBe("Photographer");
   });
 
@@ -124,6 +135,8 @@ describe("the planning API", () => {
       taskCount: 2,
       doneTaskCount: 1,
       nextTask: { id: 9, title: "Video call", dueDate: "2026-10-27", dueTime: "19:00:00" },
+      isPrivate: false,
+      isMine: false,
     });
   });
 
@@ -144,6 +157,7 @@ describe("the planning API", () => {
       instagramUrl: "https://instagram.com/luzdeagua",
       websiteUrl: null,
       notes: null,
+      isPrivate: true,
     });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
@@ -159,6 +173,7 @@ describe("the planning API", () => {
       instagram_url: "https://instagram.com/luzdeagua",
       website_url: null,
       notes: null,
+      is_private: true,
     });
     expect(item.nextTask).toBeNull();
   });
