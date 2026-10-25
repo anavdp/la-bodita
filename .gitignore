@@ -35,3 +35,6 @@ frontend/public/fonts/
 # Local preview servers for Claude: machine-specific paths, kept locally only
 .claude/launch.json
 
+
+# The Pi keeps its bucket key here; never commit it.
+secrets/

@@ -22,5 +22,11 @@ class Settings(BaseSettings):
     planner_url: str = "http://localhost:5173"
     api_url: str = "http://localhost:8000"
 
+    # Uploaded documents: a private Google Cloud Storage bucket, reached with a
+    # service account's key file (mounted read-only on the Pi, never committed).
+    # Empty means documents aren't set up yet; the rest of the planner still runs.
+    documents_bucket: str = ""
+    documents_key_file: str = ""
+
 
 settings = Settings()

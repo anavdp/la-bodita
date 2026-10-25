@@ -198,6 +198,62 @@ Google on the live planner, and a third Google account was refused: in
 Cloudflare, **Zero Trust → Access controls → Applications**, delete
 `La Bodita planner`. Leave the tunnel and its `planner` route as they are.
 
+## 10. Keep documents in a private bucket
+
+Passports, certificates and vendor photos are stored in Google Cloud Storage,
+not on the Pi's SD card. The bucket is private: nobody can open a file from it
+directly. The planner hands out a download link that works for 5 minutes.
+
+**Create the bucket.** In [Google Cloud Console](https://console.cloud.google.com),
+in the same project as the photos bucket, open **Cloud Storage → Buckets → Create**:
+
+1. **Name**: something like `gerardoyvicky-documents` (it must be unique across
+   all of Google).
+2. **Location type**: Region, the one closest to you.
+3. **Storage class**: Standard.
+4. **Access control**: tick **Enforce public access prevention on this bucket**,
+   and keep **Uniform** access control.
+5. **Data protection**: keep soft delete on (deleted files can be recovered for
+   7 days). Leave versioning and retention off.
+6. **Create**. If it asks to confirm public access prevention, confirm.
+
+This bucket is the opposite of the photos bucket: never add `allUsers` to it.
+
+**Create its key.** In **IAM & Admin → Service accounts → Create service account**:
+
+1. Name `la-bodita-documents`. **Create and continue**, skip the roles
+   (it gets access to this one bucket only, next), **Done**.
+2. Back in the bucket, **Permissions → Grant access**: paste the service
+   account's email (`la-bodita-documents@…iam.gserviceaccount.com`), role
+   **Storage Object User**, **Save**.
+3. Open the service account, **Keys → Add key → Create new key → JSON**. A
+   `.json` file downloads. It's a password: don't email it or commit it.
+
+**On the Pi**, in `/opt/la-bodita`, put the key in a `secrets` folder:
+
+```bash
+mkdir -p secrets
+# from your Mac:  scp ~/Downloads/<the-key>.json pi@<your-pi>:/opt/la-bodita/secrets/gcs-key.json
+chmod 600 secrets/gcs-key.json
+```
+
+Add the bucket's name to `.env`:
+
+```
+DOCUMENTS_BUCKET=gerardoyvicky-documents
+```
+
+then take the new `docker-compose.yml`, run `docker compose up -d`, and check it:
+
+```bash
+docker compose exec backend python -m app.storage check
+```
+
+It saves a small test file, makes a download link and deletes the file again.
+"All good" means the planner can use the bucket. Otherwise it says what's
+wrong (the bucket's name, the key file, or the role). Once it works, delete
+the key from your Mac's Downloads.
+
 ## Updating
 
 Nothing to do on the Pi. Push to `main`, and once the **Publish images to Docker

@@ -15,8 +15,15 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?set GOOGLE_CLIENT_SECRET in .env}
       PLANNER_URL: ${PLANNER_URL:?set PLANNER_URL in .env}
       API_URL: ${PLANNER_URL}
+      # Uploaded documents (deploy/README.md, step 10). Until the bucket is set
+      # up, the planner runs without them.
+      DOCUMENTS_BUCKET: ${DOCUMENTS_BUCKET:-}
+      DOCUMENTS_KEY_FILE: /run/secrets/gcs-key.json
     volumes:
       - data:/data
+      # The bucket's key file, read-only. Only this service gets it: the
+      # guests' backend never sees documents.
+      - ./secrets:/run/secrets:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
