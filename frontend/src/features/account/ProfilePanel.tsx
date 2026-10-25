@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import { useAuth } from "../../auth/AuthProvider";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
+import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -40,10 +41,8 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const initial = (name.trim() || user?.displayName || "?").charAt(0).toUpperCase();
-
   return (
-    <SidePanel title={t("profile.title")} sticker={<span className="font-playful-display">{initial}</span>} onClose={onClose}>
+    <SidePanel title={t("profile.title")} icon={screenIcons.settings} onClose={onClose}>
       <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
         <div className={panelBody}>
           <div>

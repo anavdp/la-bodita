@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 
 import { renderWithProviders } from "../testing/renderWithProviders";
+import { ProfilePanel } from "./account/ProfilePanel";
 import { BudgetLineForm } from "./budget/BudgetLineForm";
 import { CalendarEventForm } from "./calendar/CalendarEventForm";
 import { AddFilesForm } from "./documents/AddFilesForm";
@@ -55,6 +56,8 @@ const drawers: [string, ReactElement, string][] = [
   ],
   ["Add category", <CategoryFormDialog existingCount={0} onSave={save} onClose={close} />, "generic.png"],
   ["Settings", <SettingsPanel onClose={close} />, "engagement.png"],
+  // Opened from the top bar too, beside Settings, so it wears the same ring.
+  ["Your profile", <ProfilePanel onClose={close} />, "engagement.png"],
 ];
 
 describe("drawer titles", () => {
