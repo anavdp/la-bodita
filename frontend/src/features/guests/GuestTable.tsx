@@ -187,7 +187,7 @@ export function GuestTable({
               sortKey="answered"
               sort={sort}
               onSort={onSort}
-              label={t("guests.column.rsvp")}
+              label={t(isPhone ? "guests.column.rsvpShort" : "guests.column.rsvp")}
               className={`${headerCell} text-center`}
             />
             {!isPhone && <th className={`${headerCell} pr-6 text-right`}>{t("guests.column.actions")}</th>}
@@ -265,15 +265,16 @@ export function GuestTable({
                       aria-expanded={isOpen(guest, "rsvp")}
                       onClick={() => toggleMenu(guest, "rsvp")}
                       data-status={guest.rsvpStatus}
-                      className={`inline-flex items-center gap-2 rounded-[14px] border-2 border-ink px-4 py-1 text-lg transition-[filter] hover:brightness-95 ${
-                        rsvpPillClass[guest.rsvpStatus]
-                      }`}
+                      className={`inline-flex items-center gap-2 rounded-[14px] border-2 border-ink py-1 text-lg transition-[filter] hover:brightness-95 ${
+                        isPhone ? "px-2.5 py-2.5" : "px-4"
+                      } ${rsvpPillClass[guest.rsvpStatus]}`}
                     >
                       <span
                         aria-hidden="true"
                         className={`h-3 w-3 rounded-full border-2 border-ink ${statusDotClass[guest.rsvpStatus]}`}
                       />
-                      {statusLabel}
+                      {/* On a phone the dot alone says it; the button's label still reads it out. */}
+                      {!isPhone && statusLabel}
                     </button>
                     {isByAnswer && guest.rsvpAnsweredAt !== null && (
                       <time

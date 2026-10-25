@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import type { Guest } from "../../api/types";
 import { aGuest } from "../../testing/guestFactory";
+import { onAPhone } from "../../testing/onAPhone";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { LanguageProvider } from "../../i18n/LanguageProvider";
 import { noColumnFilters } from "./filtering";
@@ -59,7 +60,16 @@ describe("GuestTable", () => {
       expect.stringContaining("Name"),
       expect.stringContaining("RSVP"),
     ]);
+    expect(screen.getAllByRole("columnheader")[1]).not.toHaveTextContent("Status");
     expect(screen.getAllByRole("cell")).toHaveLength(2);
+  });
+
+  it("given a phone, when a guest's RSVP is shown, then the pill is just its colored dot, its status read out", () => {
+    onAPhone();
+    renderTable([aGuest({ firstName: "Ana", lastName: "Pérez", rsvpStatus: "declined" })]);
+
+    const pill = screen.getByRole("button", { name: "Ana Pérez — Declined. Change RSVP" });
+    expect(pill.textContent?.trim()).toBe("");
   });
 
   it("given a phone, when a guest's name is tapped, then the guest opens to edit", async () => {
