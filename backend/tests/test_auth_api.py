@@ -159,6 +159,63 @@ def test_given_no_sign_in_when_they_ask_who_they_are_then_it_answers_401(anonymo
     assert anonymous_client.get("/api/auth/me").status_code == 401
 
 
+def test_given_a_signed_in_user_when_they_change_their_name_then_it_is_saved_and_comes_back(
+    anonymous_client: TestClient, db_session: Session, vicky: UserAccount
+):
+    sign_in(anonymous_client, db_session, vicky)
+
+    response = anonymous_client.patch("/api/auth/me", json={"display_name": "  Vicky De Palma "})
+
+    assert response.status_code == 200
+    assert response.json() == {"email": "vicky@example.com", "display_name": "Vicky De Palma"}
+    db_session.refresh(vicky)
+    assert vicky.display_name == "Vicky De Palma"
+
+
+def test_given_a_signed_in_user_when_they_blank_their_name_then_it_is_refused(
+    anonymous_client: TestClient, db_session: Session, vicky: UserAccount
+):
+    sign_in(anonymous_client, db_session, vicky)
+
+    for blank in ({"display_name": "   "}, {"display_name": None}, {}):
+        assert anonymous_client.patch("/api/auth/me", json=blank).status_code == 422
+    db_session.refresh(vicky)
+    assert vicky.display_name == "Vicky"
+
+
+def test_given_a_signed_in_user_when_they_send_an_email_then_the_sign_in_email_stays_as_it_was(
+    anonymous_client: TestClient, db_session: Session, vicky: UserAccount
+):
+    """The email is the Google sign-in and the allow-list key: changing it here could lock someone out."""
+    sign_in(anonymous_client, db_session, vicky)
+
+    response = anonymous_client.patch(
+        "/api/auth/me", json={"display_name": "Vicky", "email": "someone@else.com"}
+    )
+
+    assert response.status_code == 422
+    db_session.refresh(vicky)
+    assert vicky.email == "vicky@example.com"
+
+
+def test_given_two_users_when_one_changes_their_name_then_only_their_own_account_changes(
+    anonymous_client: TestClient, db_session: Session, wedding: Wedding, vicky: UserAccount
+):
+    gerardo = UserAccount(wedding_id=wedding.id, email="gerardo@example.com", display_name="Gerardo")
+    db_session.add(gerardo)
+    db_session.commit()
+    sign_in(anonymous_client, db_session, vicky)
+
+    anonymous_client.patch("/api/auth/me", json={"display_name": "Vic"})
+
+    db_session.refresh(gerardo)
+    assert gerardo.display_name == "Gerardo"
+
+
+def test_given_no_sign_in_when_a_name_change_is_sent_then_it_answers_401(anonymous_client: TestClient):
+    assert anonymous_client.patch("/api/auth/me", json={"display_name": "Someone"}).status_code == 401
+
+
 def test_given_a_made_up_session_cookie_when_the_planner_is_used_then_it_answers_401(
     anonymous_client: TestClient, vicky: UserAccount
 ):

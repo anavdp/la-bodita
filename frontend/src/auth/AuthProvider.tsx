@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
-import { getSignedInUser, signOut as endSession } from "../api/auth";
+import { getSignedInUser, signOut as endSession, updateDisplayName } from "../api/auth";
 import { onUnauthorized } from "../api/client";
 import type { SignedInUser } from "../api/types";
 
@@ -12,6 +12,8 @@ export interface AuthContextValue {
   status: AuthStatus;
   user: SignedInUser | null;
   signOut: () => Promise<void>;
+  /** Renames the signed-in user everywhere the planner shows them. */
+  saveDisplayName: (displayName: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -48,7 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = useMemo<AuthContextValue>(() => ({ ...state, signOut }), [state, signOut]);
+  const saveDisplayName = useCallback(async (displayName: string) => {
+    const user = await updateDisplayName(displayName);
+    setState({ status: "signedIn", user });
+  }, []);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({ ...state, signOut, saveDisplayName }),
+    [state, signOut, saveDisplayName],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

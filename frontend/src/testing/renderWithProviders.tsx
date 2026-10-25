@@ -39,6 +39,7 @@ export function renderWithProviders(ui: ReactElement, options: Options = {}): Re
     status: "signedIn",
     user: aSignedInUser,
     signOut: () => Promise.resolve(),
+    saveDisplayName: () => Promise.resolve(),
     ...auth,
   };
   const weddingValue: WeddingContextValue = {

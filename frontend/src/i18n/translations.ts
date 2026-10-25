@@ -47,6 +47,14 @@ const en = {
   "settings.dateHint": "The sidebar's countdown counts down to this day.",
   "settings.titleRequired": "Give the wedding a title.",
 
+  "profile.title": "Your profile",
+  "profile.edit": "Edit profile",
+  "profile.name": "Your name",
+  "profile.nameHint": "Shown in the top bar and on the papers each of you needs.",
+  "profile.nameRequired": "Tell us your name.",
+  "profile.email": "Email",
+  "profile.emailHint": "This is the Google account you sign in with, so it can't be changed here.",
+
   "guests.title": "Guest List",
   "guests.subtitle": "Your people. Your party. One very good list.",
   "guests.showing": "Showing {shown} of {total} guests",
@@ -617,6 +625,14 @@ const es: Record<TranslationKey, string> = {
   "settings.weddingDate": "Fecha de la boda",
   "settings.dateHint": "La cuenta atrás de la barra lateral cuenta hasta este día.",
   "settings.titleRequired": "Ponle un título a la boda.",
+
+  "profile.title": "Tu perfil",
+  "profile.edit": "Editar perfil",
+  "profile.name": "Tu nombre",
+  "profile.nameHint": "Aparece en la barra superior y en los papeles que necesita cada uno.",
+  "profile.nameRequired": "Dinos tu nombre.",
+  "profile.email": "Correo",
+  "profile.emailHint": "Es la cuenta de Google con la que entras, así que no se puede cambiar aquí.",
 
   "guests.title": "Lista de Invitados",
   "guests.subtitle": "Tu gente. Tu fiesta. Una muy buena lista.",

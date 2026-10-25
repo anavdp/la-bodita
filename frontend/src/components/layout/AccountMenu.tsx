@@ -1,15 +1,17 @@
 import { useCallback, useRef, useState } from "react";
 
 import { useAuth } from "../../auth/AuthProvider";
+import { ProfilePanel } from "../../features/account/ProfilePanel";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useDismiss } from "../form/useDismiss";
 import { menuItem, menuPanel } from "../playful/styles";
 
-/** The signed-in user's initial in the top bar, opening who they are and sign-out. */
+/** The signed-in user's initial in the top bar, opening who they are, their profile and sign-out. */
 export function AccountMenu() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
   const close = useCallback(() => setIsOpen(false), []);
   useDismiss(wrapper, isOpen, close);
@@ -41,6 +43,20 @@ export function AccountMenu() {
             role="menuitem"
             onClick={() => {
               close();
+              setIsProfileOpen(true);
+            }}
+            className={menuItem}
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">
+              edit
+            </span>
+            {t("profile.edit")}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              close();
               void signOut().catch(() => undefined);
             }}
             className={menuItem}
@@ -52,6 +68,7 @@ export function AccountMenu() {
           </button>
         </div>
       )}
+      {isProfileOpen && <ProfilePanel onClose={() => setIsProfileOpen(false)} />}
     </div>
   );
 }
