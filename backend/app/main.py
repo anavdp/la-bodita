@@ -1,7 +1,19 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, budget_lines, calendar_events, categories, guests, households, items, requirements, rsvp, weddings
+from app.api import (
+    auth,
+    budget_lines,
+    calendar_events,
+    categories,
+    documents,
+    guests,
+    households,
+    items,
+    requirements,
+    rsvp,
+    weddings,
+)
 from app.auth import require_user
 from app.config import settings
 
@@ -24,7 +36,17 @@ def create_app(guest_only: bool = False) -> FastAPI:
     if not guest_only:
         # Every planner route needs a signed-in user; only sign-in itself is open.
         signed_in = [Depends(require_user)]
-        planner_routers = (weddings, guests, households, categories, items, requirements, budget_lines, calendar_events)
+        planner_routers = (
+            weddings,
+            guests,
+            households,
+            categories,
+            items,
+            requirements,
+            budget_lines,
+            calendar_events,
+            documents,
+        )
         for planner_router in planner_routers:
             app.include_router(planner_router.router, dependencies=signed_in)
         app.include_router(auth.router)

@@ -9,6 +9,7 @@ from app.schemas.category import (
     SubcategoryRead,
     SubcategoryUpdate,
 )
+from app.schemas.document import DocumentRead, DocumentUpdate
 from app.schemas.guest import GuestCreate, GuestRead, GuestUpdate
 from app.schemas.guest_import import GuestImportGuest, GuestImportPreview, GuestImportRow, GuestImportRowError
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate, NextTask
@@ -38,6 +39,8 @@ __all__ = [
     "CategoryCreate",
     "CategoryRead",
     "CategoryUpdate",
+    "DocumentRead",
+    "DocumentUpdate",
     "GuestCreate",
     "GuestImportGuest",
     "GuestImportPreview",

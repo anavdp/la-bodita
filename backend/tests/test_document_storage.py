@@ -8,39 +8,7 @@ from google.api_core.exceptions import Forbidden, NotFound
 
 from app.config import Settings
 from app.storage import DocumentStorage, StorageNotConfigured, check, main
-
-
-class FakeBlob:
-    def __init__(self, bucket: "FakeBucket", name: str):
-        self.bucket = bucket
-        self.name = name
-
-    def upload_from_file(self, data, content_type, if_generation_match):
-        if self.bucket.refuse is not None:
-            raise self.bucket.refuse
-        if if_generation_match == 0 and self.name in self.bucket.objects:
-            raise AssertionError("an existing object would have been overwritten")
-        self.bucket.objects[self.name] = (data.read(), content_type)
-
-    def generate_signed_url(self, **options):
-        self.bucket.signed.append((self.name, options))
-        return f"https://storage.googleapis.com/{self.bucket.name}/{self.name}?X-Goog-Signature=abc"
-
-    def delete(self):
-        if self.name not in self.bucket.objects:
-            raise NotFound("gone")
-        del self.bucket.objects[self.name]
-
-
-class FakeBucket:
-    def __init__(self, name: str = "la-bodita-documents"):
-        self.name = name
-        self.objects: dict[str, tuple[bytes, str]] = {}
-        self.signed: list[tuple[str, dict]] = []
-        self.refuse: Exception | None = None
-
-    def blob(self, name: str) -> FakeBlob:
-        return FakeBlob(self, name)
+from tests.fakes import FakeBucket
 
 
 @pytest.fixture
@@ -183,3 +151,13 @@ def test_given_a_key_file_that_is_not_there_when_storage_is_built_then_it_names_
         DocumentStorage.from_settings(
             Settings(_env_file=None, documents_bucket="our-papers", documents_key_file=str(missing))
         )
+
+
+def test_given_no_bucket_in_the_settings_when_the_api_asks_for_storage_then_documents_are_off(monkeypatch):
+    from app.api import documents
+
+    monkeypatch.setattr(documents, "settings", Settings(_env_file=None, documents_bucket=""))
+    documents._configured_storage.cache_clear()
+
+    assert documents.get_document_storage() is None
+    documents._configured_storage.cache_clear()

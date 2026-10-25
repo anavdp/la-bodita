@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.api.documents import StorageDependency, delete_files
 from app.api.guests import SessionDependency, WeddingDependency
 from app.auth import CurrentUser
 from app.models import Category, Item, Subcategory, UserAccount, Wedding
@@ -143,7 +144,9 @@ def update_item(
 
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_item(item: ItemDependency, session: SessionDependency) -> None:
-    """Its tasks go with it."""
+def delete_item(item: ItemDependency, session: SessionDependency, storage: StorageDependency) -> None:
+    """Its tasks and files go with it, the files out of the bucket too."""
+    documents = list(item.documents)
     session.delete(item)
     session.commit()
+    delete_files(storage, documents)

@@ -8,6 +8,7 @@ from app.database import Base
 from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin
 
 if TYPE_CHECKING:
+    from app.models.document import Document
     from app.models.item import Item
 
 
@@ -29,3 +30,7 @@ class Requirement(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     notes: Mapped[str | None] = mapped_column(default=None)
 
     item: Mapped["Item | None"] = relationship(back_populates="requirements")
+    # Not deleted with the task: they stay on the item (the column is SET NULL).
+    documents: Mapped[list["Document"]] = relationship(
+        back_populates="requirement", order_by="Document.id", passive_deletes=True
+    )

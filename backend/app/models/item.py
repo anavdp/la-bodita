@@ -11,6 +11,7 @@ from app.models.mixins import PrivacyMixin, PrimaryKeyMixin, TimestampMixin, Wed
 if TYPE_CHECKING:
     from app.models.budget_line import BudgetLine
     from app.models.calendar_event import CalendarEvent
+    from app.models.document import Document
     from app.models.requirement import Requirement
 
 
@@ -61,6 +62,12 @@ class Item(PrivacyMixin, WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Ba
     budget_lines: Mapped[list["BudgetLine"]] = relationship(
         back_populates="item",
         order_by="BudgetLine.id",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    documents: Mapped[list["Document"]] = relationship(
+        back_populates="item",
+        order_by="Document.id",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )

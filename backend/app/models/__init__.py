@@ -1,5 +1,6 @@
 from app.models.budget_line import BudgetLine, BudgetLineStatus
 from app.models.calendar_event import CalendarEvent
+from app.models.document import Document, DocumentKind
 from app.models.category import Category, Subcategory
 from app.models.guest import (
     Guest,
@@ -19,6 +20,8 @@ __all__ = [
     "BudgetLine",
     "BudgetLineStatus",
     "CalendarEvent",
+    "Document",
+    "DocumentKind",
     "Category",
     "Guest",
     "GuestGender",
