@@ -25,8 +25,9 @@ import { GuestFormDialog } from "./GuestFormDialog";
 import { GuestImportDialog } from "./GuestImportDialog";
 import { GuestStats } from "./GuestStats";
 import { GuestTable } from "./GuestTable";
-import { sortGuests } from "./sorting";
-import type { GuestSortOrder } from "./sorting";
+import { householdNamesOf } from "./households";
+import { nextSort, sortGuests } from "./sorting";
+import type { GuestSort } from "./sorting";
 import { useGuests } from "./useGuests";
 
 /** Which guest the dialog is open for: a guest to edit, or null to create one. */
@@ -85,17 +86,18 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   /** The RSVP status picked in the header summary, if any: the table shows only those guests. */
   const [rsvpFilter, setRsvpFilter] = useState<RsvpStatus | null>(null);
 
-  /** Name order by default; the RSVP header flips it to newest answers first. */
-  const [sortOrder, setSortOrder] = useState<GuestSortOrder>("name");
+  /** Name order by default; the Name, Household and RSVP headers pick and flip it. */
+  const [sort, setSort] = useState<GuestSort>({ key: "name", direction: "ascending" });
 
   const searchedGuests = useMemo(() => filterGuestsByName(guests, term), [guests, term]);
   const visibleGuests = useMemo(
     () =>
       sortGuests(
         rsvpFilter === null ? searchedGuests : searchedGuests.filter((guest) => guest.rsvpStatus === rsvpFilter),
-        sortOrder,
+        sort,
+        householdNamesOf(households),
       ),
-    [searchedGuests, rsvpFilter, sortOrder],
+    [searchedGuests, rsvpFilter, sort, households],
   );
   const visibleHouseholds = useMemo(() => {
     const needle = term.trim().toLowerCase();
@@ -219,8 +221,8 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
         <GuestTable
           guests={visibleGuests}
           households={households}
-          sortOrder={sortOrder}
-          onToggleSort={() => setSortOrder((current) => (current === "name" ? "answered" : "name"))}
+          sort={sort}
+          onSort={(key) => setSort((current) => nextSort(current, key))}
           onEdit={(guest) => setDialogTarget({ guest })}
           onDelete={handleDelete}
           onChangeRsvp={handleChangeRsvp}

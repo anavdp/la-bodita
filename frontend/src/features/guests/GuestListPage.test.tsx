@@ -539,7 +539,7 @@ describe("GuestListPage sorting by answer", () => {
     vi.resetAllMocks();
   });
 
-  it("given the guest list, when the RSVP header is clicked, then the newest answers come first, and clicking again goes back to names", async () => {
+  it("given the guest list, when the RSVP header is clicked, then the newest answers come first, and clicking again shows the oldest first", async () => {
     renderWithProviders(<GuestListPage />);
     await screen.findByText("Anna Bianchi");
 
@@ -547,7 +547,33 @@ describe("GuestListPage sorting by answer", () => {
     expect(rowNames()).toEqual(["Sofia Mendoza", "Anna Bianchi", "Carlos Mendoza"]);
 
     await userEvent.click(screen.getByRole("button", { name: "RSVP Status" }));
-    expect(rowNames()).toEqual(["Anna Bianchi", "Carlos Mendoza", "Sofia Mendoza"]);
+    expect(rowNames()).toEqual(["Anna Bianchi", "Sofia Mendoza", "Carlos Mendoza"]);
+  });
+
+  it("given the guest list, when the Name header is clicked, then the names go from Z to A", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Anna Bianchi");
+
+    await userEvent.click(screen.getByRole("button", { name: "Name" }));
+
+    expect(rowNames()).toEqual(["Sofia Mendoza", "Carlos Mendoza", "Anna Bianchi"]);
+  });
+
+  it("given families, when the Household header is clicked, then each family is listed together and guests on their own come last", async () => {
+    const zeta = { ...earlier, householdId: 70 };
+    const sofia = { ...later, householdId: 80 };
+    const carlos = { ...waiting, householdId: 80 };
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([zeta, carlos, sofia]);
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([
+      { id: 70, name: "Zeta", rsvpToken: "z", broadcastList: null, guestIds: [zeta.id] },
+      { id: 80, name: "Famiglia M", rsvpToken: "m", broadcastList: null, guestIds: [carlos.id, sofia.id] },
+    ]);
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Anna Bianchi");
+
+    await userEvent.click(screen.getByRole("button", { name: "Household" }));
+
+    expect(rowNames()).toEqual(["Carlos Mendoza", "Sofia Mendoza", "Anna Bianchi"]);
   });
 
   it("given the newest answers first, when a pending guest is confirmed in place, then they move to the top", async () => {

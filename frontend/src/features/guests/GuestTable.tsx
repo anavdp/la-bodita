@@ -6,7 +6,9 @@ import { avatarTones, menuItem, menuPanel } from "../../components/playful/style
 import { fullName } from "./filtering";
 import { statusDotClass } from "./GuestStats";
 import { NotSpecified } from "./NotSpecified";
-import type { GuestSortOrder } from "./sorting";
+import { householdNamesOf } from "./households";
+import { firstDirectionOf } from "./sorting";
+import type { GuestSort, GuestSortKey } from "./sorting";
 import {
   relationshipLabelKey,
   rsvpLabelKey,
@@ -20,10 +22,10 @@ interface GuestTableProps {
   guests: Guest[];
   /** Names the household column. Someone on their own shows blank: their household is just them. */
   households?: Household[];
-  /** "answered" shows when each guest answered, under their RSVP. */
-  sortOrder: GuestSortOrder;
-  /** The RSVP header switches between name order and newest answers first. */
-  onToggleSort: () => void;
+  /** The column the rows are sorted by; sorting by answer also shows when each guest answered. */
+  sort: GuestSort;
+  /** A sortable column's header was clicked. */
+  onSort: (key: GuestSortKey) => void;
   onEdit: (guest: Guest) => void;
   onDelete: (guest: Guest) => void;
   onChangeRsvp: (guest: Guest, status: RsvpStatus) => void;
@@ -50,24 +52,58 @@ export function initialsOf(guest: Guest): string {
 const headerCell = "px-4 py-4 font-normal";
 const cell = "px-4 py-3";
 
+/** The arrow says which way a column sorts; the others show they can. */
+const sortIcon = { ascending: "arrow_upward", descending: "arrow_downward" } as const;
+
+function SortableHeader({
+  sortKey,
+  sort,
+  onSort,
+  label,
+  className,
+}: {
+  sortKey: GuestSortKey;
+  sort: GuestSort;
+  onSort: (key: GuestSortKey) => void;
+  label: string;
+  className: string;
+}) {
+  const { t } = useTranslation();
+  const isActive = sort.key === sortKey;
+  return (
+    <th className={className} aria-sort={isActive ? sort.direction : undefined}>
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
+        title={t(`guests.sort.${sortKey}.${isActive && sort.direction === firstDirectionOf(sortKey) ? "reverse" : "first"}` as const)}
+        className="inline-flex items-center gap-1 uppercase tracking-wider transition-colors hover:text-ink/70"
+      >
+        {label}
+        <span
+          className={`material-symbols-outlined text-[18px] ${isActive ? "" : "text-ink/40"}`}
+          aria-hidden="true"
+        >
+          {isActive ? sortIcon[sort.direction] : "swap_vert"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 export function GuestTable({
   guests,
   households = [],
-  sortOrder,
-  onToggleSort,
+  sort,
+  onSort,
   onEdit,
   onDelete,
   onChangeRsvp,
 }: GuestTableProps) {
   const { t, language } = useTranslation();
-  const isByAnswer = sortOrder === "answered";
+  const isByAnswer = sort.key === "answered";
   const answeredDay = new Intl.DateTimeFormat(language, { month: "short", day: "numeric" });
   const answeredMoment = new Intl.DateTimeFormat(language, { dateStyle: "long", timeStyle: "short" });
-  const householdNames = new Map(
-    households
-      .filter((household) => household.guestIds.length > 1)
-      .map((household) => [household.id, household.name]),
-  );
+  const householdNames = householdNamesOf(households);
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
@@ -94,24 +130,30 @@ export function GuestTable({
       <table className="w-full border-collapse text-left font-playful text-ink">
         <thead>
           <tr className="border-b-[2.5px] border-ink bg-cream text-[15px] uppercase tracking-wider">
-            <th className={`${headerCell} border-r-2 border-ink/20 pl-6`}>{t("guests.column.name")}</th>
-            <th className={headerCell}>{t("guests.column.household")}</th>
+            <SortableHeader
+              sortKey="name"
+              sort={sort}
+              onSort={onSort}
+              label={t("guests.column.name")}
+              className={`${headerCell} border-r-2 border-ink/20 pl-6`}
+            />
+            <SortableHeader
+              sortKey="household"
+              sort={sort}
+              onSort={onSort}
+              label={t("guests.column.household")}
+              className={headerCell}
+            />
             <th className={headerCell}>{t("guests.column.type")}</th>
             <th className={headerCell}>{t("guests.column.relationship")}</th>
             <th className={headerCell}>{t("guests.column.side")}</th>
-            <th className={`${headerCell} text-center`} aria-sort={isByAnswer ? "descending" : undefined}>
-              <button
-                type="button"
-                onClick={onToggleSort}
-                title={t(isByAnswer ? "guests.sort.byName" : "guests.sort.byAnswer")}
-                className="inline-flex items-center gap-1 uppercase tracking-wider transition-colors hover:text-ink/70"
-              >
-                {t("guests.column.rsvp")}
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                  {isByAnswer ? "arrow_downward" : "swap_vert"}
-                </span>
-              </button>
-            </th>
+            <SortableHeader
+              sortKey="answered"
+              sort={sort}
+              onSort={onSort}
+              label={t("guests.column.rsvp")}
+              className={`${headerCell} text-center`}
+            />
             <th className={`${headerCell} pr-6 text-right`}>{t("guests.column.actions")}</th>
           </tr>
         </thead>
