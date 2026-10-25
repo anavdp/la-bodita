@@ -3,7 +3,9 @@ import { useState } from "react";
 import type { Guest, Household, RsvpStatus } from "../../api/types";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { avatarTones, menuItem, menuPanel } from "../../components/playful/styles";
+import { ColumnFilterHeader } from "./ColumnFilterHeader";
 import { fullName } from "./filtering";
+import type { GuestColumnFilters, GuestFilterColumn } from "./filtering";
 import { statusDotClass } from "./GuestStats";
 import { NotSpecified } from "./NotSpecified";
 import { householdNamesOf } from "./households";
@@ -29,10 +31,15 @@ interface GuestTableProps {
   onEdit: (guest: Guest) => void;
   onDelete: (guest: Guest) => void;
   onChangeRsvp: (guest: Guest, status: RsvpStatus) => void;
+  /** What is ticked under the Type, Relationship and Side funnels. */
+  filters: GuestColumnFilters;
+  onChangeFilters: (filters: GuestColumnFilters) => void;
 }
 
-/** Both columns open a menu, and only ever one at a time. */
-type OpenMenu = { guestId: number; kind: "rsvp" | "actions" } | null;
+/** Rows and filterable headers open menus, and only ever one at a time. */
+type OpenMenu = { guestId: number; kind: "rsvp" | "actions" } | { kind: "filter"; column: GuestFilterColumn } | null;
+
+const filterColumns: GuestFilterColumn[] = ["type", "relationship", "side"];
 
 /** The RSVP pill's fill: soft green, butter, or soft coral. */
 const rsvpPillClass: Record<RsvpStatus, string> = {
@@ -98,6 +105,8 @@ export function GuestTable({
   onEdit,
   onDelete,
   onChangeRsvp,
+  filters,
+  onChangeFilters,
 }: GuestTableProps) {
   const { t, language } = useTranslation();
   const isByAnswer = sort.key === "answered";
@@ -112,21 +121,31 @@ export function GuestTable({
     setIsConfirmingDelete(false);
   };
 
-  const isOpen = (guest: Guest, kind: OpenMenu extends null ? never : "rsvp" | "actions") =>
-    openMenu?.guestId === guest.id && openMenu.kind === kind;
+  const isOpen = (guest: Guest, kind: "rsvp" | "actions") =>
+    openMenu !== null && openMenu.kind === kind && openMenu.guestId === guest.id;
 
   const toggleMenu = (guest: Guest, kind: "rsvp" | "actions") => {
     setIsConfirmingDelete(false);
     setOpenMenu((current) =>
-      current?.guestId === guest.id && current.kind === kind ? null : { guestId: guest.id, kind },
+      current !== null && current.kind === kind && current.guestId === guest.id ? null : { guestId: guest.id, kind },
     );
   };
+
+  const isFilterOpen = (column: GuestFilterColumn) => openMenu?.kind === "filter" && openMenu.column === column;
+
+  const toggleFilter = (column: GuestFilterColumn) => {
+    setIsConfirmingDelete(false);
+    setOpenMenu(isFilterOpen(column) ? null : { kind: "filter", column });
+  };
+
+  /** A filter menu is taller than a row menu, and a filtered table can be one row short. */
+  const roomForMenu = openMenu === null ? "" : openMenu.kind === "filter" ? "min-h-[30rem]" : "pb-28";
 
   return (
     // The table scrolls sideways on narrow screens, and `overflow-x: auto` makes
     // the browser clip vertically too - which cuts off a row menu opened near the
     // bottom. Reserving room while a menu is open keeps it reachable.
-    <div className={`overflow-x-auto ${openMenu === null ? "" : "pb-28"}`}>
+    <div className={`overflow-x-auto ${roomForMenu}`}>
       <table className="w-full border-collapse text-left font-playful text-ink">
         <thead>
           <tr className="border-b-[2.5px] border-ink bg-cream text-[15px] uppercase tracking-wider">
@@ -144,9 +163,19 @@ export function GuestTable({
               label={t("guests.column.household")}
               className={headerCell}
             />
-            <th className={headerCell}>{t("guests.column.type")}</th>
-            <th className={headerCell}>{t("guests.column.relationship")}</th>
-            <th className={headerCell}>{t("guests.column.side")}</th>
+            {filterColumns.map((column) => (
+              <ColumnFilterHeader
+                key={column}
+                column={column}
+                label={t(`guests.column.${column}` as const)}
+                filters={filters}
+                isOpen={isFilterOpen(column)}
+                onChange={onChangeFilters}
+                onToggle={() => toggleFilter(column)}
+                onClose={() => setOpenMenu(null)}
+                className={headerCell}
+              />
+            ))}
             <SortableHeader
               sortKey="answered"
               sort={sort}
