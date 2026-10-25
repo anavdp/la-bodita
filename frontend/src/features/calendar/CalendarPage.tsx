@@ -1,11 +1,15 @@
 import { useId, useMemo, useState } from "react";
 
 import type { CalendarEvent, CalendarEventDraft, Category } from "../../api/types";
+import { LoadProblems } from "../../components/feedback/LoadProblems";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
-import { compactButton, outlinedCard, secondaryButton } from "../../components/playful/styles";
+import { compactButton, outlinedCard } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { Language, TranslationKey } from "../../i18n/translations";
+import type { Language } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { CategoryChips } from "../planning/CategoryChips";
@@ -181,7 +185,7 @@ export function CalendarPage() {
   const { wedding } = useWedding();
   const { term } = useSearch();
   const calendar = useCalendar(wedding?.id ?? null);
-  const { categories, items, tasks, events, isLoading, hasLoadError } = calendar;
+  const { categories, items, tasks, events, isLoading, loadFailures } = calendar;
   const nextUpId = useId();
   const pickedDayId = useId();
   const comingUpId = useId();
@@ -195,7 +199,8 @@ export function CalendarPage() {
   const [pickedDay, setPickedDay] = useState(todayIso);
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const [formTarget, setFormTarget] = useState<FormTarget>(null);
-  const [actionError, setActionError] = useState<TranslationKey | null>(null);
+  const [actionError, setActionError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
 
   const categoriesById = useMemo(() => new Map(categories.map((each) => [each.id, each])), [categories]);
   const categoryOf = (entry: CalendarEntry) =>
@@ -248,8 +253,8 @@ export function CalendarPage() {
     setActionError(null);
     try {
       await calendar.removeEvent(event.id);
-    } catch {
-      setActionError("planning.saveFailed");
+    } catch (failure) {
+      setActionError(failedTo("errors.delete", failure));
     }
   };
 
@@ -330,35 +335,28 @@ export function CalendarPage() {
     if (isLoading) {
       return <p className="p-2 font-playful text-xl text-ink/70">{t("calendar.loading")}</p>;
     }
-    if (hasLoadError) {
-      return (
-        <div className="flex flex-col items-start gap-4 p-2">
-          <p className="font-playful text-xl text-coral">{t("planning.loadFailed")}</p>
-          <button type="button" onClick={calendar.reload} className={secondaryButton}>
-            {t("planning.retry")}
-          </button>
-        </div>
-      );
-    }
     return (
-      <div role="grid" aria-label={monthTitle} data-month className="flex flex-col gap-1 sm:gap-1.5">
-        <div role="row" className="grid grid-cols-7 gap-1 sm:gap-1.5">
-          {weekdays.map((weekday) => (
-            <span
-              key={weekday}
-              role="columnheader"
-              className="py-1 text-center font-playful text-sm uppercase tracking-wider text-ink/70"
-            >
-              {weekday}
-            </span>
+      <>
+        <LoadProblems failures={loadFailures} onRetry={calendar.reload} />
+        <div role="grid" aria-label={monthTitle} data-month className="flex flex-col gap-1 sm:gap-1.5">
+          <div role="row" className="grid grid-cols-7 gap-1 sm:gap-1.5">
+            {weekdays.map((weekday) => (
+              <span
+                key={weekday}
+                role="columnheader"
+                className="py-1 text-center font-playful text-sm uppercase tracking-wider text-ink/70"
+              >
+                {weekday}
+              </span>
+            ))}
+          </div>
+          {weeks.map((week) => (
+            <div key={week[0]} role="row" className="grid grid-cols-7 gap-1 sm:gap-1.5">
+              {week.map(dayCell)}
+            </div>
           ))}
         </div>
-        {weeks.map((week) => (
-          <div key={week[0]} role="row" className="grid grid-cols-7 gap-1 sm:gap-1.5">
-            {week.map(dayCell)}
-          </div>
-        ))}
-      </div>
+      </>
     );
   };
 
@@ -376,7 +374,7 @@ export function CalendarPage() {
 
       {actionError !== null && (
         <p role="alert" className="mb-4 font-playful text-lg text-coral">
-          {t(actionError)}
+          {problemText(actionError)}
         </p>
       )}
 
@@ -406,7 +404,7 @@ export function CalendarPage() {
         </section>
 
         <aside className="flex w-full flex-col gap-4 font-playful text-ink xl:w-80 xl:shrink-0">
-          {!isLoading && !hasLoadError && (
+          {!isLoading && (
             <section aria-labelledby={pickedDayId} className={`${outlinedCard} px-6 py-5 sm:hidden`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2

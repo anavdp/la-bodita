@@ -2,11 +2,13 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import type { Guest, Household, HouseholdDraft } from "../../api/types";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField as field } from "../../components/form/styles";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { filterGuestsByName, fullName } from "../guests/filtering";
 
 interface HouseholdFormDialogProps {
@@ -30,7 +32,8 @@ export function HouseholdFormDialog({ household, guests, households, onSave, onC
   const [name, setName] = useState(household?.name ?? "");
   const [selected, setSelected] = useState<Set<number>>(new Set(household?.guestIds ?? []));
   const [search, setSearch] = useState("");
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   // Only families are worth naming: "Now in Maria Rossi" next to Maria Rossi says nothing.
@@ -67,8 +70,8 @@ export function HouseholdFormDialog({ household, guests, households, onSave, onC
       // In list order, so what is sent reads the way the checklist does.
       const guestIds = guests.filter((guest) => selected.has(guest.id)).map((guest) => guest.id);
       await onSave({ name: name.trim(), guestIds });
-    } catch {
-      setError("households.form.saveFailed");
+    } catch (failure) {
+      setError(failedTo("households.form.saveFailed", failure));
     } finally {
       setIsSaving(false);
     }
@@ -143,7 +146,7 @@ export function HouseholdFormDialog({ household, guests, households, onSave, onC
 
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {t(error)}
+              {problemText(error)}
             </p>
           )}
         </div>

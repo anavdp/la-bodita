@@ -1,6 +1,9 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { DatePicker } from "../../components/form/DatePicker";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
@@ -8,7 +11,6 @@ import { CountdownSticker } from "../../components/layout/CountdownSticker";
 import { iconUrl } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { useWedding } from "../../wedding/WeddingProvider";
 
 const hint = "mt-1.5 text-base text-ink/70";
@@ -29,7 +31,8 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
 
   const [name, setName] = useState(wedding?.name ?? "");
   const [weddingDate, setWeddingDate] = useState<string | null>(wedding?.wedding_date ?? null);
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
@@ -43,8 +46,8 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
     try {
       await saveWedding({ name: name.trim(), wedding_date: weddingDate });
       onClose();
-    } catch {
-      setError("planning.saveFailed");
+    } catch (failure) {
+      setError(failedTo("errors.save", failure));
       setIsSaving(false);
     }
   };
@@ -76,7 +79,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           </div>
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {t(error)}
+              {problemText(error)}
             </p>
           )}
         </div>

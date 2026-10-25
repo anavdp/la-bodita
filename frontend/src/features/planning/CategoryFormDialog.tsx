@@ -2,12 +2,14 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import type { Category, CategoryDraft } from "../../api/types";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
 import { IconPicker } from "../../components/playful/IconPicker";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { PrivacySwitch } from "./Privacy";
 
 /** Soft colors that read well behind dark text, offered in turn as a new category's default. */
@@ -30,7 +32,8 @@ export function CategoryFormDialog({ category = null, existingCount, onSave, onC
   const [emoji, setEmoji] = useState(category?.emoji ?? "");
   const [color, setColor] = useState(category?.color ?? palette[existingCount % palette.length]);
   const [isPrivate, setIsPrivate] = useState(category?.isPrivate ?? false);
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
@@ -43,8 +46,8 @@ export function CategoryFormDialog({ category = null, existingCount, onSave, onC
     setIsSaving(true);
     try {
       await onSave({ name: name.trim(), emoji: emoji.trim() || null, color, isPrivate });
-    } catch {
-      setError("planning.saveFailed");
+    } catch (failure) {
+      setError(failedTo("errors.save", failure));
       setIsSaving(false);
     }
   };
@@ -84,7 +87,7 @@ export function CategoryFormDialog({ category = null, existingCount, onSave, onC
           />
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {t(error)}
+              {problemText(error)}
             </p>
           )}
         </div>

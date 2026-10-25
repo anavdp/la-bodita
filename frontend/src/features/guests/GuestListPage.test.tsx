@@ -192,7 +192,7 @@ describe("GuestListPage", () => {
       screen.getByRole("button", { name: "Remove Carlos Mendoza from the guest list?" }),
     );
 
-    expect(await screen.findByText("We could not remove this guest.")).toBeInTheDocument();
+    expect(await screen.findByText(/^We could not remove this guest\. Something went wrong on our side/)).toBeInTheDocument();
   });
 
   it("given a guest row, when the table is rendered, then the side is shown as its flag", async () => {
@@ -267,7 +267,7 @@ describe("changing an RSVP from the table", () => {
     await userEvent.click(screen.getByRole("button", { name: /Carlos Mendoza — Pending/ }));
     await userEvent.click(screen.getByRole("button", { name: "Mark as Declined" }));
 
-    expect(await screen.findByText("We could not update this RSVP.")).toBeInTheDocument();
+    expect(await screen.findByText(/^We could not update this RSVP\. /)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Carlos Mendoza — Pending/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^1 Pending/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^0 Declined/ })).toBeInTheDocument();
@@ -461,7 +461,7 @@ describe("the Households tab", () => {
     await userEvent.click(await screen.findByRole("button", { name: /Famiglia Rossi — Not on a list/ }));
     await userEvent.click(screen.getByRole("button", { name: /Groom's list/ }));
 
-    expect(await screen.findByText("We could not update this broadcast list.")).toBeInTheDocument();
+    expect(await screen.findByText(/^We could not update this broadcast list\. /)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Famiglia Rossi — Not on a list/ })).toBeInTheDocument();
   });
 });

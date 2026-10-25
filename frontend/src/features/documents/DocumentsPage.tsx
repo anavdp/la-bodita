@@ -2,10 +2,13 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import type { WeddingDocument } from "../../api/types";
+import { LoadProblems } from "../../components/feedback/LoadProblems";
+import { failedTo, hasFailed } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
-import { folderTab, outlinedCard, secondaryButton } from "../../components/playful/styles";
+import { folderTab, outlinedCard } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { toIso } from "../calendar/calendarMath";
@@ -39,7 +42,8 @@ export function DocumentsPage({ tab }: { tab: DocumentsTab }) {
   const weddingId = wedding?.id ?? null;
   const state = useDocuments(weddingId);
   const [panel, setPanel] = useState<Panel>(null);
-  const [actionError, setActionError] = useState<TranslationKey | null>(null);
+  const [actionError, setActionError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
 
   const missingCount = state.requests.filter((request) => request.isMissing).length;
   const openUpload = (preset?: FilesPreset) => setPanel({ kind: "files", document: null, preset });
@@ -48,8 +52,8 @@ export function DocumentsPage({ tab }: { tab: DocumentsTab }) {
     setActionError(null);
     try {
       await change();
-    } catch {
-      setActionError("planning.saveFailed");
+    } catch (failure) {
+      setActionError(failedTo("errors.save", failure));
     }
   };
 
@@ -74,16 +78,9 @@ export function DocumentsPage({ tab }: { tab: DocumentsTab }) {
     if (state.isLoading || weddingId === null) {
       return <p className={`${outlinedCard} p-6 font-playful text-xl text-ink/70`}>{t("documents.loading")}</p>;
     }
-    if (state.hasLoadError) {
-      return (
-        <div className={`${outlinedCard} flex flex-col items-start gap-4 p-6`}>
-          <p className="font-playful text-xl text-coral">{t("planning.loadFailed")}</p>
-          <button type="button" onClick={state.reload} className={secondaryButton}>
-            {t("planning.retry")}
-          </button>
-        </div>
-      );
-    }
+    // Either tab is built on the files; the papers tab on what was asked for too.
+    if (hasFailed(state.loadFailures, "errors.part.documents")) return null;
+    if (tab === "papers" && hasFailed(state.loadFailures, "errors.part.papers")) return null;
     if (tab === "papers") {
       return (
         <PapersTab
@@ -135,10 +132,13 @@ export function DocumentsPage({ tab }: { tab: DocumentsTab }) {
 
       {actionError !== null && (
         <p role="alert" className="mb-4 font-playful text-lg text-coral">
-          {t(actionError)}
+          {problemText(actionError)}
         </p>
       )}
 
+      {!state.isLoading && (
+        <LoadProblems failures={state.loadFailures} onRetry={state.reload} className={`${outlinedCard} mb-6 p-6`} />
+      )}
       {body()}
 
       <div className="fixed inset-x-4 bottom-4 z-30 flex items-center gap-3 md:hidden">

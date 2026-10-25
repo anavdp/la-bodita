@@ -2,6 +2,9 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import type { Guest, GuestDraft, GuestGender, GuestRelationshipType, GuestSide, RsvpStatus } from "../../api/types";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField as field } from "../../components/form/styles";
@@ -66,14 +69,15 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
   const isInFamily = guest !== null && households.some((option) => option.id === guest.householdId);
   const [household, setHousehold] = useState(isInFamily ? String(guest.householdId) : "");
 
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
     if (firstName.trim() === "" || lastName.trim() === "") {
-      setError(t("guests.form.nameRequired"));
+      setError("guests.form.nameRequired");
       return;
     }
 
@@ -93,7 +97,7 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
         householdId: chosenHousehold(guest, household, isInFamily),
       });
     } catch (failure) {
-      setError(failure instanceof Error ? failure.message : t("guests.form.saveFailed"));
+      setError(failedTo("guests.form.saveFailed", failure));
     } finally {
       setIsSaving(false);
     }
@@ -218,7 +222,7 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
 
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {error}
+              {problemText(error)}
             </p>
           )}
         </div>

@@ -4,13 +4,16 @@ import { createBudgetLine, deleteBudgetLine, listBudgetLines, updateBudgetLine }
 import { listCategories } from "../../api/categories";
 import { listItems } from "../../api/items";
 import type { BudgetLine, BudgetLineDraft, BudgetLineStatus, Category, Item } from "../../api/types";
+import { keepWhatLoaded, loadPart } from "../../components/feedback/problems";
+import type { LoadFailure } from "../../components/feedback/problems";
 
 export interface BudgetState {
   categories: Category[];
   items: Item[];
   lines: BudgetLine[];
   isLoading: boolean;
-  hasLoadError: boolean;
+  /** The lists that did not load; the rest are shown. */
+  loadFailures: LoadFailure[];
   reload: () => void;
   addLine: (draft: BudgetLineDraft) => Promise<void>;
   editLine: (lineId: number, draft: BudgetLineDraft) => Promise<void>;
@@ -28,25 +31,23 @@ export function useBudget(weddingId: number | null): BudgetState {
   const [items, setItems] = useState<Item[]>([]);
   const [lines, setLines] = useState<BudgetLine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadError, setHasLoadError] = useState(false);
+  const [loadFailures, setLoadFailures] = useState<LoadFailure[]>([]);
 
   const load = useCallback(async () => {
     if (weddingId === null) return;
-    try {
-      const [loadedCategories, loadedItems, loadedLines] = await Promise.all([
-        listCategories(weddingId),
-        listItems(weddingId),
-        listBudgetLines(weddingId),
-      ]);
-      setCategories(loadedCategories);
-      setItems(loadedItems);
-      setLines(loadedLines);
-      setHasLoadError(false);
-    } catch {
-      setHasLoadError(true);
-    } finally {
-      setIsLoading(false);
-    }
+    const [categoriesResult, itemsResult, linesResult] = await Promise.allSettled([
+      listCategories(weddingId),
+      listItems(weddingId),
+      listBudgetLines(weddingId),
+    ]);
+    setLoadFailures(
+      keepWhatLoaded([
+        loadPart("errors.part.categories", categoriesResult, setCategories),
+        loadPart("errors.part.items", itemsResult, setItems),
+        loadPart("errors.part.budget", linesResult, setLines),
+      ]),
+    );
+    setIsLoading(false);
   }, [weddingId]);
 
   useEffect(() => {
@@ -85,7 +86,7 @@ export function useBudget(weddingId: number | null): BudgetState {
     items,
     lines,
     isLoading,
-    hasLoadError,
+    loadFailures,
     reload: () => {
       setIsLoading(true);
       void load();

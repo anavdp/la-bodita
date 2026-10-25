@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import * as calendarApi from "../../api/calendar";
+import { ApiError } from "../../api/client";
 import * as categoriesApi from "../../api/categories";
 import * as itemsApi from "../../api/items";
 import * as tasksApi from "../../api/tasks";
@@ -249,5 +250,63 @@ describe("CalendarPage", () => {
     await user.click(await screen.findByRole("button", { name: "Try again" }));
 
     expect(await screen.findByText("Cake tasting", { selector: "[data-month] *" })).toBeInTheDocument();
+  });
+
+  it("given the events fail on the server, when the page opens, then the tasks still show and it names what failed", async () => {
+    vi.mocked(calendarApi.listCalendarEvents).mockRejectedValue(
+      new ApiError("Something went wrong on our side.", 500, { code: "internal_error", requestId: "1a2b3c4d" }),
+    );
+    renderWithProviders(<CalendarPage />, { route: "/calendar" });
+
+    await loaded();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("We could not load your events.");
+    expect(alert).toHaveTextContent("Reference: 1a2b3c4d");
+    expect(screen.queryByRole("button", { name: /Bridal fair/ })).not.toBeInTheDocument();
+  });
+
+  it("given the planner is offline, when the page opens, then it says so rather than that something broke", async () => {
+    const offline = new ApiError("offline", 0);
+    vi.mocked(categoriesApi.listCategories).mockRejectedValue(offline);
+    vi.mocked(itemsApi.listItems).mockRejectedValue(offline);
+    vi.mocked(tasksApi.listTasks).mockRejectedValue(offline);
+    vi.mocked(calendarApi.listCalendarEvents).mockRejectedValue(offline);
+    renderWithProviders(<CalendarPage />, { route: "/calendar" });
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("We could not load your categories, your items, your tasks, and your events.");
+    expect(alert).toHaveTextContent("You seem to be offline.");
+    expect(alert).not.toHaveTextContent("on our side");
+  });
+
+  it("given the server breaks on save, when an event is saved, then the drawer stays open and shows the reference", async () => {
+    const user = userEvent.setup();
+    vi.mocked(calendarApi.updateCalendarEvent).mockRejectedValue(
+      new ApiError("Something went wrong on our side.", 500, { requestId: "beef0042" }),
+    );
+    renderWithProviders(<CalendarPage />, { route: "/calendar" });
+    await loaded();
+
+    await user.click(within(day("Tuesday, October 27")).getByRole("button", { name: /Bridal fair/ }));
+    const drawer = screen.getByRole("dialog", { name: "Edit event" });
+    await user.click(within(drawer).getByRole("button", { name: "Save" }));
+
+    expect(await within(drawer).findByRole("alert")).toHaveTextContent(
+      "We could not save that. Something went wrong on our side. Reference: beef0042",
+    );
+    expect(screen.getByRole("dialog", { name: "Edit event" })).toBeInTheDocument();
+  });
+
+  it("given no connection, when an event is deleted, then the page says it could not delete it and why", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.mocked(calendarApi.deleteCalendarEvent).mockRejectedValue(new ApiError("offline", 0));
+    renderWithProviders(<CalendarPage />, { route: "/calendar" });
+    await loaded();
+
+    await user.click(within(day("Tuesday, October 27")).getByRole("button", { name: /Bridal fair/ }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Delete" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("We could not delete that. You seem to be offline.");
   });
 });

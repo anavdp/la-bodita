@@ -3,10 +3,14 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 import type { BudgetLine, BudgetLineDraft, BudgetLineStatus } from "../../api/types";
+import { LoadProblems } from "../../components/feedback/LoadProblems";
+import { failedTo, hasFailed } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { Switch } from "../../components/form/Switch";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
-import { compactButton, outlinedCard, secondaryButton } from "../../components/playful/styles";
+import { compactButton, outlinedCard } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -222,13 +226,14 @@ export function BudgetPage() {
   const { wedding } = useWedding();
   const { term } = useSearch();
   const budget = useBudget(wedding?.id ?? null);
-  const { categories, items, lines, isLoading, hasLoadError } = budget;
+  const { categories, items, lines, isLoading, loadFailures } = budget;
 
   const [collapsed, setCollapsed] = useState<Set<string>>(rememberedCollapsed);
   const [choosingId, setChoosingId] = useState<number | null>(null);
   const [formTarget, setFormTarget] = useState<FormTarget>(null);
   const [hint, setHint] = useState<Hint>(null);
-  const [actionError, setActionError] = useState<TranslationKey | null>(null);
+  const [actionError, setActionError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
 
   const visible = useMemo(() => {
     const needle = term.trim().toLowerCase();
@@ -264,8 +269,8 @@ export function BudgetPage() {
           ? { key: status === "paid" ? "budget.hint.paid" : "budget.hint.booked", title: line.title }
           : null,
       );
-    } catch {
-      setActionError("planning.saveFailed");
+    } catch (failure) {
+      setActionError(failedTo("errors.save", failure));
     }
   };
 
@@ -277,8 +282,8 @@ export function BudgetPage() {
         lines.filter((line) => line.status === "considering").map((line) => budget.setStatus(line.id, "idea")),
       );
       setHint({ key: "budget.hint.switchedOff" });
-    } catch {
-      setActionError("planning.saveFailed");
+    } catch (failure) {
+      setActionError(failedTo("errors.save", failure));
     }
   };
 
@@ -297,8 +302,8 @@ export function BudgetPage() {
     setActionError(null);
     try {
       await budget.removeLine(line.id);
-    } catch {
-      setActionError("planning.saveFailed");
+    } catch (failure) {
+      setActionError(failedTo("errors.delete", failure));
     }
   };
 
@@ -316,16 +321,7 @@ export function BudgetPage() {
     if (isLoading) {
       return <p className={`${outlinedCard} p-6 font-playful text-xl text-ink/70`}>{t("budget.loading")}</p>;
     }
-    if (hasLoadError) {
-      return (
-        <div className={`${outlinedCard} flex flex-col items-start gap-4 p-6`}>
-          <p className="font-playful text-xl text-coral">{t("planning.loadFailed")}</p>
-          <button type="button" onClick={budget.reload} className={secondaryButton}>
-            {t("planning.retry")}
-          </button>
-        </div>
-      );
-    }
+    if (hasFailed(loadFailures, "errors.part.budget")) return null;
     if (lines.length === 0) {
       return <p className={`${outlinedCard} p-6 font-playful text-xl text-ink/70`}>{t("budget.empty")}</p>;
     }
@@ -400,11 +396,16 @@ export function BudgetPage() {
       </p>
       {actionError !== null && (
         <p role="alert" className="mb-4 font-playful text-lg text-coral">
-          {t(actionError)}
+          {problemText(actionError)}
         </p>
       )}
 
-      <div className="flex flex-col gap-4">{listArea()}</div>
+      <div className="flex flex-col gap-4">
+        {!isLoading && (
+          <LoadProblems failures={loadFailures} onRetry={budget.reload} className={`${outlinedCard} p-6`} />
+        )}
+        {listArea()}
+      </div>
 
       {formTarget !== null && (
         <BudgetLineForm

@@ -2,9 +2,11 @@ import { useId, useState } from "react";
 
 import { documentFileUrl } from "../../api/documents";
 import type { Item, PaperRequest, WeddingDocument } from "../../api/types";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { compactButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { AddFilesForm } from "./AddFilesForm";
 import type { FilesPreset } from "./AddFilesForm";
 import { AskForPaperForm } from "./AskForPaperForm";
@@ -37,7 +39,8 @@ export function ItemPapers({ weddingId, item, items, refresh }: ItemPapersProps)
   const state = useDocuments(weddingId, item.id, refresh);
   const [panel, setPanel] = useState<Panel>(null);
   const [viewingId, setViewingId] = useState<number | null>(null);
-  const [actionError, setActionError] = useState<TranslationKey | null>(null);
+  const [actionError, setActionError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
 
   const missing = state.requests.filter((request) => request.isMissing);
   const whose = (request: PaperRequest) =>
@@ -47,8 +50,8 @@ export function ItemPapers({ weddingId, item, items, refresh }: ItemPapersProps)
     setActionError(null);
     try {
       await change();
-    } catch {
-      setActionError("planning.saveFailed");
+    } catch (failure) {
+      setActionError(failedTo("errors.save", failure));
     }
   };
 
@@ -176,7 +179,7 @@ export function ItemPapers({ weddingId, item, items, refresh }: ItemPapersProps)
 
       {actionError !== null && (
         <p role="alert" className="text-lg text-coral">
-          {t(actionError)}
+          {problemText(actionError)}
         </p>
       )}
 

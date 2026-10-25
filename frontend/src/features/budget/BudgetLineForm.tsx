@@ -2,12 +2,14 @@ import { useId, useState } from "react";
 import type { FormEvent } from "react";
 
 import type { BudgetLine, BudgetLineDraft, Item } from "../../api/types";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField, textArea } from "../../components/form/styles";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { counts } from "./budgetMath";
 
 /** Dollars for Venezuela, euros for Italy and Spain. */
@@ -52,7 +54,8 @@ export function BudgetLineForm({ line, items, defaultCurrency, onSave, onDelete,
   const [quote, setQuote] = useState(asText(line?.estimatedAmount ?? null));
   const [finalPrice, setFinalPrice] = useState(asText(line?.actualAmount ?? null));
   const [notes, setNotes] = useState(line?.notes ?? "");
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   const currencyOptions = [
@@ -89,8 +92,8 @@ export function BudgetLineForm({ line, items, defaultCurrency, onSave, onDelete,
         actualAmount,
         notes: notes.trim() === "" ? null : notes.trim(),
       });
-    } catch {
-      setError("planning.saveFailed");
+    } catch (failure) {
+      setError(failedTo("errors.save", failure));
       setIsSaving(false);
     }
   };
@@ -167,7 +170,7 @@ export function BudgetLineForm({ line, items, defaultCurrency, onSave, onDelete,
           </div>
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {t(error)}
+              {problemText(error)}
             </p>
           )}
         </div>

@@ -2,6 +2,9 @@ import { useId, useState } from "react";
 import type { FormEvent } from "react";
 
 import type { Category, Item, ItemDraft, ItemStatus } from "../../api/types";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField, textArea } from "../../components/form/styles";
@@ -85,7 +88,8 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
   };
   const [notes, setNotes] = useState(item?.notes ?? "");
   const [isPrivate, setIsPrivate] = useState(item?.isPrivate ?? false);
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   const idFor = (fieldName: string) => `${formId}-${fieldName}`;
@@ -123,8 +127,8 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
         notes: blankToNull(notes),
         isPrivate,
       });
-    } catch {
-      setError("planning.saveFailed");
+    } catch (failure) {
+      setError(failedTo("errors.save", failure));
       setIsSaving(false);
     }
   };
@@ -241,7 +245,7 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
           />
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {t(error)}
+              {problemText(error)}
             </p>
           )}
         </div>

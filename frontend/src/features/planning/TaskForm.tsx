@@ -12,13 +12,14 @@ import {
   uploadDocument,
 } from "../../api/documents";
 import type { Item, PaperRequest, Person, Task, TaskDraft, WeddingDocument } from "../../api/types";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { DatePicker } from "../../components/form/DatePicker";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
 import { compactButton, primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { uploadErrorKey } from "../documents/uploadErrors";
 
@@ -101,7 +102,8 @@ export function TaskForm({ task = null, itemId, items = [], onSave, onDelete, on
   const [files, setFiles] = useState<File[]>([]);
   // Once saved, a retry after a failed upload saves the same task again instead of adding another.
   const [savedId, setSavedId] = useState<number | null>(task?.id ?? null);
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   const papers = useTaskPapers(weddingId, task);
@@ -427,7 +429,7 @@ export function TaskForm({ task = null, itemId, items = [], onSave, onDelete, on
 
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {t(error)}
+              {problemText(error)}
             </p>
           )}
         </div>

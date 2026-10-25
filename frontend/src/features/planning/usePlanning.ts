@@ -4,13 +4,16 @@ import { createCategory, deleteCategory, listCategories, updateCategory } from "
 import { createItem, deleteItem, listItems, updateItem } from "../../api/items";
 import { createTask, deleteTask, listTasks, updateTask } from "../../api/tasks";
 import type { Category, CategoryDraft, Item, ItemDraft, Task, TaskChanges, TaskDraft } from "../../api/types";
+import { keepWhatLoaded, loadPart } from "../../components/feedback/problems";
+import type { LoadFailure } from "../../components/feedback/problems";
 
 export interface PlanningState {
   categories: Category[];
   items: Item[];
   tasks: Task[];
   isLoading: boolean;
-  hasLoadError: boolean;
+  /** The lists that did not load; the rest are shown. */
+  loadFailures: LoadFailure[];
   reload: () => void;
   addCategory: (draft: CategoryDraft) => Promise<void>;
   editCategory: (categoryId: number, changes: Partial<CategoryDraft>) => Promise<void>;
@@ -36,25 +39,23 @@ export function usePlanning(weddingId: number | null): PlanningState {
   const [items, setItems] = useState<Item[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadError, setHasLoadError] = useState(false);
+  const [loadFailures, setLoadFailures] = useState<LoadFailure[]>([]);
 
   const load = useCallback(async () => {
     if (weddingId === null) return;
-    try {
-      const [loadedCategories, loadedItems, loadedTasks] = await Promise.all([
-        listCategories(weddingId),
-        listItems(weddingId),
-        listTasks(weddingId),
-      ]);
-      setCategories(loadedCategories);
-      setItems(loadedItems);
-      setTasks(loadedTasks);
-      setHasLoadError(false);
-    } catch {
-      setHasLoadError(true);
-    } finally {
-      setIsLoading(false);
-    }
+    const [categoriesResult, itemsResult, tasksResult] = await Promise.allSettled([
+      listCategories(weddingId),
+      listItems(weddingId),
+      listTasks(weddingId),
+    ]);
+    setLoadFailures(
+      keepWhatLoaded([
+        loadPart("errors.part.categories", categoriesResult, setCategories),
+        loadPart("errors.part.items", itemsResult, setItems),
+        loadPart("errors.part.tasks", tasksResult, setTasks),
+      ]),
+    );
+    setIsLoading(false);
   }, [weddingId]);
 
   useEffect(() => {
@@ -104,7 +105,7 @@ export function usePlanning(weddingId: number | null): PlanningState {
     items,
     tasks,
     isLoading,
-    hasLoadError,
+    loadFailures,
     reload: () => {
       setIsLoading(true);
       void load();

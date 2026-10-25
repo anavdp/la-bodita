@@ -108,4 +108,70 @@ describe("request", () => {
 
     expect(listener).toHaveBeenCalledTimes(1);
   });
+
+  it("given a crash on the server, when its JSON answer is read, then the code and the reference come along", async () => {
+    vi.stubGlobal("fetch", () =>
+      respondWith(
+        { detail: "Something went wrong on our side.", code: "internal_error", request_id: "1a2b3c4d" },
+        { status: 500 },
+      ),
+    );
+
+    const failure = (await request("/api/weddings/1/calendar-events").catch((error: unknown) => error)) as ApiError;
+
+    expect(failure.code).toBe("internal_error");
+    expect(failure.requestId).toBe("1a2b3c4d");
+    expect(failure.kind).toBe("broken");
+  });
+
+  it("given an error with no JSON body, when it carries the reference header, then the reference is still read", async () => {
+    vi.stubGlobal("fetch", () =>
+      Promise.resolve(new Response("boom", { status: 500, headers: { "X-Request-ID": "deadbeef" } })),
+    );
+
+    const failure = (await request("/api/weddings").catch((error: unknown) => error)) as ApiError;
+
+    expect(failure.requestId).toBe("deadbeef");
+    expect(failure.code).toBe("internal_error");
+  });
+
+  it("given no network, when a call cannot reach the server, then it fails as offline", async () => {
+    vi.stubGlobal("fetch", () => Promise.reject(new TypeError("Failed to fetch")));
+
+    const failure = (await request("/api/weddings").catch((error: unknown) => error)) as ApiError;
+
+    expect(failure).toBeInstanceOf(ApiError);
+    expect(failure.status).toBe(0);
+    expect(failure.kind).toBe("offline");
+    expect(failure.requestId).toBeNull();
+  });
+
+  it.each([
+    [502, "unavailable"],
+    [503, "unavailable"],
+    [504, "unavailable"],
+    [522, "unavailable"],
+    [500, "broken"],
+    [401, "signedOut"],
+    [404, "rejected"],
+    [409, "rejected"],
+    [422, "rejected"],
+  ] as const)("given a %i answer, when it is read, then it is the %s kind", async (status, kind) => {
+    vi.stubGlobal("fetch", () => Promise.resolve(new Response("", { status })));
+
+    const failure = (await request("/api/weddings").catch((error: unknown) => error)) as ApiError;
+
+    expect(failure.kind).toBe(kind);
+  });
+
+  it("given a validation answer, when its detail is a list of fields, then the message stays readable", async () => {
+    vi.stubGlobal("fetch", () =>
+      respondWith({ detail: [{ loc: ["body", "title"], msg: "Field required" }], code: "invalid" }, { status: 422 }),
+    );
+
+    const failure = (await request("/api/weddings").catch((error: unknown) => error)) as ApiError;
+
+    expect(failure.code).toBe("invalid");
+    expect(failure.message).toBe("422");
+  });
 });

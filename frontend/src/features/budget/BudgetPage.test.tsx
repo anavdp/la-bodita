@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import * as budgetApi from "../../api/budget";
+import { ApiError } from "../../api/client";
 import * as categoriesApi from "../../api/categories";
 import * as itemsApi from "../../api/items";
 import type { BudgetLine } from "../../api/types";
@@ -336,5 +337,14 @@ describe("BudgetPage", () => {
     await screen.findByText("Parish fee");
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Presupuesto");
     expect(screen.getByRole("button", { name: "Apagar todo" })).toBeInTheDocument();
+  });
+
+  it("given the items fail to load, when the page opens, then the costs still show and it says what failed", async () => {
+    vi.mocked(itemsApi.listItems).mockRejectedValue(new ApiError("", 502));
+    renderWithProviders(<BudgetPage />, { route: "/budget" });
+
+    expect(await screen.findByText("Parish fee")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("We could not load your items.");
+    expect(screen.getByRole("alert")).toHaveTextContent("isn't answering");
   });
 });

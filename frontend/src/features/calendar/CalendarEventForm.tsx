@@ -2,13 +2,15 @@ import { useId, useState } from "react";
 import type { FormEvent } from "react";
 
 import type { CalendarEvent, CalendarEventDraft, Item } from "../../api/types";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { DatePicker } from "../../components/form/DatePicker";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField, textArea } from "../../components/form/styles";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 
 interface CalendarEventFormProps {
   /** The event being edited, or null to add one. */
@@ -37,7 +39,8 @@ export function CalendarEventForm({ event, startDate = null, items, onSave, onDe
   const [end, setEnd] = useState(event?.endDate ?? null);
   const [time, setTime] = useState(event?.startTime?.slice(0, 5) ?? "");
   const [notes, setNotes] = useState(event?.notes ?? "");
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (submitted: FormEvent) => {
@@ -68,8 +71,8 @@ export function CalendarEventForm({ event, startDate = null, items, onSave, onDe
         itemId: pickedItem?.id ?? null,
         notes: notes.trim() === "" ? null : notes.trim(),
       });
-    } catch {
-      setError("planning.saveFailed");
+    } catch (failure) {
+      setError(failedTo("errors.save", failure));
       setIsSaving(false);
     }
   };
@@ -139,7 +142,7 @@ export function CalendarEventForm({ event, startDate = null, items, onSave, onDe
           </div>
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {t(error)}
+              {problemText(error)}
             </p>
           )}
         </div>

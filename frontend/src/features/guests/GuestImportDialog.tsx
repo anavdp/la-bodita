@@ -4,6 +4,9 @@ import type { ChangeEvent } from "react";
 import { ApiError } from "../../api/client";
 import { guestImportTemplateUrl, previewGuestImport } from "../../api/guests";
 import type { GuestImportDraft, GuestImportRow } from "../../api/types";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
@@ -37,7 +40,8 @@ export function GuestImportDialog({ weddingId, onImport, onClose }: GuestImportD
   const { t } = useTranslation();
 
   const [rows, setRows] = useState<GuestImportRow[] | null>(null);
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isBusy, setIsBusy] = useState(false);
 
   const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -66,8 +70,8 @@ export function GuestImportDialog({ weddingId, onImport, onClose }: GuestImportD
     setIsBusy(true);
     try {
       await onImport(readyGuests);
-    } catch {
-      setError("guests.import.importFailed");
+    } catch (failure) {
+      setError(failedTo("guests.import.importFailed", failure));
     } finally {
       setIsBusy(false);
     }
@@ -207,7 +211,7 @@ export function GuestImportDialog({ weddingId, onImport, onClose }: GuestImportD
 
         {error !== null && (
           <p role="alert" className="text-lg text-coral">
-            {t(error)}
+            {problemText(error)}
           </p>
         )}
       </div>

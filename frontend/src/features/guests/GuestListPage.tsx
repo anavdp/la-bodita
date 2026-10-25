@@ -10,11 +10,14 @@ import type {
   HouseholdDraft,
   RsvpStatus,
 } from "../../api/types";
+import { LoadProblems } from "../../components/feedback/LoadProblems";
+import { failedTo, hasFailed } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
-import { folderTab, outlinedCard, secondaryButton } from "../../components/playful/styles";
+import { folderTab, outlinedCard } from "../../components/playful/styles";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
@@ -57,7 +60,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     guests,
     households,
     isLoading,
-    hasLoadError,
+    loadFailures,
     reload,
     addGuest,
     addGuests,
@@ -74,7 +77,8 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [householdDialog, setHouseholdDialog] = useState<HouseholdDialog>(null);
   /** Which row action failed, if any: the dialog reports its own failures. */
-  const [actionError, setActionError] = useState<TranslationKey | null>(null);
+  const [actionError, setActionError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
 
   /** The RSVP status picked in the header summary, if any: the table shows only those guests. */
   const [rsvpFilter, setRsvpFilter] = useState<RsvpStatus | null>(null);
@@ -124,8 +128,8 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     setActionError(null);
     try {
       await removeGuest(guest.id);
-    } catch {
-      setActionError("guests.deleteFailed");
+    } catch (failure) {
+      setActionError(failedTo("guests.deleteFailed", failure));
     }
   };
 
@@ -133,8 +137,8 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     setActionError(null);
     try {
       await setRsvpStatus(guest.id, rsvpStatus);
-    } catch {
-      setActionError("guests.rsvpFailed");
+    } catch (failure) {
+      setActionError(failedTo("guests.rsvpFailed", failure));
     }
   };
 
@@ -142,8 +146,8 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     setActionError(null);
     try {
       await setBroadcastList(household.id, broadcastList);
-    } catch {
-      setActionError("households.broadcastFailed");
+    } catch (failure) {
+      setActionError(failedTo("households.broadcastFailed", failure));
     }
   };
 
@@ -165,16 +169,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     if (isLoading) {
       return <p className="font-playful text-xl text-ink/70">{t("guests.loading")}</p>;
     }
-    if (hasLoadError) {
-      return (
-        <div className="flex flex-col items-start gap-4">
-          <p className="font-playful text-xl text-coral">{t("guests.loadFailed")}</p>
-          <button type="button" onClick={reload} className={secondaryButton}>
-            {t("guests.retry")}
-          </button>
-        </div>
-      );
-    }
+    if (hasFailed(loadFailures, "errors.part.guests")) return null;
     if (guests.length === 0) {
       return <p className="font-playful text-xl text-ink/70">{t("guests.empty")}</p>;
     }
@@ -285,9 +280,10 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
       </nav>
       {actionError !== null && (
         <p role="alert" className="mb-4 font-playful text-lg text-coral">
-          {t(actionError)}
+          {problemText(actionError)}
         </p>
       )}
+      {!isLoading && <LoadProblems failures={loadFailures} onRetry={reload} />}
       {tableArea()}
 
       {dialogTarget !== null && (
