@@ -6,7 +6,7 @@ import { Dropdown } from "../../components/form/Dropdown";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { outlinedCard } from "../../components/playful/styles";
-import { AddTaskForm } from "../planning/AddTaskForm";
+import { TaskForm } from "../planning/TaskForm";
 import { categoryLabel } from "../planning/CategoryChips";
 import { formatDueDate, formatDueTime, isOverdue } from "../planning/schedule";
 import { itemStatuses, statusPill } from "./itemStatus";
@@ -19,7 +19,10 @@ interface ItemDetailProps {
   onChangeStatus: (status: ItemStatus) => void;
   onEdit: () => void;
   onDelete: () => void;
-  onAddTask: (draft: TaskDraft) => Promise<void>;
+  onAddTask: (draft: TaskDraft) => Promise<Task>;
+  onEditTask: (taskId: number, draft: TaskDraft) => Promise<Task>;
+  /** A task form closed: its papers and files may have changed. */
+  onTaskFormClosed?: () => void;
   onToggleTask: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
   /** More sections under the tasks: the item's papers and files. */
@@ -53,6 +56,8 @@ export function ItemDetail({
   onEdit,
   onDelete,
   onAddTask,
+  onEditTask,
+  onTaskFormClosed,
   onToggleTask,
   onDeleteTask,
   children,
@@ -60,6 +65,7 @@ export function ItemDetail({
   const { t, language } = useTranslation();
   const titleId = useId();
   const [isAdding, setIsAdding] = useState(false);
+  const [editing, setEditing] = useState<Task | null>(null);
 
   // Done tasks sink to the bottom, the rest keep the API's soonest-first order.
   const ordered = [...tasks.filter((task) => !task.isDone), ...tasks.filter((task) => task.isDone)];
@@ -165,6 +171,16 @@ export function ItemDetail({
               )}
               <button
                 type="button"
+                aria-label={t("tasks.edit", { title: task.title })}
+                onClick={() => setEditing(task)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-ink/60 transition-colors hover:bg-accent/40 hover:text-ink"
+              >
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  edit
+                </span>
+              </button>
+              <button
+                type="button"
                 aria-label={t("tasks.delete", { title: task.title })}
                 onClick={() => onDeleteTask(task)}
                 className="px-1 text-xl text-ink opacity-40 transition-opacity hover:text-coral hover:opacity-100 group-hover:opacity-100"
@@ -175,13 +191,37 @@ export function ItemDetail({
           ))}
         </ul>
         {isAdding ? (
-          <AddTaskForm itemId={item.id} onAdd={onAddTask} onClose={() => setIsAdding(false)} />
+          <TaskForm
+            itemId={item.id}
+            onSave={(draft) => onAddTask(draft)}
+            onClose={() => {
+              setIsAdding(false);
+              onTaskFormClosed?.();
+            }}
+          />
         ) : (
           <button type="button" onClick={() => setIsAdding(true)} className={`${linkStyle} self-start`}>
             {t("tasks.addOpen")}
           </button>
         )}
       </div>
+
+      {editing !== null && (
+        <TaskForm
+          task={editing}
+          itemId={item.id}
+          onSave={(draft) => onEditTask(editing.id, draft)}
+          onDelete={() => {
+            if (!window.confirm(t("tasks.deleteConfirm", { title: editing.title }))) return;
+            setEditing(null);
+            onDeleteTask(editing);
+          }}
+          onClose={() => {
+            setEditing(null);
+            onTaskFormClosed?.();
+          }}
+        />
+      )}
 
       {children}
 

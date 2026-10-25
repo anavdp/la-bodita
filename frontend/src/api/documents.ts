@@ -99,9 +99,18 @@ function toPayload(changes: object): Record<string, unknown> {
 const documentsUrl = (weddingId: number) => `/api/weddings/${weddingId}/documents`;
 const requestsUrl = (weddingId: number) => `/api/weddings/${weddingId}/paper-requests`;
 
-/** Newest first; `itemId` narrows it to one item's. */
-export async function listDocuments(weddingId: number, filter: { itemId?: number } = {}): Promise<WeddingDocument[]> {
-  const query = filter.itemId === undefined ? "" : `?item_id=${filter.itemId}`;
+/** "?item_id=7": only the filters given. */
+function queryOf(filter: Record<string, number | undefined>): string {
+  const pairs = Object.entries(filter).filter(([, value]) => value !== undefined);
+  return pairs.length === 0 ? "" : `?${pairs.map(([key, value]) => `${payloadKeys[key]}=${value}`).join("&")}`;
+}
+
+/** Newest first; `itemId` or `requirementId` narrows it to one item's or one task's. */
+export async function listDocuments(
+  weddingId: number,
+  filter: { itemId?: number; requirementId?: number } = {},
+): Promise<WeddingDocument[]> {
+  const query = queryOf(filter);
   const payloads = await request<DocumentPayload[]>(`${documentsUrl(weddingId)}${query}`);
   return payloads.map(toDocument);
 }
@@ -140,7 +149,7 @@ export function deleteDocument(weddingId: number, documentId: number): Promise<v
 
 /** In the order they were asked for; `itemId` narrows it to one item's. */
 export async function listPaperRequests(weddingId: number, filter: { itemId?: number } = {}): Promise<PaperRequest[]> {
-  const query = filter.itemId === undefined ? "" : `?item_id=${filter.itemId}`;
+  const query = queryOf(filter);
   const payloads = await request<PaperRequestPayload[]>(`${requestsUrl(weddingId)}${query}`);
   return payloads.map(toPaperRequest);
 }

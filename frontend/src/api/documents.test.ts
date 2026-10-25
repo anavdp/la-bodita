@@ -95,6 +95,15 @@ describe("the documents API", () => {
     expect(fetchMock.mock.calls[0][0]).toBe("http://localhost:8000/api/weddings/3/documents?item_id=7");
   });
 
+  it("given a task, when its documents are listed, then only its are asked for", async () => {
+    const fetchMock = vi.fn((_url: string) => jsonResponse([]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await listDocuments(3, { requirementId: 4 });
+
+    expect(fetchMock.mock.calls[0][0]).toBe("http://localhost:8000/api/weddings/3/documents?requirement_id=4");
+  });
+
   it("given a file and where it goes, when it is uploaded, then both travel as a form", async () => {
     const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse(documentPayload, 201));
     vi.stubGlobal("fetch", fetchMock);

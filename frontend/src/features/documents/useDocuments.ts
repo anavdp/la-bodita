@@ -45,9 +45,10 @@ export interface DocumentsState {
 
 /**
  * Every file and every paper asked for, with what they hang off, or only one
- * item's (`itemId`, for the item detail). Each change reloads the lot.
+ * item's (`itemId`, for the item detail). Each change reloads the lot, and so
+ * does a new `refresh`, for changes made elsewhere (a task's papers).
  */
-export function useDocuments(weddingId: number | null, itemId?: number): DocumentsState {
+export function useDocuments(weddingId: number | null, itemId?: number, refresh?: number): DocumentsState {
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [documents, setDocuments] = useState<WeddingDocument[]>([]);
@@ -82,7 +83,7 @@ export function useDocuments(weddingId: number | null, itemId?: number): Documen
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, refresh]);
 
   const changeThenReload = useCallback(
     async (change: (weddingId: number) => Promise<unknown>) => {

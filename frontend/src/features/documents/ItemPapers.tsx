@@ -9,6 +9,7 @@ import { AddFilesForm } from "./AddFilesForm";
 import type { FilesPreset } from "./AddFilesForm";
 import { AskForPaperForm } from "./AskForPaperForm";
 import { DocumentTile } from "./DocumentTile";
+import { PhotoViewer } from "./PhotoViewer";
 import { useDocuments } from "./useDocuments";
 
 interface ItemPapersProps {
@@ -16,6 +17,8 @@ interface ItemPapersProps {
   item: Item;
   /** Every item, for moving a file to another one. */
   items: Item[];
+  /** Bumped when the item's tasks changed their papers or files. */
+  refresh?: number;
 }
 
 type Panel = { kind: "files"; document: WeddingDocument | null; preset?: FilesPreset } | { kind: "ask" } | null;
@@ -27,12 +30,13 @@ const heading = "font-playful-display text-xl uppercase tracking-wide";
  * An item's paperwork in its detail: the papers it asks for, ticked off as
  * they are uploaded, and every photo and file filed under it.
  */
-export function ItemPapers({ weddingId, item, items }: ItemPapersProps) {
+export function ItemPapers({ weddingId, item, items, refresh }: ItemPapersProps) {
   const { t } = useTranslation();
   const papersId = useId();
   const filesId = useId();
-  const state = useDocuments(weddingId, item.id);
+  const state = useDocuments(weddingId, item.id, refresh);
   const [panel, setPanel] = useState<Panel>(null);
+  const [viewingId, setViewingId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
 
   const missing = state.requests.filter((request) => request.isMissing);
@@ -152,6 +156,7 @@ export function ItemPapers({ weddingId, item, items }: ItemPapersProps) {
               weddingId={weddingId}
               document={document}
               onEdit={(each) => setPanel({ kind: "files", document: each })}
+              onView={(photo) => setViewingId(photo.id)}
             />
           ))}
           <li>
@@ -175,6 +180,18 @@ export function ItemPapers({ weddingId, item, items }: ItemPapersProps) {
         </p>
       )}
 
+      {viewingId !== null && (
+        <PhotoViewer
+          weddingId={weddingId}
+          photos={state.documents.filter((document) => document.kind === "photo")}
+          startId={viewingId}
+          onClose={() => setViewingId(null)}
+          onEdit={(photo) => {
+            setViewingId(null);
+            setPanel({ kind: "files", document: photo });
+          }}
+        />
+      )}
       {panel?.kind === "files" && (
         <AddFilesForm
           weddingId={weddingId}

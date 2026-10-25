@@ -11,7 +11,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
-import { AddTaskForm } from "../planning/AddTaskForm";
+import { TaskForm } from "../planning/TaskForm";
 import { CategoryChips, chip } from "../planning/CategoryChips";
 import { formatDueDate, formatDueTime, groupOpenTasks, isOverdue } from "../planning/schedule";
 import { usePlanning } from "../planning/usePlanning";
@@ -22,16 +22,17 @@ interface TaskRowProps {
   task: Task;
   category: Category | undefined;
   onToggle: (task: Task) => void;
+  onEdit: (task: Task) => void;
 }
 
-function TaskRow({ task, category, onToggle }: TaskRowProps) {
-  const { language } = useTranslation();
+function TaskRow({ task, category, onToggle, onEdit }: TaskRowProps) {
+  const { t, language } = useTranslation();
   const due = task.dueDate
     ? [formatDueDate(task.dueDate, language), task.dueTime && formatDueTime(task.dueTime)].filter(Boolean).join(" · ")
     : "–";
 
   return (
-    <li className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 border-b-2 border-ink/10 py-3 font-playful text-ink last:border-b-0 sm:grid-cols-[1fr_14rem_8rem]">
+    <li className="group grid grid-cols-[1fr_auto_auto] items-center gap-x-4 gap-y-1 border-b-2 border-ink/10 py-3 font-playful text-ink last:border-b-0 sm:grid-cols-[1fr_14rem_8rem_auto]">
       <label className="flex cursor-pointer items-center gap-4">
         <input
           type="checkbox"
@@ -58,6 +59,16 @@ function TaskRow({ task, category, onToggle }: TaskRowProps) {
       >
         {due}
       </span>
+      <button
+        type="button"
+        aria-label={t("tasks.edit", { title: task.title })}
+        onClick={() => onEdit(task)}
+        className="flex h-9 w-9 items-center justify-center rounded-full text-ink/60 transition-colors hover:bg-accent/40 hover:text-ink"
+      >
+        <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+          edit
+        </span>
+      </button>
     </li>
   );
 }
@@ -92,6 +103,7 @@ export function ChecklistPage() {
   const isAdding = searchParams.get("add") === "task";
   const closeAdding = () => setSearchParams({}, { replace: true });
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
+  const [editing, setEditing] = useState<Task | null>(null);
 
   const categoriesById = useMemo(() => new Map(categories.map((each) => [each.id, each])), [categories]);
   const filtered = useMemo(() => {
@@ -120,6 +132,7 @@ export function ChecklistPage() {
       task={task}
       category={task.categoryId === null ? undefined : categoriesById.get(task.categoryId)}
       onToggle={handleToggle}
+      onEdit={setEditing}
     />
   );
 
@@ -163,7 +176,22 @@ export function ChecklistPage() {
         </button>
       </PageHeader>
 
-      {isAdding && <AddTaskForm items={items} onAdd={planning.addTask} onClose={closeAdding} />}
+      {isAdding && (
+        <TaskForm items={items} onSave={(draft) => planning.addTask(draft)} onClose={closeAdding} />
+      )}
+      {editing !== null && (
+        <TaskForm
+          task={editing}
+          items={items}
+          onSave={(draft) => planning.editTask(editing.id, draft)}
+          onDelete={() => {
+            if (!window.confirm(t("tasks.deleteConfirm", { title: editing.title }))) return;
+            setEditing(null);
+            void planning.removeTask(editing.id).catch(() => setActionError("planning.saveFailed"));
+          }}
+          onClose={() => setEditing(null)}
+        />
+      )}
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <div role="group" aria-label={t("checklist.showLabel")} className="mr-4 flex gap-2">

@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import * as categoriesApi from "../../api/categories";
+import * as documentsApi from "../../api/documents";
 import * as itemsApi from "../../api/items";
 import * as tasksApi from "../../api/tasks";
 import { aCategory, anItem, aTask } from "../../testing/planningFactory";
@@ -9,6 +10,7 @@ import { renderWithProviders } from "../../testing/renderWithProviders";
 import { ChecklistPage } from "./ChecklistPage";
 
 vi.mock("../../api/categories");
+vi.mock("../../api/documents");
 vi.mock("../../api/items");
 vi.mock("../../api/tasks");
 
@@ -34,6 +36,9 @@ describe("ChecklistPage", () => {
     vi.mocked(categoriesApi.listCategories).mockResolvedValue([cake, church]);
     vi.mocked(itemsApi.listItems).mockResolvedValue([dulceRosa, iglesia]);
     vi.mocked(tasksApi.listTasks).mockResolvedValue([lateCall, certificates, flavors, readings, rings, reserved]);
+    vi.mocked(documentsApi.listPeople).mockResolvedValue([]);
+    vi.mocked(documentsApi.listDocuments).mockResolvedValue([]);
+    vi.mocked(documentsApi.listPaperRequests).mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -140,6 +145,39 @@ describe("ChecklistPage", () => {
         dueTime: null,
       }),
     );
+  });
+
+  it("given a task, when it is edited, then its new date is saved", async () => {
+    vi.mocked(tasksApi.updateTask).mockResolvedValue({ ...certificates, dueDate: "2026-10-28" });
+    renderWithProviders(<ChecklistPage />, { route: "/checklist" });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Edit Bring baptism certificates" }));
+    const drawer = screen.getByRole("dialog");
+    expect(within(drawer).getByLabelText("Task")).toHaveValue("Bring baptism certificates");
+    await userEvent.click(within(drawer).getByRole("button", { name: "Date" }));
+    await userEvent.click(within(drawer).getByRole("button", { name: "Wednesday, October 28, 2026" }));
+    await userEvent.click(within(drawer).getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(tasksApi.updateTask).toHaveBeenCalledWith(1, certificates.id, {
+        title: "Bring baptism certificates",
+        itemId: certificates.itemId,
+        dueDate: "2026-10-28",
+        dueTime: null,
+      }),
+    );
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("given a task, when it is deleted from its form, then it is gone", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.mocked(tasksApi.deleteTask).mockResolvedValue();
+    renderWithProviders(<ChecklistPage />, { route: "/checklist" });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Edit Bring baptism certificates" }));
+    await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(tasksApi.deleteTask).toHaveBeenCalledWith(1, certificates.id));
   });
 
   it("given a task the API refuses, when it is added, then the form says so", async () => {

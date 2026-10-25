@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createCategory, deleteCategory, listCategories, updateCategory } from "../../api/categories";
 import { createItem, deleteItem, listItems, updateItem } from "../../api/items";
 import { createTask, deleteTask, listTasks, updateTask } from "../../api/tasks";
-import type { Category, CategoryDraft, Item, ItemDraft, Task, TaskDraft } from "../../api/types";
+import type { Category, CategoryDraft, Item, ItemDraft, Task, TaskChanges, TaskDraft } from "../../api/types";
 
 export interface PlanningState {
   categories: Category[];
@@ -18,7 +18,9 @@ export interface PlanningState {
   addItem: (draft: ItemDraft) => Promise<void>;
   editItem: (itemId: number, changes: Partial<ItemDraft>) => Promise<void>;
   removeItem: (itemId: number) => Promise<void>;
-  addTask: (draft: TaskDraft) => Promise<void>;
+  /** Answers with the task as saved, so its papers and files can follow it. */
+  addTask: (draft: TaskDraft) => Promise<Task>;
+  editTask: (taskId: number, changes: TaskChanges) => Promise<Task>;
   setTaskDone: (taskId: number, isDone: boolean) => Promise<void>;
   removeTask: (taskId: number) => Promise<void>;
 }
@@ -68,6 +70,17 @@ export function usePlanning(weddingId: number | null): PlanningState {
     [weddingId, load],
   );
 
+  /** A task as saved, for the papers and files that go with it. */
+  const saveTaskThenReload = useCallback(
+    async (save: (weddingId: number) => Promise<Task>): Promise<Task> => {
+      if (weddingId === null) throw new Error("No wedding to plan");
+      const task = await save(weddingId);
+      await load();
+      return task;
+    },
+    [weddingId, load],
+  );
+
   /** A tick shows at once; if the API refuses, it goes back. */
   const setTaskDone = useCallback(
     async (taskId: number, isDone: boolean) => {
@@ -102,7 +115,8 @@ export function usePlanning(weddingId: number | null): PlanningState {
     addItem: (draft) => changeThenReload((id) => createItem(id, draft)),
     editItem: (itemId, changes) => changeThenReload((id) => updateItem(id, itemId, changes)),
     removeItem: (itemId) => changeThenReload((id) => deleteItem(id, itemId)),
-    addTask: (draft) => changeThenReload((id) => createTask(id, draft)),
+    addTask: (draft) => saveTaskThenReload((id) => createTask(id, draft)),
+    editTask: (taskId, changes) => saveTaskThenReload((id) => updateTask(id, taskId, changes)),
     setTaskDone,
     removeTask: (taskId) => changeThenReload((id) => deleteTask(id, taskId)),
   };

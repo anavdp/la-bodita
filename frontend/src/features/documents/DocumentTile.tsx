@@ -8,6 +8,8 @@ interface DocumentTileProps {
   weddingId: number;
   document: WeddingDocument;
   onEdit: (document: WeddingDocument) => void;
+  /** Opens a photo in the viewer; a paper always opens in its own tab. */
+  onView: (document: WeddingDocument) => void;
 }
 
 /** "PDF", "JPG": what a paper tile says it is. */
@@ -15,10 +17,10 @@ const extensionOf = (document: WeddingDocument) =>
   (document.fileName.match(/\.([a-z0-9]+)$/i)?.[1] ?? document.kind).toUpperCase().slice(0, 4);
 
 /**
- * A file on a shelf: a photo as its thumbnail, a paper as a card. Tapping it
- * opens the file; the pencil opens its details.
+ * A file on a shelf: a photo as its thumbnail, a paper as a card. Tapping a
+ * photo opens the viewer, a paper opens the file; the pencil opens its details.
  */
-export function DocumentTile({ weddingId, document, onEdit }: DocumentTileProps) {
+export function DocumentTile({ weddingId, document, onEdit, onView }: DocumentTileProps) {
   const { t } = useTranslation();
   // HEIC straight from an iPhone shows in Safari but not in every browser.
   const [isBroken, setIsBroken] = useState(false);
@@ -42,7 +44,12 @@ export function DocumentTile({ weddingId, document, onEdit }: DocumentTileProps)
   if (document.kind === "photo") {
     return (
       <li className="relative w-24 shrink-0">
-        <a href={href} target="_blank" rel="noreferrer" className="block">
+        <button
+          type="button"
+          aria-label={t("documents.view", { title: document.title })}
+          onClick={() => onView(document)}
+          className="block w-full text-left"
+        >
           {showsImage ? (
             <img
               src={href}
@@ -59,7 +66,7 @@ export function DocumentTile({ weddingId, document, onEdit }: DocumentTileProps)
             </span>
           )}
           <span className="mt-1 block truncate text-sm text-ink/80">{document.title}</span>
-        </a>
+        </button>
         {editButton}
       </li>
     );

@@ -335,6 +335,20 @@ describe("DocumentsPage", () => {
       expect(await screen.findByText(/No files yet/)).toBeInTheDocument();
     });
 
+    it("given photos on the shelves, when one is tapped, then it opens in the viewer and can be edited from there", async () => {
+      renderWithProviders(<DocumentsPage tab="all" />, { route: "/documents/all" });
+
+      await userEvent.click(await screen.findByRole("button", { name: "View Fitting 1" }));
+
+      const viewer = screen.getByRole("dialog", { name: "Photos" });
+      expect(within(viewer).getByText("1 of 2")).toBeInTheDocument();
+      await userEvent.click(within(viewer).getByRole("button", { name: "Next photo" }));
+      expect(within(viewer).getByRole("img", { name: "Engagement photo" })).toBeInTheDocument();
+      await userEvent.click(within(viewer).getByRole("button", { name: "Edit Engagement photo" }));
+      expect(screen.queryByRole("dialog", { name: "Photos" })).not.toBeInTheDocument();
+      expect(screen.getByRole("dialog")).toHaveTextContent("Edit file");
+    });
+
     it("given a photo the browser can't show, when it fails to load, then a plain tile stands in", async () => {
       renderWithProviders(<DocumentsPage tab="all" />, { route: "/documents/all" });
 

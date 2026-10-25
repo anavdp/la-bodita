@@ -44,6 +44,7 @@ export function ItemsPage() {
     const linked = Number(searchParams.get("item"));
     return Number.isInteger(linked) && linked > 0 ? linked : null;
   });
+  const [papersVersion, setPapersVersion] = useState(0);
   const [dialogTarget, setDialogTarget] = useState<DialogTarget>(null);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
@@ -214,10 +215,12 @@ export function ItemsPage() {
             onEdit={() => setDialogTarget({ item: selected })}
             onDelete={() => handleDelete(selected)}
             onAddTask={planning.addTask}
+            onEditTask={planning.editTask}
+            onTaskFormClosed={() => setPapersVersion((version) => version + 1)}
             onToggleTask={(task: Task) => void attempt(() => planning.setTaskDone(task.id, !task.isDone))}
             onDeleteTask={(task: Task) => void attempt(() => planning.removeTask(task.id))}
           >
-            {wedding && <ItemPapers weddingId={wedding.id} item={selected} items={items} />}
+            {wedding && <ItemPapers weddingId={wedding.id} item={selected} items={items} refresh={papersVersion} />}
           </ItemDetail>
         )}
       </div>

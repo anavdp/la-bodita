@@ -9,6 +9,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import { categoryLabel, chip } from "../planning/CategoryChips";
 import { DocumentTile } from "./DocumentTile";
 import { shelves } from "./papers";
+import { PhotoViewer } from "./PhotoViewer";
 import type { Shelf } from "./papers";
 
 interface AllFilesTabProps {
@@ -23,6 +24,7 @@ interface AllFilesTabProps {
 export function AllFilesTab({ weddingId, categories, documents, searchTerm, onEdit }: AllFilesTabProps) {
   const { t } = useTranslation();
   const [kind, setKind] = useState<DocumentKind | null>(null);
+  const [viewingId, setViewingId] = useState<number | null>(null);
 
   const needle = fold(searchTerm.trim());
   const searched = documents.filter((document) =>
@@ -31,6 +33,11 @@ export function AllFilesTab({ weddingId, categories, documents, searchTerm, onEd
     ),
   );
   const shown = searched.filter((document) => kind === null || document.kind === kind);
+  const shelved = shelves(shown, categories);
+  // The viewer pages through the photos in the order the shelves show them.
+  const photos = shelved.flatMap((shelf) => shelf.items.flatMap((item) => item.documents)).filter(
+    (document) => document.kind === "photo",
+  );
   const countOf = (each: DocumentKind) => searched.filter((document) => document.kind === each).length;
 
   const shelfLabel = (shelf: Shelf) => {
@@ -65,7 +72,7 @@ export function AllFilesTab({ weddingId, categories, documents, searchTerm, onEd
         <p className={`${outlinedCard} p-6 font-playful text-xl text-ink/70`}>{t("documents.noMatches")}</p>
       ) : (
         <div className="flex flex-col gap-4">
-          {shelves(shown, categories).map((shelf) => (
+          {shelved.map((shelf) => (
             <section key={shelf.key} aria-label={shelfLabel(shelf)} className={`${outlinedCard} px-4 py-4 md:px-6`}>
               <h2 className="mb-2 flex items-center gap-3 text-ink">
                 <span
@@ -91,7 +98,13 @@ export function AllFilesTab({ weddingId, categories, documents, searchTerm, onEd
                   )}
                   <ul className="flex flex-wrap gap-4 pt-2">
                     {item.documents.map((document) => (
-                      <DocumentTile key={document.id} weddingId={weddingId} document={document} onEdit={onEdit} />
+                      <DocumentTile
+                        key={document.id}
+                        weddingId={weddingId}
+                        document={document}
+                        onEdit={onEdit}
+                        onView={(photo) => setViewingId(photo.id)}
+                      />
                     ))}
                   </ul>
                 </div>
@@ -99,6 +112,19 @@ export function AllFilesTab({ weddingId, categories, documents, searchTerm, onEd
             </section>
           ))}
         </div>
+      )}
+
+      {viewingId !== null && (
+        <PhotoViewer
+          weddingId={weddingId}
+          photos={photos}
+          startId={viewingId}
+          onClose={() => setViewingId(null)}
+          onEdit={(photo) => {
+            setViewingId(null);
+            onEdit(photo);
+          }}
+        />
       )}
     </>
   );

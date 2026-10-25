@@ -182,6 +182,39 @@ describe("ItemsPage", () => {
     expect(tasksApi.createTask).not.toHaveBeenCalled();
   });
 
+  it("given a task, when it is edited, then its new date is saved", async () => {
+    vi.mocked(tasksApi.updateTask).mockResolvedValue({ ...certificates, dueDate: "2026-10-28" });
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Edit Bring baptism certificates" }));
+    const drawer = screen.getByRole("dialog");
+    expect(within(drawer).getByLabelText("Task")).toHaveValue("Bring baptism certificates");
+    await userEvent.click(within(drawer).getByRole("button", { name: "Date" }));
+    await userEvent.click(within(drawer).getByRole("button", { name: "Wednesday, October 28, 2026" }));
+    await userEvent.click(within(drawer).getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(tasksApi.updateTask).toHaveBeenCalledWith(1, certificates.id, {
+        title: "Bring baptism certificates",
+        itemId: certificates.itemId,
+        dueDate: "2026-10-28",
+        dueTime: null,
+      }),
+    );
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("given a task, when it is deleted from its form, then it is gone", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.mocked(tasksApi.deleteTask).mockResolvedValue();
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Edit Bring baptism certificates" }));
+    await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(tasksApi.deleteTask).toHaveBeenCalledWith(1, certificates.id));
+  });
+
   it("given a task, when it is deleted, then it is removed", async () => {
     vi.mocked(tasksApi.deleteTask).mockResolvedValue();
     renderWithProviders(<ItemsPage />, { route: "/items" });
