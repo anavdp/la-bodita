@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import Wedding
+from app.models import UserAccount, Wedding
 
 
 def test_given_a_wedding_when_the_list_is_requested_then_it_is_returned(
@@ -70,3 +70,21 @@ def test_given_no_such_wedding_when_it_is_changed_then_it_is_not_found(client: T
     response = client.patch(f"/api/weddings/{wedding.id + 1}", json={"name": "Otra"})
 
     assert response.status_code == 404
+
+
+def test_given_two_people_on_the_list_when_the_wedding_people_are_asked_for_then_both_come_back_without_emails(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    db_session.add_all(
+        [
+            UserAccount(wedding_id=wedding.id, email="vicky@example.com", display_name="Vicky"),
+            UserAccount(wedding_id=wedding.id, email="gerardo@example.com", display_name="Gerardo"),
+        ]
+    )
+    db_session.commit()
+
+    response = client.get(f"/api/weddings/{wedding.id}/people")
+
+    assert response.status_code == 200
+    assert [person["display_name"] for person in response.json()] == ["Vicky", "Gerardo"]
+    assert "email" not in response.json()[0]

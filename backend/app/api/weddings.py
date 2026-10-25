@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from sqlalchemy import select
 
 from app.api.guests import SessionDependency, WeddingDependency
-from app.models import Wedding
-from app.schemas import WeddingRead, WeddingUpdate
+from app.models import UserAccount, Wedding
+from app.schemas import Person, WeddingRead, WeddingUpdate
 
 router = APIRouter(prefix="/api/weddings", tags=["weddings"])
 
@@ -22,3 +22,9 @@ def update_wedding(payload: WeddingUpdate, wedding: WeddingDependency, session: 
     session.commit()
     session.refresh(wedding)
     return wedding
+
+
+@router.get("/{wedding_id}/people", response_model=list[Person])
+def list_people(wedding: WeddingDependency, session: SessionDependency) -> list[UserAccount]:
+    """The two of us, in the order we were added: the columns of the papers table."""
+    return list(session.scalars(select(UserAccount).where(UserAccount.wedding_id == wedding.id).order_by(UserAccount.id)))
