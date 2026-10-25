@@ -604,3 +604,60 @@ describe("GuestListPage sorting by answer", () => {
     expect(rowNames()).toEqual(["Anna Bianchi", "Carlos Mendoza", "Sofia Mendoza"]);
   });
 });
+
+describe("GuestListPage column filters", () => {
+  beforeEach(() => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria]);
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("given the Side funnel, when Italy is ticked, then only Italian guests are listed and counted", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: "Filter by Side" }));
+    await userEvent.click(screen.getByRole("menuitemcheckbox", { name: "Italy" }));
+
+    expect(screen.getByText("Maria Rossi")).toBeInTheDocument();
+    expect(screen.queryByText("Carlos Mendoza")).not.toBeInTheDocument();
+    expect(screen.getByText("Showing 1 of 2 guests")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Filter by Side, 1 on" })).toBeInTheDocument();
+  });
+
+  it("given a side filter, when an RSVP status is picked too, then a guest must match both", async () => {
+    const paola = aGuest({ firstName: "Paola", lastName: "Conti", side: "italy", rsvpStatus: "pending" });
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria, paola]);
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: "Filter by Side" }));
+    await userEvent.click(screen.getByRole("menuitemcheckbox", { name: "Italy" }));
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+
+    const rows = screen.getAllByRole("row").slice(1);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toHaveTextContent("Paola Conti");
+  });
+
+  it("given filters nobody matches, when they are set, then the headers stay so the filters can be cleared", async () => {
+    renderWithProviders(<GuestListPage />);
+    await screen.findByText("Maria Rossi");
+
+    await userEvent.click(screen.getByRole("button", { name: "Filter by Side" }));
+    await userEvent.click(screen.getByRole("menuitemcheckbox", { name: "Spain" }));
+    await userEvent.click(screen.getByRole("button", { name: "Done" }));
+
+    expect(screen.getByText("No guests match these filters.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Filter by Side, 1 on" })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+
+    expect(screen.getByText("Maria Rossi")).toBeInTheDocument();
+    expect(screen.getByText("Carlos Mendoza")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Filter by Side" })).toBeInTheDocument();
+  });
+});

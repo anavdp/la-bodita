@@ -120,6 +120,31 @@ describe("ItemsPage", () => {
     expect(within(detail).getByRole("checkbox", { name: "Send Pinterest board" })).toBeInTheDocument();
   });
 
+  it("given a phone, when an item is tapped, then its panel below the list is scrolled into view", async () => {
+    const scrollIntoView = vi.spyOn(Element.prototype, "scrollIntoView");
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    await userEvent.click(await screen.findByRole("button", { name: /Luz de Agua Fotografía/ }));
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.contexts[0]).toContainElement(
+      screen.getByRole("heading", { name: "Luz de Agua Fotografía" }),
+    );
+  });
+
+  it("given a laptop, when an item is clicked, then the page stays put since its panel is beside the list", async () => {
+    const scrollIntoView = vi.spyOn(Element.prototype, "scrollIntoView");
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query) => ({ matches: query.includes("min-width"), addEventListener: () => {}, removeEventListener: () => {} }) as unknown as MediaQueryList,
+    );
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    await userEvent.click(await screen.findByRole("button", { name: /Luz de Agua Fotografía/ }));
+
+    expect(screen.getByRole("region", { name: "Luz de Agua Fotografía" })).toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
   it("given an open task, when it is ticked, then it is saved as done", async () => {
     vi.mocked(tasksApi.updateTask).mockResolvedValue({ ...certificates, isDone: true });
     renderWithProviders(<ItemsPage />, { route: "/items" });
@@ -239,7 +264,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const panel = screen.getByRole("dialog", { name: "New item" });
 
     expect(within(panel).getByRole("combobox", { name: "Contact type" })).toHaveTextContent("Phone");
@@ -251,14 +276,14 @@ describe("ItemsPage", () => {
     expect(within(panel).getByLabelText("Email")).toBeInTheDocument();
     await userEvent.click(within(panel).getByRole("button", { name: "Cancel" }));
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     expect(screen.getByRole("combobox", { name: "Contact type" })).toHaveTextContent("Email");
   });
 
   it("given one contact, when another is added and removed, then each new one takes a type not used yet", async () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const panel = screen.getByRole("dialog", { name: "New item" });
 
     await userEvent.click(within(panel).getByRole("button", { name: "+ Add contact" }));
@@ -281,7 +306,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const dialog = screen.getByRole("dialog", { name: "New item" });
     await userEvent.type(within(dialog).getByLabelText("Name"), "Dulce Rosa Pastelería");
     await userEvent.click(within(dialog).getByRole("combobox", { name: "Category" }));
@@ -315,7 +340,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const dialog = screen.getByRole("dialog", { name: "New item" });
     await userEvent.type(within(dialog).getByLabelText("Name"), "Atelier Novias");
     expect(dialog).toHaveTextContent("You both see it.");
@@ -345,7 +370,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const dialog = screen.getByRole("dialog", { name: "New item" });
     await userEvent.type(within(dialog).getByLabelText("Name"), "Atelier Novias");
     await userEvent.click(within(dialog).getByRole("combobox", { name: "Category" }));
@@ -376,7 +401,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByRole("alert")).toHaveTextContent("Give it a name.");
@@ -388,7 +413,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     await userEvent.type(screen.getByLabelText("Name"), "Deco Bonita");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 

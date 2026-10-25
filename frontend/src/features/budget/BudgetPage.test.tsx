@@ -213,7 +213,7 @@ describe("BudgetPage", () => {
     renderWithProviders(<BudgetPage />, { route: "/budget" });
     await screen.findByText("Parish fee");
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Cost" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Cost" }));
     const drawer = screen.getByRole("dialog", { name: "New cost" });
     await userEvent.click(within(drawer).getByRole("combobox", { name: "Item" }));
     await userEvent.type(within(drawer).getByRole("searchbox"), "andr");
@@ -241,7 +241,7 @@ describe("BudgetPage", () => {
     renderWithProviders(<BudgetPage />, { route: "/budget" });
     await screen.findByText("Parish fee");
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Cost" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Cost" }));
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByRole("alert")).toHaveTextContent("Give it a name, or pick an item.");
@@ -252,7 +252,7 @@ describe("BudgetPage", () => {
     renderWithProviders(<BudgetPage />, { route: "/budget" });
     await screen.findByText("Parish fee");
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Cost" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Cost" }));
     await userEvent.type(screen.getByLabelText("What is it"), "Flights");
     await userEvent.type(screen.getByLabelText("Quote"), "about 2000");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));

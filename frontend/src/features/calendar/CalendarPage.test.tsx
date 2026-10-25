@@ -159,7 +159,7 @@ describe("CalendarPage", () => {
     renderWithProviders(<CalendarPage />, { route: "/calendar" });
     await loaded();
 
-    await user.click(screen.getByRole("button", { name: "+ Add Event" }));
+    await user.click(screen.getByRole("button", { name: "Add Event" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Save" }));
 
     expect(within(screen.getByRole("dialog")).getByRole("alert")).toHaveTextContent("Give it a name.");
@@ -198,6 +198,47 @@ describe("CalendarPage", () => {
 
     expect(window.confirm).toHaveBeenCalledWith("Delete “Bridal fair”?");
     await waitFor(() => expect(calendarApi.deleteCalendarEvent).toHaveBeenCalledWith(1, fair.id));
+  });
+
+  it("given a phone, when a day is tapped, then what is on it is listed below the month", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<CalendarPage />, { route: "/calendar" });
+    await loaded();
+
+    await user.click(screen.getByRole("button", { name: "Show Friday, October 23" }));
+
+    const onDay = screen.getByRole("region", { name: "Friday, October 23" });
+    expect(within(onDay).getByRole("listitem")).toHaveTextContent("Baptism certificates · Iglesia de Araure");
+
+    await user.click(screen.getByRole("button", { name: "Show Wednesday, October 28" }));
+    expect(within(screen.getByRole("region", { name: "Wednesday, October 28" })).getByText("Nothing on this day.")).toBeInTheDocument();
+  });
+
+  it("given a tapped day, when its event is opened from the list, then its drawer opens to edit it", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<CalendarPage />, { route: "/calendar" });
+    await loaded();
+
+    await user.click(screen.getByRole("button", { name: "Show Tuesday, October 27" }));
+    await user.click(within(screen.getByRole("region", { name: "Tuesday, October 27" })).getByRole("button", { name: /Bridal fair/ }));
+
+    expect(screen.getByRole("dialog", { name: "Edit event" })).toBeInTheDocument();
+  });
+
+  it("given a tapped day, when something is added on it, then the drawer opens on that day", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<CalendarPage />, { route: "/calendar" });
+    await loaded();
+
+    await user.click(screen.getByRole("button", { name: "Show Wednesday, October 28" }));
+    await user.click(screen.getByRole("button", { name: "+ Add on this day" }));
+    const drawer = screen.getByRole("dialog", { name: "New event" });
+    await user.type(within(drawer).getByLabelText("What is it"), "Dinner");
+    await user.click(within(drawer).getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(calendarApi.createCalendarEvent).toHaveBeenCalledWith(1, expect.objectContaining({ startDate: "2026-10-28" })),
+    );
   });
 
   it("given the plans cannot load, when the page opens, then it offers to try again", async () => {

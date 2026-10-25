@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { aGuest } from "../../testing/guestFactory";
+import { onAPhone } from "../../testing/onAPhone";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { GuestStats } from "./GuestStats";
 
@@ -13,6 +14,19 @@ const guests = [
 ];
 
 describe("GuestStats", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("given a phone, when the summary is rendered, then each status shows only its dot and count, its word read out", () => {
+    onAPhone();
+    renderWithProviders(<GuestStats guests={guests} activeStatus={null} onToggleStatus={vi.fn()} />);
+
+    const confirmed = screen.getByRole("button", { name: "2 Confirmed" });
+    expect(screen.getByText("Confirmed")).toHaveClass("sr-only");
+    expect(confirmed).toHaveAttribute("title", "Confirmed");
+  });
+
   it("given a guest list, when the summary is rendered, then each RSVP state gets its count", () => {
     renderWithProviders(<GuestStats guests={guests} activeStatus={null} onToggleStatus={vi.fn()} />);
 

@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 
 import type { Category, CategoryDraft } from "../../api/types";
-import { ActionIcon, PageHeader } from "../../components/playful/PageHeader";
-import { outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -96,10 +96,7 @@ export function CategoriesPage() {
   return (
     <>
       <PageHeader title={t("categories.title")} subtitle={t("categories.subtitle")} art="generic.png">
-        <button type="button" onClick={() => setDrawerTarget({ category: null })} className={primaryButton}>
-          <ActionIcon name="add" />
-          {t("categories.addOpen")}
-        </button>
+        <HeaderAction icon="add" label={t("categories.addOpen")} onClick={() => setDrawerTarget({ category: null })} />
       </PageHeader>
 
       {actionError !== null && (

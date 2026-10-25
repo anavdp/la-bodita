@@ -3,8 +3,11 @@ import userEvent from "@testing-library/user-event";
 
 import type { Guest } from "../../api/types";
 import { aGuest } from "../../testing/guestFactory";
+import { onAPhone } from "../../testing/onAPhone";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { LanguageProvider } from "../../i18n/LanguageProvider";
+import { noColumnFilters } from "./filtering";
+import type { GuestColumnFilters } from "./filtering";
 import { GuestTable } from "./GuestTable";
 import type { GuestSort, GuestSortKey } from "./sorting";
 
@@ -17,6 +20,8 @@ interface Handlers {
   onChangeRsvp: (guest: Guest, status: Guest["rsvpStatus"]) => void;
   onSort: (key: GuestSortKey) => void;
   sort: GuestSort;
+  filters: GuestColumnFilters;
+  onChangeFilters: (filters: GuestColumnFilters) => void;
 }
 
 function renderTable(guests: Guest[], handlers: Partial<Handlers> = {}) {
@@ -28,20 +33,73 @@ function renderTable(guests: Guest[], handlers: Partial<Handlers> = {}) {
       onEdit={handlers.onEdit ?? noop}
       onDelete={handlers.onDelete ?? noop}
       onChangeRsvp={handlers.onChangeRsvp ?? noop}
+      filters={handlers.filters ?? noColumnFilters}
+      onChangeFilters={handlers.onChangeFilters ?? noop}
     />,
   );
 }
 
 describe("GuestTable", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("given a phone, when the table is rendered, then it keeps only the name and the RSVP", () => {
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query) =>
+        ({
+          matches: query.includes("max-width"),
+          media: query,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+        }) as unknown as MediaQueryList,
+    );
+    renderTable([aGuest({ firstName: "Ana", lastName: "Pérez" })]);
+
+    expect(screen.getAllByRole("columnheader").map((header) => header.textContent)).toEqual([
+      expect.stringContaining("Name"),
+      expect.stringContaining("RSVP"),
+    ]);
+    expect(screen.getAllByRole("columnheader")[1]).not.toHaveTextContent("Status");
+    expect(screen.getAllByRole("cell")).toHaveLength(2);
+  });
+
+  it("given a phone, when a guest's RSVP is shown, then the pill is just its colored dot, its status read out", () => {
+    onAPhone();
+    renderTable([aGuest({ firstName: "Ana", lastName: "Pérez", rsvpStatus: "declined" })]);
+
+    const pill = screen.getByRole("button", { name: "Ana Pérez — Declined. Change RSVP" });
+    expect(pill.textContent?.trim()).toBe("");
+  });
+
+  it("given a phone, when a guest's name is tapped, then the guest opens to edit", async () => {
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query) =>
+        ({
+          matches: query.includes("max-width"),
+          media: query,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+        }) as unknown as MediaQueryList,
+    );
+    const onEdit = vi.fn();
+    const ana = aGuest({ firstName: "Ana", lastName: "Pérez" });
+    renderTable([ana], { onEdit });
+
+    await userEvent.click(screen.getByRole("button", { name: "Ana Pérez" }));
+
+    expect(onEdit).toHaveBeenCalledWith(ana);
+  });
+
   it("given guests, when the table is rendered, then RSVP sits just before the actions column", () => {
     renderTable([aGuest()]);
 
-    const withoutIcons = (header: HTMLElement) =>
-      [...header.childNodes]
-        .flatMap((node) => (node instanceof HTMLButtonElement ? [...node.childNodes] : [node]))
-        .filter((node) => !(node instanceof HTMLElement && node.getAttribute("aria-hidden") === "true"))
-        .map((node) => node.textContent)
-        .join("");
+    const withoutIcons = (node: Node): string =>
+      node instanceof HTMLElement && node.getAttribute("aria-hidden") === "true"
+        ? ""
+        : node.nodeType === Node.TEXT_NODE
+          ? (node.textContent ?? "")
+          : [...node.childNodes].map(withoutIcons).join("");
     expect(screen.getAllByRole("columnheader").map(withoutIcons)).toEqual([
       "Name",
       "Household",
@@ -256,6 +314,8 @@ describe("GuestTable households", () => {
         onEdit={noop}
         onDelete={noop}
         onChangeRsvp={noop}
+        filters={noColumnFilters}
+        onChangeFilters={noop}
       />,
     );
 
@@ -277,6 +337,8 @@ describe("GuestTable one-person households", () => {
         onEdit={noop}
         onDelete={noop}
         onChangeRsvp={noop}
+        filters={noColumnFilters}
+        onChangeFilters={noop}
       />,
     );
 
@@ -296,6 +358,8 @@ describe("GuestTable relationships", () => {
           onEdit={noop}
           onDelete={noop}
           onChangeRsvp={noop}
+          filters={noColumnFilters}
+          onChangeFilters={noop}
         />
       </LanguageProvider>,
     );
@@ -314,6 +378,8 @@ describe("GuestTable sides", () => {
         onEdit={noop}
         onDelete={noop}
         onChangeRsvp={noop}
+        filters={noColumnFilters}
+        onChangeFilters={noop}
       />,
     );
 
@@ -367,5 +433,66 @@ describe("GuestTable sides", () => {
     renderTable([aGuest({ rsvpAnsweredAt: "2026-10-25T12:00:00Z" })]);
 
     expect(screen.queryByText("Oct 25")).not.toBeInTheDocument();
+  });
+});
+
+describe("the column filters", () => {
+  it("given the table, when it is rendered, then Type, Relationship and Side each have a funnel", () => {
+    renderTable([aGuest()]);
+
+    for (const column of ["Type", "Relationship", "Side"]) {
+      expect(screen.getByRole("button", { name: `Filter by ${column}` }).closest("th")).not.toBeNull();
+    }
+  });
+
+  it("given the side menu is open, when the relationship funnel is clicked, then only the relationship menu is open", async () => {
+    renderTable([aGuest()]);
+
+    await userEvent.click(screen.getByRole("button", { name: "Filter by Side" }));
+    expect(screen.getByRole("menuitemcheckbox", { name: "Italy" })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Filter by Relationship" }));
+
+    expect(screen.getAllByRole("menu")).toHaveLength(1);
+    expect(screen.getByRole("menuitemcheckbox", { name: "Family" })).toBeInTheDocument();
+  });
+
+  it("given a filter menu is open, when its funnel is clicked again, then it closes", async () => {
+    renderTable([aGuest()]);
+    const funnel = screen.getByRole("button", { name: "Filter by Type" });
+
+    await userEvent.click(funnel);
+    await userEvent.click(funnel);
+
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("given a filter menu is open, when Done is clicked, then it closes", async () => {
+    renderTable([aGuest()]);
+
+    await userEvent.click(screen.getByRole("button", { name: "Filter by Type" }));
+    await userEvent.click(screen.getByRole("button", { name: "Done" }));
+
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("given the side menu, when Italy is ticked, then the table asks for that filter", async () => {
+    const onChangeFilters = vi.fn();
+    renderTable([aGuest()], { onChangeFilters });
+
+    await userEvent.click(screen.getByRole("button", { name: "Filter by Side" }));
+    await userEvent.click(screen.getByRole("menuitemcheckbox", { name: "Italy" }));
+
+    expect(onChangeFilters).toHaveBeenCalledWith({ ...noColumnFilters, side: ["italy"] });
+  });
+
+  it("given a filter menu is open, when it would fall past a short table, then the table makes room for it", async () => {
+    const { container } = renderTable([aGuest()]);
+    const scrollArea = container.querySelector(".overflow-x-auto");
+    expect(scrollArea).not.toHaveClass("min-h-[30rem]");
+
+    await userEvent.click(screen.getByRole("button", { name: "Filter by Relationship" }));
+
+    expect(scrollArea).toHaveClass("min-h-[30rem]");
   });
 });

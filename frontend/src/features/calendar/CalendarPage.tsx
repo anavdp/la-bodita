@@ -2,8 +2,8 @@ import { useId, useMemo, useState } from "react";
 
 import type { CalendarEvent, CalendarEventDraft, Category } from "../../api/types";
 import { CategoryIcon } from "../../components/playful/IconPicker";
-import { PageHeader } from "../../components/playful/PageHeader";
-import { compactButton, outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { compactButton, outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { Language, TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -129,6 +129,49 @@ function UpcomingRow({ entry, category }: UpcomingRowProps) {
   );
 }
 
+interface DayRowProps {
+  entry: CalendarEntry;
+  category: Category | undefined;
+  onOpen: (event: CalendarEvent) => void;
+}
+
+/** One thing on the tapped day: events open their drawer, tasks only show, as on the grid. */
+function DayRow({ entry, category, onOpen }: DayRowProps) {
+  const content = (
+    <>
+      <span
+        aria-hidden="true"
+        className="h-3.5 w-3.5 shrink-0 rounded-full border-2 border-ink"
+        style={{ backgroundColor: category?.color ?? "transparent" }}
+      />
+      <span className="min-w-0 flex-1">
+        <span className={`block text-lg ${entry.isDone ? "text-ink/50 line-through" : ""}`}>
+          {[entry.title, entry.itemName].filter(Boolean).join(" · ")}
+        </span>
+        {entry.time !== null && <span className="block text-base text-ink/70">{formatDueTime(entry.time)}</span>}
+      </span>
+    </>
+  );
+  return (
+    <li className="border-t-2 border-ink/10 first:border-t-0">
+      {entry.kind === "event" ? (
+        <button
+          type="button"
+          onClick={() => onOpen(entry.source)}
+          className="flex w-full items-center gap-3 py-3 text-left"
+        >
+          {content}
+          <span className="material-symbols-outlined text-ink/70" aria-hidden="true">
+            chevron_right
+          </span>
+        </button>
+      ) : (
+        <div className="flex items-center gap-3 py-3">{content}</div>
+      )}
+    </li>
+  );
+}
+
 /**
  * A month at a glance: dated tasks and events on their days, colored by
  * category, with what is next and the coming two weeks beside it.
@@ -140,6 +183,7 @@ export function CalendarPage() {
   const calendar = useCalendar(wedding?.id ?? null);
   const { categories, items, tasks, events, isLoading, hasLoadError } = calendar;
   const nextUpId = useId();
+  const pickedDayId = useId();
   const comingUpId = useId();
 
   const todayIso = toIso(new Date());
@@ -147,6 +191,8 @@ export function CalendarPage() {
     const today = new Date();
     return { year: today.getFullYear(), index: today.getMonth() };
   });
+  // A phone's grid only has room for colored bars, so a tapped day is listed in words below it.
+  const [pickedDay, setPickedDay] = useState(todayIso);
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const [formTarget, setFormTarget] = useState<FormTarget>(null);
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
@@ -220,7 +266,9 @@ export function CalendarPage() {
         role="gridcell"
         aria-label={label}
         aria-current={isToday ? "date" : undefined}
-        className={`group flex min-h-[4.5rem] min-w-0 flex-col gap-1 rounded-2xl p-1.5 sm:min-h-[6.5rem] sm:p-2 ${
+        className={`group relative flex min-h-[4.5rem] min-w-0 flex-col gap-1 rounded-2xl p-1.5 sm:min-h-[6.5rem] sm:p-2 ${
+          isInMonth && iso === pickedDay ? "ring-[2.5px] ring-sky sm:ring-0" : ""
+        } ${
           !isInMonth
             ? "text-ink/35"
             : isWeddingDay
@@ -255,6 +303,15 @@ export function CalendarPage() {
           <span className="sr-only font-playful-display text-sm uppercase leading-tight tracking-wide sm:not-sr-only">
             {t("calendar.weddingDay")}
           </span>
+        )}
+        {isInMonth && (
+          <button
+            type="button"
+            aria-label={t("calendar.showDay", { date: label })}
+            aria-pressed={iso === pickedDay}
+            onClick={() => setPickedDay(iso)}
+            className="absolute inset-0 z-[1] rounded-2xl sm:hidden"
+          />
         )}
         {onDay.map((entry) => (
           <EntryChip
@@ -310,9 +367,7 @@ export function CalendarPage() {
   return (
     <>
       <PageHeader title={t("calendar.title")} subtitle={t("calendar.subtitle")} art="title-calendar.png">
-        <button type="button" onClick={() => setFormTarget({ startDate: null })} className={primaryButton}>
-          {t("calendar.add")}
-        </button>
+        <HeaderAction icon="add" label={t("calendar.add")} onClick={() => setFormTarget({ startDate: null })} />
       </PageHeader>
 
       <div className="mb-6">
@@ -351,6 +406,35 @@ export function CalendarPage() {
         </section>
 
         <aside className="flex w-full flex-col gap-4 font-playful text-ink xl:w-80 xl:shrink-0">
+          {!isLoading && !hasLoadError && (
+            <section aria-labelledby={pickedDayId} className={`${outlinedCard} px-6 py-5 sm:hidden`}>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2
+                  id={pickedDayId}
+                  className="inline-block -rotate-1 rounded-md border-2 border-ink bg-butter px-3 py-0.5 font-playful-display text-base uppercase tracking-wide"
+                >
+                  {longDate.format(fromIso(pickedDay))}
+                </h2>
+                <button type="button" onClick={() => setFormTarget({ startDate: pickedDay })} className={compactButton}>
+                  {t("calendar.addOnDay")}
+                </button>
+              </div>
+              {entriesOn(entries, pickedDay).length === 0 ? (
+                <p className="mt-2 text-lg text-ink/70">{t("calendar.nothingOnDay")}</p>
+              ) : (
+                <ul className="mt-1">
+                  {entriesOn(entries, pickedDay).map((entry) => (
+                    <DayRow
+                      key={entry.key}
+                      entry={entry}
+                      category={categoryOf(entry)}
+                      onOpen={(event) => setFormTarget({ event })}
+                    />
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
           <section
             aria-labelledby={nextUpId}
             className="-rotate-1 rounded-[28px] border-[2.5px] border-ink bg-accent px-6 py-5"

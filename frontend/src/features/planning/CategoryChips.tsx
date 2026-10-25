@@ -1,4 +1,6 @@
 import type { Category } from "../../api/types";
+import { Dropdown } from "../../components/form/Dropdown";
+import { useIsPhone } from "../../components/layout/useIsPhone";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { isIconName } from "../../components/playful/iconCatalog";
 import { useTranslation } from "../../i18n/LanguageProvider";
@@ -26,11 +28,39 @@ interface CategoryChipsProps {
   showAll?: boolean;
 }
 
-/** One tap narrows a screen to a category; tapping it again, or "All", widens it back. */
+/**
+ * One tap narrows a screen to a category; tapping it again, or "All", widens it back.
+ * On a phone, where a row of chips piles up, they fold into one dropdown.
+ */
 export function CategoryChips({ categories, activeId, onChange, counts, showAll = true }: CategoryChipsProps) {
   const { t } = useTranslation();
+  const isPhone = useIsPhone();
   const withCount = (label: string, count: number | undefined) =>
     count === undefined ? label : `${label} ${count}`;
+
+  if (isPhone) {
+    // The dropdown always offers "All": it is the only way back from a category here.
+    const options = [
+      // Alone, "All" could read as all tasks rather than all categories.
+      { value: "", label: withCount(t("planning.everyCategory"), counts?.all) },
+      ...categories.map((category) => ({
+        value: String(category.id),
+        label: withCount(categoryLabel(category), counts && (counts.byCategory.get(category.id) ?? 0)),
+      })),
+    ];
+    return (
+      <div className="min-w-[11rem] flex-1">
+        <Dropdown
+          label={t("planning.filterLabel")}
+          hideLabel
+          value={activeId === null ? "" : String(activeId)}
+          options={options}
+          onChange={(value) => onChange(value === "" ? null : Number(value))}
+          triggerClassName={`${chip(activeId !== null)} w-full`}
+        />
+      </div>
+    );
+  }
 
   return (
     <div role="group" aria-label={t("planning.filterLabel")} className="flex flex-wrap gap-2">

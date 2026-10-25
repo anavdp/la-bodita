@@ -206,7 +206,7 @@ describe("ChecklistPage", () => {
     await screen.findByText("Bring baptism certificates");
     expect(screen.queryByLabelText("Task")).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Task" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Task" }));
 
     const drawer = screen.getByRole("dialog", { name: "New task" });
     expect(within(drawer).getByLabelText("Task")).toBeInTheDocument();

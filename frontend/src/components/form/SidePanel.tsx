@@ -5,8 +5,8 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import { useCloseOnEscape } from "../../features/households/dialogStyles";
 
 /** The scrolling middle of a panel, and the bar that keeps its buttons at the bottom. */
-export const panelBody = "flex flex-1 flex-col gap-5 overflow-y-auto px-8 py-6 font-playful text-ink";
-export const panelFooter = "flex flex-wrap justify-end gap-3 border-t-[2.5px] border-ink bg-accent/40 px-8 py-4";
+export const panelBody = "flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-6 font-playful text-ink sm:px-8";
+export const panelFooter = "flex flex-wrap justify-end gap-3 border-t-[2.5px] border-ink bg-accent/40 px-5 py-4 sm:px-8";
 
 interface SidePanelProps {
   title: string;
@@ -21,7 +21,7 @@ interface SidePanelProps {
 
 /**
  * Forms slide in from the right, beside the list they change, the way the item
- * detail does, instead of covering the page.
+ * detail does, instead of covering the page. On a phone they fill the screen.
  */
 export function SidePanel({ title, sticker, wide = false, onClose, children }: SidePanelProps) {
   const { t } = useTranslation();
@@ -40,11 +40,11 @@ export function SidePanel({ title, sticker, wide = false, onClose, children }: S
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`relative flex h-full w-full flex-col overflow-hidden rounded-l-[32px] border-y-[2.5px] border-l-[2.5px] border-ink bg-cream ${
+        className={`relative flex h-full w-full flex-col overflow-hidden border-ink bg-cream sm:rounded-l-[32px] sm:border-y-[2.5px] sm:border-l-[2.5px] ${
           wide ? "max-w-2xl" : "max-w-md"
         }`}
       >
-        <header className="flex items-center justify-between gap-4 border-b-[2.5px] border-ink bg-accent px-8 py-5">
+        <header className="flex items-center justify-between gap-4 border-b-[2.5px] border-ink bg-accent px-5 py-5 sm:px-8">
           <div className="flex items-center gap-3">
             {sticker !== undefined && (
               <span

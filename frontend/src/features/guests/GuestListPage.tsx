@@ -13,14 +13,15 @@ import type {
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
-import { ActionIcon, PageHeader } from "../../components/playful/PageHeader";
-import { folderTab, outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { folderTab, outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
 import { HouseholdFormDialog } from "../households/HouseholdFormDialog";
 import { HouseholdsPanel } from "../households/HouseholdsPanel";
-import { filterGuestsByName } from "./filtering";
+import { filterGuestsByColumns, filterGuestsByName, hasColumnFilters, noColumnFilters } from "./filtering";
+import type { GuestColumnFilters } from "./filtering";
 import { GuestFormDialog } from "./GuestFormDialog";
 import { GuestImportDialog } from "./GuestImportDialog";
 import { GuestStats } from "./GuestStats";
@@ -78,19 +79,18 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   /** The RSVP status picked in the header summary, if any: the table shows only those guests. */
   const [rsvpFilter, setRsvpFilter] = useState<RsvpStatus | null>(null);
 
+  /** What is ticked under the table's Type, Relationship and Side funnels. */
+  const [columnFilters, setColumnFilters] = useState<GuestColumnFilters>(noColumnFilters);
+
   /** Name order by default; the Name, Household and RSVP headers pick and flip it. */
   const [sort, setSort] = useState<GuestSort>({ key: "name", direction: "ascending" });
 
   const searchedGuests = useMemo(() => filterGuestsByName(guests, term), [guests, term]);
-  const visibleGuests = useMemo(
-    () =>
-      sortGuests(
-        rsvpFilter === null ? searchedGuests : searchedGuests.filter((guest) => guest.rsvpStatus === rsvpFilter),
-        sort,
-        householdNamesOf(households),
-      ),
-    [searchedGuests, rsvpFilter, sort, households],
-  );
+  const visibleGuests = useMemo(() => {
+    const byStatus =
+      rsvpFilter === null ? searchedGuests : searchedGuests.filter((guest) => guest.rsvpStatus === rsvpFilter);
+    return sortGuests(filterGuestsByColumns(byStatus, columnFilters), sort, householdNamesOf(households));
+  }, [searchedGuests, rsvpFilter, columnFilters, sort, households]);
   const visibleHouseholds = useMemo(() => {
     const needle = term.trim().toLowerCase();
     return households.filter((household) => household.name.toLowerCase().includes(needle));
@@ -205,7 +205,10 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
         </p>
       );
     }
-    if (visibleGuests.length === 0) {
+    // The column filters live in the table's headers, so the table stays up
+    // even when they leave nobody: that is where they get changed back.
+    const isFilteredByColumn = hasColumnFilters(columnFilters);
+    if (visibleGuests.length === 0 && !isFilteredByColumn) {
       return <p className="font-playful text-xl text-ink/70">{t("guests.statusNoMatches")}</p>;
     }
     return (
@@ -218,10 +221,25 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
           onEdit={(guest) => setDialogTarget({ guest })}
           onDelete={handleDelete}
           onChangeRsvp={handleChangeRsvp}
+          filters={columnFilters}
+          onChangeFilters={setColumnFilters}
         />
-        <p className="border-t-2 border-ink/15 px-6 py-4 font-playful text-lg text-ink">
-          {t("guests.showing", { shown: visibleGuests.length, total: guests.length })}
-        </p>
+        {visibleGuests.length === 0 ? (
+          <div className="flex flex-wrap items-center gap-4 border-t-2 border-ink/15 px-6 py-4 font-playful text-lg text-ink">
+            <p>{t("guests.filter.noMatches")}</p>
+            <button
+              type="button"
+              onClick={() => setColumnFilters(noColumnFilters)}
+              className="text-ink/70 underline"
+            >
+              {t("guests.filter.clearAll")}
+            </button>
+          </div>
+        ) : (
+          <p className="border-t-2 border-ink/15 px-6 py-4 font-playful text-lg text-ink">
+            {t("guests.showing", { shown: visibleGuests.length, total: guests.length })}
+          </p>
+        )}
       </div>
     );
   };
@@ -230,29 +248,21 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     <>
       <PageHeader title={t("guests.title")} subtitle={t("guests.subtitle")} art="title-cheers.png">
         {tab === "households" ? (
-          <button
-            type="button"
+          <HeaderAction
+            icon="add"
+            label={t("households.add")}
             onClick={() => setHouseholdDialog({ kind: "form", household: null })}
-            className={primaryButton}
-          >
-            <ActionIcon name="add" />
-            {t("households.add")}
-          </button>
+          />
         ) : (
           <>
-            <button
-              type="button"
-              onClick={() => setIsImportOpen(true)}
+            <HeaderAction
+              icon="upload"
+              label={t("guests.import.open")}
+              variant="secondary"
               disabled={weddingId === null}
-              className={secondaryButton}
-            >
-              <ActionIcon name="upload" />
-              {t("guests.import.open")}
-            </button>
-            <button type="button" onClick={() => setDialogTarget({ guest: null })} className={primaryButton}>
-              <ActionIcon name="add" />
-              {t("guests.add")}
-            </button>
+              onClick={() => setIsImportOpen(true)}
+            />
+            <HeaderAction icon="add" label={t("guests.add")} onClick={() => setDialogTarget({ guest: null })} />
           </>
         )}
       </PageHeader>

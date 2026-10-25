@@ -239,7 +239,7 @@ describe("DocumentsPage", () => {
       vi.mocked(tasksApi.listTasks).mockResolvedValue([secondFitting]);
       renderWithProviders(<DocumentsPage tab="all" />, { route: "/documents/all" });
 
-      await userEvent.click(await screen.findByRole("button", { name: "+ Upload" }));
+      await userEvent.click(await screen.findByRole("button", { name: "Upload" }));
       const photos = [
         new File(["a"], "one.jpg", { type: "image/jpeg" }),
         new File(["b"], "two.jpg", { type: "image/jpeg" }),
@@ -270,7 +270,7 @@ describe("DocumentsPage", () => {
     it("given only PDFs picked, when the kind was not chosen, then they go up as papers", async () => {
       renderWithProviders(<DocumentsPage tab="all" />, { route: "/documents/all" });
 
-      await userEvent.click(await screen.findByRole("button", { name: "+ Upload" }));
+      await userEvent.click(await screen.findByRole("button", { name: "Upload" }));
       await userEvent.upload(fileInput(), new File(["%PDF"], "contract.pdf", { type: "application/pdf" }));
 
       expect(within(panel()).getByRole("combobox", { name: "What is it" })).toHaveTextContent("A paper");
@@ -279,7 +279,7 @@ describe("DocumentsPage", () => {
     it("given no file picked, when saved, then it asks for one", async () => {
       renderWithProviders(<DocumentsPage tab="all" />, { route: "/documents/all" });
 
-      await userEvent.click(await screen.findByRole("button", { name: "+ Upload" }));
+      await userEvent.click(await screen.findByRole("button", { name: "Upload" }));
       await userEvent.click(within(panel()).getByRole("button", { name: "Save" }));
 
       expect(within(panel()).getByRole("alert")).toHaveTextContent("Pick at least one photo or PDF.");
@@ -289,7 +289,7 @@ describe("DocumentsPage", () => {
       vi.mocked(documentsApi.uploadDocument).mockRejectedValue(new ApiError("Documents aren't set up yet", 503));
       renderWithProviders(<DocumentsPage tab="all" />, { route: "/documents/all" });
 
-      await userEvent.click(await screen.findByRole("button", { name: "+ Upload" }));
+      await userEvent.click(await screen.findByRole("button", { name: "Upload" }));
       await userEvent.upload(fileInput(), new File(["a"], "one.jpg", { type: "image/jpeg" }));
       await userEvent.click(within(panel()).getByRole("button", { name: "Save 1 file" }));
 

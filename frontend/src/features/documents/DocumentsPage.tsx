@@ -2,8 +2,8 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import type { WeddingDocument } from "../../api/types";
-import { PageHeader } from "../../components/playful/PageHeader";
-import { folderTab, outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { folderTab, outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -118,10 +118,9 @@ export function DocumentsPage({ tab }: { tab: DocumentsTab }) {
         subtitle={t(tab === "papers" ? "documents.subtitle.papers" : "documents.subtitle.all")}
         art="title-documents.png"
       >
+        {/* On a phone the camera button in the bottom bar does this. */}
         <div className="hidden md:block">
-          <button type="button" onClick={() => openUpload()} className={primaryButton}>
-            {t("documents.upload")}
-          </button>
+          <HeaderAction icon="upload" label={t("documents.upload")} onClick={() => openUpload()} />
         </div>
       </PageHeader>
 

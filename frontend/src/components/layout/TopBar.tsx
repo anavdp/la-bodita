@@ -12,7 +12,16 @@ import { AccountMenu } from "./AccountMenu";
 const iconButton =
   "flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
 
-export function TopBar() {
+interface TopBarProps {
+  /** Whether the phone's menu drawer is out. */
+  isMenuOpen?: boolean;
+  /** Whether the laptop's sidebar is folded to its icons, so the bar starts where it ends. */
+  isSidebarCollapsed?: boolean;
+  /** Slides the phone's menu drawer in; left out where the sidebar sits beside the page. */
+  onOpenMenu?: () => void;
+}
+
+export function TopBar({ isMenuOpen = false, isSidebarCollapsed = false, onOpenMenu }: TopBarProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { term, setTerm } = useSearch();
@@ -22,7 +31,23 @@ export function TopBar() {
 
   return (
     <>
-      <header className="fixed top-0 right-0 left-0 z-10 flex h-20 items-center justify-between gap-4 border-b-2 border-ink/15 bg-cream px-margin-mobile font-playful md:left-[260px] md:px-margin-desktop">
+      <header className={`fixed top-0 right-0 left-0 z-10 flex h-20 items-center justify-between gap-2 border-b-2 border-ink/15 bg-cream px-margin-mobile font-playful md:px-margin-desktop ${
+          isSidebarCollapsed ? "md:left-[88px]" : "md:left-[260px]"
+        }`}>
+        {onOpenMenu !== undefined && (
+          <button
+            type="button"
+            onClick={onOpenMenu}
+            aria-label={t("layout.menu")}
+            aria-expanded={isMenuOpen}
+            aria-controls="main-menu"
+            className={`${iconButton} shrink-0 md:hidden`}
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">
+              menu
+            </span>
+          </button>
+        )}
         <div className="relative w-full max-w-[560px]">
           <span
             className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-ink"
@@ -40,13 +65,14 @@ export function TopBar() {
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-3">
           {/* A task can be added from any screen; it opens the checklist's new task form.
               Notifications land with their own issue and stay disabled until then. */}
           <button
             type="button"
             onClick={() => navigate("/checklist?add=task")}
-            className={compactButton}
+            aria-label={t("layout.addTask")}
+            className={`${compactButton} max-sm:h-10 max-sm:w-10 max-sm:px-0`}
           >
             <span className="material-symbols-outlined" aria-hidden="true">
               add
@@ -59,7 +85,8 @@ export function TopBar() {
               {theme === "dark" ? "light_mode" : "dark_mode"}
             </span>
           </button>
-          <button type="button" disabled aria-label={t("layout.notifications")} title={t("layout.unavailable")} className={iconButton}>
+          {/* A placeholder, so a phone's narrow bar leaves it out. */}
+          <button type="button" disabled aria-label={t("layout.notifications")} title={t("layout.unavailable")} className={`${iconButton} max-sm:hidden`}>
             <span className="material-symbols-outlined" aria-hidden="true">
               notifications
             </span>

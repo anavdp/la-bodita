@@ -1,4 +1,5 @@
 import type { Guest, RsvpStatus } from "../../api/types";
+import { useIsPhone } from "../../components/layout/useIsPhone";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { summariseRsvps } from "./guestSummary";
@@ -39,6 +40,12 @@ const labelClass = "font-playful text-xl";
  */
 export function GuestStats({ guests, activeStatus, onToggleStatus }: GuestStatsProps) {
   const { t } = useTranslation();
+  // A phone fits the totals on one line and the statuses, as dot and count only, on the next.
+  const isPhone = useIsPhone();
+  const slot = (share: string) => (isPhone ? `flex min-w-0 px-0.5 ${share}` : cellSlot);
+  const cellStyle = isPhone ? `${cellClass} !py-1` : cellClass;
+  const countStyle = isPhone ? countClass.replace("text-[34px]", "text-[26px]") : countClass;
+  const labelStyle = isPhone ? "font-playful text-base" : labelClass;
   const summary = summariseRsvps(guests);
   const countOf: Record<RsvpStatus, number> = {
     confirmed: summary.confirmed,
@@ -59,10 +66,10 @@ export function GuestStats({ guests, activeStatus, onToggleStatus }: GuestStatsP
       className="flex flex-wrap divide-ink/40 rounded-[28px] border-[2.5px] border-ink bg-accent p-2 md:flex-nowrap md:divide-x-2"
     >
       {totals.map(({ labelKey, count }) => (
-        <div key={labelKey} className={cellSlot}>
-          <div className={cellClass}>
-            <span className={countClass}>{count}</span>{" "}
-            <span className={labelClass}>{t(labelKey)}</span>
+        <div key={labelKey} className={slot("basis-1/2")}>
+          <div className={cellStyle}>
+            <span className={countStyle}>{count}</span>{" "}
+            <span className={labelStyle}>{t(labelKey)}</span>
           </div>
         </div>
       ))}
@@ -70,29 +77,32 @@ export function GuestStats({ guests, activeStatus, onToggleStatus }: GuestStatsP
       {summaryStatuses.map((status) => {
         const content = (
           <>
-            <span className={countClass}>
+            <span className={countStyle}>
               <span aria-hidden="true" className={`h-4 w-4 rounded-full border-2 border-ink ${statusDotClass[status]}`} />
               {countOf[status]}
             </span>{" "}
-            <span className={labelClass}>{t(statusLabelKey[status])}</span>
+            <span className={isPhone ? "sr-only" : labelStyle}>{t(statusLabelKey[status])}</span>
           </>
         );
 
         if (onToggleStatus === undefined) {
           return (
-            <div key={status} className={cellSlot}>
-              <span className={cellClass}>{content}</span>
+            <div key={status} className={slot("basis-1/3")}>
+              <span className={cellStyle} title={t(statusLabelKey[status])}>
+                {content}
+              </span>
             </div>
           );
         }
         const isActive = status === activeStatus;
         return (
-          <div key={status} className={cellSlot}>
+          <div key={status} className={slot("basis-1/3")}>
             <button
               type="button"
               aria-pressed={isActive}
+              title={t(statusLabelKey[status])}
               onClick={() => onToggleStatus(status)}
-              className={`${cellClass} transition-colors hover:bg-cream-light/50 ${
+              className={`${cellStyle} transition-colors hover:bg-cream-light/50 ${
                 isActive ? "bg-cream-light ring-[2.5px] ring-inset ring-ink" : ""
               }`}
             >
