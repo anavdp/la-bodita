@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import type { Guest, Household, RsvpStatus } from "../../api/types";
+import { useIsPhone } from "../../components/layout/useIsPhone";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { avatarTones, menuItem, menuPanel } from "../../components/playful/styles";
 import { ColumnFilterHeader } from "./ColumnFilterHeader";
@@ -109,6 +110,8 @@ export function GuestTable({
   onChangeFilters,
 }: GuestTableProps) {
   const { t, language } = useTranslation();
+  // A phone has room for who and whether they are coming; the rest waits for a wider screen.
+  const isPhone = useIsPhone();
   const isByAnswer = sort.key === "answered";
   const answeredDay = new Intl.DateTimeFormat(language, { month: "short", day: "numeric" });
   const answeredMoment = new Intl.DateTimeFormat(language, { dateStyle: "long", timeStyle: "short" });
@@ -156,26 +159,30 @@ export function GuestTable({
               label={t("guests.column.name")}
               className={`${headerCell} border-r-2 border-ink/20 pl-6`}
             />
-            <SortableHeader
-              sortKey="household"
-              sort={sort}
-              onSort={onSort}
-              label={t("guests.column.household")}
-              className={headerCell}
-            />
-            {filterColumns.map((column) => (
-              <ColumnFilterHeader
-                key={column}
-                column={column}
-                label={t(`guests.column.${column}` as const)}
-                filters={filters}
-                isOpen={isFilterOpen(column)}
-                onChange={onChangeFilters}
-                onToggle={() => toggleFilter(column)}
-                onClose={() => setOpenMenu(null)}
-                className={headerCell}
-              />
-            ))}
+            {!isPhone && (
+              <>
+                <SortableHeader
+                  sortKey="household"
+                  sort={sort}
+                  onSort={onSort}
+                  label={t("guests.column.household")}
+                  className={headerCell}
+                />
+                {filterColumns.map((column) => (
+                  <ColumnFilterHeader
+                    key={column}
+                    column={column}
+                    label={t(`guests.column.${column}` as const)}
+                    filters={filters}
+                    isOpen={isFilterOpen(column)}
+                    onChange={onChangeFilters}
+                    onToggle={() => toggleFilter(column)}
+                    onClose={() => setOpenMenu(null)}
+                    className={headerCell}
+                  />
+                ))}
+              </>
+            )}
             <SortableHeader
               sortKey="answered"
               sort={sort}
@@ -183,7 +190,7 @@ export function GuestTable({
               label={t("guests.column.rsvp")}
               className={`${headerCell} text-center`}
             />
-            <th className={`${headerCell} pr-6 text-right`}>{t("guests.column.actions")}</th>
+            {!isPhone && <th className={`${headerCell} pr-6 text-right`}>{t("guests.column.actions")}</th>}
           </tr>
         </thead>
         <tbody className="text-lg">
@@ -206,36 +213,47 @@ export function GuestTable({
                     >
                       {initialsOf(guest)}
                     </span>
-                    <span>{name}</span>
+                    {/* Without the row menu on a phone, the name is how a guest opens. */}
+                    {isPhone ? (
+                      <button type="button" onClick={() => onEdit(guest)} className="text-left underline-offset-4 hover:underline">
+                        {name}
+                      </button>
+                    ) : (
+                      <span>{name}</span>
+                    )}
                   </span>
                 </td>
-                <td className={cell}>{householdNames.get(guest.householdId)}</td>
-                <td className={cell}>{t(guest.isChild ? "guests.type.child" : "guests.type.adult")}</td>
-                <td className={cell}>
-                  {guest.relationshipType === null ? (
-                    <NotSpecified />
-                  ) : (
-                    t(relationshipLabelKey(guest.relationshipType))
-                  )}
-                </td>
-                <td className={cell}>
-                  {/* The code is the label: the country's name is what it is announced
-                      as, and what it says on hover. */}
-                  {guest.side === null ? (
-                    <NotSpecified />
-                  ) : (
-                    <span
-                      role="img"
-                      aria-label={t(sideLabelKey(guest.side))}
-                      title={t(sideLabelKey(guest.side))}
-                      className={`inline-flex h-10 w-10 items-center justify-center rounded-full font-playful-display text-base ${
-                        sideTone[guest.side]
-                      }`}
-                    >
-                      {sideCode[guest.side]}
-                    </span>
-                  )}
-                </td>
+                {!isPhone && (
+                  <>
+                    <td className={cell}>{householdNames.get(guest.householdId)}</td>
+                    <td className={cell}>{t(guest.isChild ? "guests.type.child" : "guests.type.adult")}</td>
+                    <td className={cell}>
+                      {guest.relationshipType === null ? (
+                        <NotSpecified />
+                      ) : (
+                        t(relationshipLabelKey(guest.relationshipType))
+                      )}
+                    </td>
+                    <td className={cell}>
+                      {/* The code is the label: the country's name is what it is announced
+                          as, and what it says on hover. */}
+                      {guest.side === null ? (
+                        <NotSpecified />
+                      ) : (
+                        <span
+                          role="img"
+                          aria-label={t(sideLabelKey(guest.side))}
+                          title={t(sideLabelKey(guest.side))}
+                          className={`inline-flex h-10 w-10 items-center justify-center rounded-full font-playful-display text-base ${
+                            sideTone[guest.side]
+                          }`}
+                        >
+                          {sideCode[guest.side]}
+                        </span>
+                      )}
+                    </td>
+                  </>
+                )}
 
                 {/* The status pill is also how you change it. */}
                 <td className={`${cell} text-center`}>
@@ -293,67 +311,69 @@ export function GuestTable({
                   </div>
                 </td>
 
-                <td className={`${cell} pr-6 text-right`}>
-                  <div className="relative inline-block">
-                    <button
-                      type="button"
-                      aria-label={t("guests.actions.open", { name })}
-                      aria-expanded={isOpen(guest, "actions")}
-                      onClick={() => toggleMenu(guest, "actions")}
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-accent/60"
-                    >
-                      <span className="material-symbols-outlined" aria-hidden="true">
-                        more_vert
-                      </span>
-                    </button>
+                {!isPhone && (
+                  <td className={`${cell} pr-6 text-right`}>
+                    <div className="relative inline-block">
+                      <button
+                        type="button"
+                        aria-label={t("guests.actions.open", { name })}
+                        aria-expanded={isOpen(guest, "actions")}
+                        onClick={() => toggleMenu(guest, "actions")}
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-accent/60"
+                      >
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          more_vert
+                        </span>
+                      </button>
 
-                    {isOpen(guest, "actions") && (
-                      <div className={`${menuPanel} right-0`}>
-                        {isConfirmingDelete ? (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                closeMenus();
-                                onDelete(guest);
-                              }}
-                              className={`${menuItem} text-coral hover:bg-coral-soft`}
-                            >
-                              {t("guests.deleteConfirm", { name })}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setIsConfirmingDelete(false)}
-                              className={menuItem}
-                            >
-                              {t("guests.form.cancel")}
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                closeMenus();
-                                onEdit(guest);
-                              }}
-                              className={menuItem}
-                            >
-                              {t("guests.actions.edit")}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setIsConfirmingDelete(true)}
-                              className={`${menuItem} !text-coral`}
-                            >
-                              {t("guests.actions.delete")}
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </td>
+                      {isOpen(guest, "actions") && (
+                        <div className={`${menuPanel} right-0`}>
+                          {isConfirmingDelete ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  closeMenus();
+                                  onDelete(guest);
+                                }}
+                                className={`${menuItem} text-coral hover:bg-coral-soft`}
+                              >
+                                {t("guests.deleteConfirm", { name })}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setIsConfirmingDelete(false)}
+                                className={menuItem}
+                              >
+                                {t("guests.form.cancel")}
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  closeMenus();
+                                  onEdit(guest);
+                                }}
+                                className={menuItem}
+                              >
+                                {t("guests.actions.edit")}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setIsConfirmingDelete(true)}
+                                className={`${menuItem} !text-coral`}
+                              >
+                                {t("guests.actions.delete")}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                )}
               </tr>
             );
           })}

@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 import type { BudgetLine, BudgetLineDraft, BudgetLineStatus } from "../../api/types";
 import { Switch } from "../../components/form/Switch";
 import { CategoryIcon } from "../../components/playful/IconPicker";
-import { PageHeader } from "../../components/playful/PageHeader";
-import { compactButton, outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { compactButton, outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -358,9 +358,7 @@ export function BudgetPage() {
   return (
     <>
       <PageHeader title={t("budget.title")} subtitle={t("budget.subtitle")} art="title-budget.png">
-        <button type="button" onClick={() => setFormTarget({ line: null })} className={primaryButton}>
-          {t("budget.add")}
-        </button>
+        <HeaderAction icon="add" label={t("budget.add")} onClick={() => setFormTarget({ line: null })} />
       </PageHeader>
 
       <div className="sticky top-24 z-10 mb-4 rounded-[28px] border-[2.5px] border-ink bg-accent p-2">

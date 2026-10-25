@@ -13,8 +13,8 @@ import type {
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
-import { ActionIcon, PageHeader } from "../../components/playful/PageHeader";
-import { outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
@@ -256,29 +256,21 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     <>
       <PageHeader title={t("guests.title")} subtitle={t("guests.subtitle")} art="title-cheers.png">
         {tab === "households" ? (
-          <button
-            type="button"
+          <HeaderAction
+            icon="add"
+            label={t("households.add")}
             onClick={() => setHouseholdDialog({ kind: "form", household: null })}
-            className={primaryButton}
-          >
-            <ActionIcon name="add" />
-            {t("households.add")}
-          </button>
+          />
         ) : (
           <>
-            <button
-              type="button"
-              onClick={() => setIsImportOpen(true)}
+            <HeaderAction
+              icon="upload"
+              label={t("guests.import.open")}
+              variant="secondary"
               disabled={weddingId === null}
-              className={secondaryButton}
-            >
-              <ActionIcon name="upload" />
-              {t("guests.import.open")}
-            </button>
-            <button type="button" onClick={() => setDialogTarget({ guest: null })} className={primaryButton}>
-              <ActionIcon name="add" />
-              {t("guests.add")}
-            </button>
+              onClick={() => setIsImportOpen(true)}
+            />
+            <HeaderAction icon="add" label={t("guests.add")} onClick={() => setDialogTarget({ guest: null })} />
           </>
         )}
       </PageHeader>

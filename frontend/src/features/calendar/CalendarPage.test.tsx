@@ -159,7 +159,7 @@ describe("CalendarPage", () => {
     renderWithProviders(<CalendarPage />, { route: "/calendar" });
     await loaded();
 
-    await user.click(screen.getByRole("button", { name: "+ Add Event" }));
+    await user.click(screen.getByRole("button", { name: "Add Event" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Save" }));
 
     expect(within(screen.getByRole("dialog")).getByRole("alert")).toHaveTextContent("Give it a name.");

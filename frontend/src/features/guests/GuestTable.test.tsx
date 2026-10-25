@@ -39,6 +39,48 @@ function renderTable(guests: Guest[], handlers: Partial<Handlers> = {}) {
 }
 
 describe("GuestTable", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("given a phone, when the table is rendered, then it keeps only the name and the RSVP", () => {
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query) =>
+        ({
+          matches: query.includes("max-width"),
+          media: query,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+        }) as unknown as MediaQueryList,
+    );
+    renderTable([aGuest({ firstName: "Ana", lastName: "Pérez" })]);
+
+    expect(screen.getAllByRole("columnheader").map((header) => header.textContent)).toEqual([
+      expect.stringContaining("Name"),
+      expect.stringContaining("RSVP"),
+    ]);
+    expect(screen.getAllByRole("cell")).toHaveLength(2);
+  });
+
+  it("given a phone, when a guest's name is tapped, then the guest opens to edit", async () => {
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query) =>
+        ({
+          matches: query.includes("max-width"),
+          media: query,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+        }) as unknown as MediaQueryList,
+    );
+    const onEdit = vi.fn();
+    const ana = aGuest({ firstName: "Ana", lastName: "Pérez" });
+    renderTable([ana], { onEdit });
+
+    await userEvent.click(screen.getByRole("button", { name: "Ana Pérez" }));
+
+    expect(onEdit).toHaveBeenCalledWith(ana);
+  });
+
   it("given guests, when the table is rendered, then RSVP sits just before the actions column", () => {
     renderTable([aGuest()]);
 

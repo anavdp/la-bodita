@@ -4,8 +4,8 @@ import type { Item, ItemDraft, ItemStatus, Task } from "../../api/types";
 import { CalendarMark } from "../../components/playful/CalendarMark";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { isIconName } from "../../components/playful/iconCatalog";
-import { PageHeader } from "../../components/playful/PageHeader";
-import { outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -183,9 +183,7 @@ export function ItemsPage() {
   return (
     <>
       <PageHeader title={t("items.title")} subtitle={t("items.subtitle")} art="title-car.png">
-        <button type="button" onClick={() => setDialogTarget({ item: null })} className={primaryButton}>
-          {t("items.add")}
-        </button>
+        <HeaderAction icon="add" label={t("items.add")} onClick={() => setDialogTarget({ item: null })} />
       </PageHeader>
 
       <div className="mb-6 flex flex-wrap items-center gap-2">

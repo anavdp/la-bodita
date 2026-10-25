@@ -5,8 +5,8 @@ import { useSearchParams } from "react-router-dom";
 import type { Category, Task } from "../../api/types";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { isIconName } from "../../components/playful/iconCatalog";
-import { PageHeader } from "../../components/playful/PageHeader";
-import { outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -158,9 +158,7 @@ export function ChecklistPage() {
   return (
     <>
       <PageHeader title={t("checklist.title")} subtitle={t("checklist.subtitle")} art="title-checklist.png">
-        <button type="button" onClick={() => setSearchParams({ add: "task" })} className={primaryButton}>
-          {t("checklist.add")}
-        </button>
+        <HeaderAction icon="add" label={t("checklist.add")} onClick={() => setSearchParams({ add: "task" })} />
       </PageHeader>
 
       {isAdding && <AddTaskForm items={items} onAdd={planning.addTask} onClose={closeAdding} />}

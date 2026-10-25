@@ -2,8 +2,8 @@ import { useId, useMemo, useState } from "react";
 
 import type { CalendarEvent, CalendarEventDraft, Category } from "../../api/types";
 import { CategoryIcon } from "../../components/playful/IconPicker";
-import { PageHeader } from "../../components/playful/PageHeader";
-import { compactButton, outlinedCard, primaryButton, secondaryButton } from "../../components/playful/styles";
+import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { compactButton, outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { Language, TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
@@ -367,9 +367,7 @@ export function CalendarPage() {
   return (
     <>
       <PageHeader title={t("calendar.title")} subtitle={t("calendar.subtitle")} art="title-calendar.png">
-        <button type="button" onClick={() => setFormTarget({ startDate: null })} className={primaryButton}>
-          {t("calendar.add")}
-        </button>
+        <HeaderAction icon="add" label={t("calendar.add")} onClick={() => setFormTarget({ startDate: null })} />
       </PageHeader>
 
       <div className="mb-6">

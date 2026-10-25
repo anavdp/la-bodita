@@ -218,7 +218,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const panel = screen.getByRole("dialog", { name: "New item" });
 
     expect(within(panel).getByRole("combobox", { name: "Contact type" })).toHaveTextContent("Phone");
@@ -230,14 +230,14 @@ describe("ItemsPage", () => {
     expect(within(panel).getByLabelText("Email")).toBeInTheDocument();
     await userEvent.click(within(panel).getByRole("button", { name: "Cancel" }));
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     expect(screen.getByRole("combobox", { name: "Contact type" })).toHaveTextContent("Email");
   });
 
   it("given one contact, when another is added and removed, then each new one takes a type not used yet", async () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const panel = screen.getByRole("dialog", { name: "New item" });
 
     await userEvent.click(within(panel).getByRole("button", { name: "+ Add contact" }));
@@ -260,7 +260,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const dialog = screen.getByRole("dialog", { name: "New item" });
     await userEvent.type(within(dialog).getByLabelText("Name"), "Dulce Rosa Pastelería");
     await userEvent.click(within(dialog).getByRole("combobox", { name: "Category" }));
@@ -294,7 +294,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const dialog = screen.getByRole("dialog", { name: "New item" });
     await userEvent.type(within(dialog).getByLabelText("Name"), "Atelier Novias");
     expect(dialog).toHaveTextContent("You both see it.");
@@ -324,7 +324,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const dialog = screen.getByRole("dialog", { name: "New item" });
     await userEvent.type(within(dialog).getByLabelText("Name"), "Atelier Novias");
     await userEvent.click(within(dialog).getByRole("combobox", { name: "Category" }));
@@ -355,7 +355,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByRole("alert")).toHaveTextContent("Give it a name.");
@@ -367,7 +367,7 @@ describe("ItemsPage", () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
-    await userEvent.click(screen.getByRole("button", { name: "+ Add Item" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     await userEvent.type(screen.getByLabelText("Name"), "Deco Bonita");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
