@@ -69,7 +69,6 @@ const baptism = aPaperRequest({
   itemName: "Iglesia San José",
 });
 
-const glance = () => screen.getByRole("group", { name: "At a glance" });
 const card = (name: string) => screen.getByRole("region", { name });
 
 describe("DashboardPage", () => {
@@ -135,36 +134,106 @@ describe("DashboardPage", () => {
     expect(await screen.findByText("Pick your wedding date in Settings")).toBeInTheDocument();
   });
 
-  it("given every screen's data, when the page loads, then the strip sums up guests, tasks, money and papers", async () => {
+  it("given guests in every state, when the page loads, then the Guest List card charts their RSVPs", async () => {
     renderWithProviders(<DashboardPage />, { route: "/dashboard" });
 
     await screen.findByText("3 days late");
-    const guests = within(glance()).getByRole("link", { name: /said yes/ });
-    expect(guests).toHaveTextContent("2said yes1 still waiting");
-    expect(guests).toHaveAttribute("href", "/guests");
-    const tasks = within(glance()).getByRole("link", { name: /to do/ });
-    expect(tasks).toHaveTextContent("2to do1 late");
-    expect(tasks).toHaveAttribute("href", "/checklist");
-    const money = within(glance()).getByRole("link", { name: /booked & paid/ });
-    expect(money).toHaveTextContent("$1,500booked & paidof $2,000 planned");
-    expect(money).toHaveAttribute("href", "/budget");
-    const papers = within(glance()).getByRole("link", {
-      name: /papers missing/,
-    });
-    expect(papers).toHaveTextContent("2papers missing1 running out");
-    expect(papers).toHaveAttribute("href", "/documents");
+    const guests = card("Guest List");
+    expect(within(guests).getByRole("img", { name: "2 said yes, 1 still waiting, 1 can't come" })).toBeInTheDocument();
+    expect(within(guests).getByText("said yes").closest("li")).toHaveTextContent("2said yes");
+    expect(within(guests).getByRole("link", { name: "Guest List" })).toHaveAttribute("href", "/guests");
+    expect(guests.querySelector("img[src='/icons/title-cheers.png']")).not.toBeNull();
   });
 
-  it("given every task on time and no paper running out, when the strip is read, then it says so", async () => {
-    vi.mocked(tasksApi.listTasks).mockResolvedValue([tasting]);
-    vi.mocked(documentsApi.listDocuments).mockResolvedValue([]);
+  it("given booked and paid lines, when the page loads, then the Budget card charts them per category", async () => {
+    vi.mocked(budgetApi.listBudgetLines).mockResolvedValue([
+      aBudgetLine({ status: "paid", estimatedAmount: 300, categoryId: cake.id }),
+      aBudgetLine({ status: "confirmed", estimatedAmount: 1200 }),
+      aBudgetLine({ status: "considering", estimatedAmount: 500 }),
+      aBudgetLine({ status: "paid", currency: "EUR", estimatedAmount: 600 }),
+    ]);
+
+    renderWithProviders(<DashboardPage />, { route: "/dashboard" });
+
+    await screen.findByText("3 days late");
+    const budget = card("Budget");
+    expect(budget).toHaveTextContent("$1,500 booked & paid");
+    expect(within(budget).getByTitle("No category: $1,200")).toBeInTheDocument();
+    expect(within(budget).getByTitle("Cake: $300")).toBeInTheDocument();
+    expect(within(budget).getByText("Also €600")).toBeInTheDocument();
+    expect(within(budget).getByText("of $2,000 + €600 planned")).toBeInTheDocument();
+  });
+
+  it("given more categories than bars, when the Budget card charts them, then the smallest share one bar", async () => {
+    const categories = ["Cake", "Church", "Dress", "Decor", "Photos"].map((name) => aCategory({ name }));
+    vi.mocked(categoriesApi.listCategories).mockResolvedValue(categories);
+    vi.mocked(budgetApi.listBudgetLines).mockResolvedValue(
+      categories.map((category, index) =>
+        aBudgetLine({ status: "paid", estimatedAmount: 500 - index * 100, categoryId: category.id }),
+      ),
+    );
 
     renderWithProviders(<DashboardPage />, { route: "/dashboard" });
 
     expect(
-      within(await screen.findByRole("group", { name: "At a glance" })).getByText("all on time"),
+      await within(await screen.findByRole("region", { name: "Budget" })).findByTitle("Everything else: $100"),
     ).toBeInTheDocument();
-    expect(within(glance()).getByText("none running out")).toBeInTheDocument();
+  });
+
+  it("given tasks done, late and ahead, when the page loads, then the Checklist card charts them and names the next", async () => {
+    renderWithProviders(<DashboardPage />, { route: "/dashboard" });
+
+    await screen.findByText("3 days late");
+    const checklist = card("Checklist");
+    expect(within(checklist).getByRole("img", { name: "1 of 3 tasks done" })).toBeInTheDocument();
+    expect(within(checklist).getByText("2 to do")).toBeInTheDocument();
+    expect(within(checklist).getByText("1 late")).toBeInTheDocument();
+    expect(within(checklist).getByText("Next: Cake tasting · Sat, Oct 31")).toBeInTheDocument();
+  });
+
+  it("given papers asked for, when the page loads, then the Documents card charts them and names the next to get", async () => {
+    renderWithProviders(<DashboardPage />, { route: "/dashboard" });
+
+    await screen.findByText("3 days late");
+    const papers = card("Documents");
+    expect(within(papers).getByRole("img", { name: "0 of 2 papers in hand" })).toBeInTheDocument();
+    expect(within(papers).getByText("2 still to get")).toBeInTheDocument();
+    expect(within(papers).getByText("1 running out")).toBeInTheDocument();
+    expect(within(papers).getByText("Next to get: Baptism certificate · Iglesia San José")).toBeInTheDocument();
+  });
+
+  it("given every task on time, when the Checklist card is read, then it says so", async () => {
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([tasting]);
+
+    renderWithProviders(<DashboardPage />, { route: "/dashboard" });
+
+    expect(
+      await within(await screen.findByRole("region", { name: "Checklist" })).findByText("All on time"),
+    ).toBeInTheDocument();
+  });
+
+  it("given no guests, nothing booked and no papers asked for, when the page loads, then each card says so", async () => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([]);
+    vi.mocked(budgetApi.listBudgetLines).mockResolvedValue([]);
+    vi.mocked(documentsApi.listPaperRequests).mockResolvedValue([]);
+
+    renderWithProviders(<DashboardPage />, { route: "/dashboard" });
+
+    expect(await screen.findByText("No guests yet.")).toBeInTheDocument();
+    expect(screen.getByText("Nothing booked or paid yet.")).toBeInTheDocument();
+    expect(screen.getByText("No office has asked for a paper yet.")).toBeInTheDocument();
+  });
+
+  it("given a late task in a category with a drawing, when it needs us, then its row wears the category", async () => {
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([
+      aTask({ title: "Pay the cake deposit", dueDate: "2026-10-20", categoryId: cake.id }),
+    ]);
+
+    renderWithProviders(<DashboardPage />, { route: "/dashboard" });
+
+    const row = (await screen.findByText("Pay the cake deposit")).closest("a") as HTMLElement;
+    expect(row.querySelector("img[src='/icons/cake.png']")).not.toBeNull();
+    expect((row.querySelector("span[style]") as HTMLElement).style.backgroundColor).toContain("color-mix");
   });
 
   it("given a late task, a paper running out and an item waiting on papers, when the page loads, then each needs us", async () => {

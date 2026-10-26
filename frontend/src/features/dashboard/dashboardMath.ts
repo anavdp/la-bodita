@@ -1,4 +1,5 @@
-import type { PaperRequest, Person, Task, WeddingDocument } from "../../api/types";
+import type { BudgetLine, Category, PaperRequest, Person, Task, WeddingDocument } from "../../api/types";
+import { amountOf, isConfirmed } from "../budget/budgetMath";
 import { toIso } from "../calendar/calendarMath";
 import { itemsWaiting, paperRows, papersRunningOut } from "../documents/papers";
 import type { WaitingItem } from "../documents/papers";
@@ -60,14 +61,53 @@ export function needsYou({ tasks, requests, documents }: NeedsYouSources, today:
   return [...late, ...runningOut, ...waiting];
 }
 
-/** Papers still to get, a copy per person, as the Documents screen's table counts them. */
-export function missingPaperCount(
+/** Papers in hand and still to get, a copy per person, as the Documents screen's table counts them. */
+export function paperProgress(
   requests: PaperRequest[],
   documents: WeddingDocument[],
   people: Person[],
   todayIso: string,
-): number {
-  return paperRows(requests, documents, people, todayIso)
-    .flatMap((row) => row.cells)
-    .filter((cell) => cell.state === "missing").length;
+): { inHand: number; missing: number } {
+  const cells = paperRows(requests, documents, people, todayIso).flatMap((row) => row.cells);
+  return {
+    inHand: cells.filter((cell) => cell.state !== "missing" && cell.state !== "notAsked").length,
+    missing: cells.filter((cell) => cell.state === "missing").length,
+  };
+}
+
+export interface SpendSlice {
+  /** The category's id, or "none" for money on no category. */
+  key: string;
+  category: Category | null;
+  amount: number;
+}
+
+export interface CurrencySpend {
+  currency: string;
+  total: number;
+  slices: SpendSlice[];
+}
+
+/**
+ * What booked and paid lines add up to in each category, biggest first, one
+ * group per currency (never added together), the biggest currency first.
+ */
+export function spendByCategory(lines: BudgetLine[], categories: Category[]): CurrencySpend[] {
+  const known = new Map(categories.map((category) => [category.id, category]));
+  const byCurrency = new Map<string, Map<string, SpendSlice>>();
+  lines.filter(isConfirmed).forEach((line) => {
+    const category = line.categoryId === null ? null : (known.get(line.categoryId) ?? null);
+    const key = category === null ? "none" : String(category.id);
+    const slices = byCurrency.get(line.currency) ?? new Map<string, SpendSlice>();
+    const slice = slices.get(key) ?? { key, category, amount: 0 };
+    slice.amount += amountOf(line) ?? 0;
+    slices.set(key, slice);
+    byCurrency.set(line.currency, slices);
+  });
+  return [...byCurrency.entries()]
+    .map(([currency, slices]) => {
+      const sorted = [...slices.values()].sort((first, second) => second.amount - first.amount);
+      return { currency, total: sorted.reduce((sum, slice) => sum + slice.amount, 0), slices: sorted };
+    })
+    .sort((first, second) => second.total - first.total);
 }

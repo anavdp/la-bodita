@@ -1,5 +1,6 @@
 import { aDocument, aPaperRequest, aPerson, aTask } from "../../testing/planningFactory";
-import { daysLate, missingPaperCount, needsYou } from "./dashboardMath";
+import { aBudgetLine, aCategory } from "../../testing/planningFactory";
+import { daysLate, paperProgress, needsYou, spendByCategory } from "./dashboardMath";
 
 const today = new Date(2026, 9, 25);
 const todayIso = "2026-10-25";
@@ -108,18 +109,54 @@ describe("the figures", () => {
     expect(daysLate("2026-10-22", today)).toBe(3);
   });
 
-  it("given papers for both of us and for one, when the missing ones are counted, then each person's copy counts", () => {
+  it("given papers for both of us and for one, when they are counted, then each person's copy counts", () => {
     const requests = [
       aPaperRequest({ name: "Birth certificate", personId: null }),
       aPaperRequest({ name: "Nulla osta", personId: gerardo.id }),
-      aPaperRequest({
-        name: "Passport",
-        personId: vicky.id,
-        isMissing: false,
-        documentId: 99,
-      }),
+      aPaperRequest({ name: "Passport", personId: vicky.id, isMissing: false, documentId: 99 }),
     ];
 
-    expect(missingPaperCount(requests, [], [vicky, gerardo], todayIso)).toBe(3);
+    expect(paperProgress(requests, [], [vicky, gerardo], todayIso)).toEqual({ inHand: 1, missing: 3 });
+  });
+});
+
+describe("spending by category", () => {
+  const church = aCategory({ name: "Church", color: "#7b61c9" });
+  const dress = aCategory({ name: "Dress", color: "#6a7cf0" });
+
+  it("given booked and paid lines, when they are summed, then each category gets its share, the biggest first", () => {
+    const lines = [
+      aBudgetLine({ status: "paid", estimatedAmount: 300, categoryId: church.id }),
+      aBudgetLine({ status: "confirmed", estimatedAmount: 250, actualAmount: 280, categoryId: church.id }),
+      aBudgetLine({ status: "confirmed", estimatedAmount: 1200, categoryId: dress.id }),
+      aBudgetLine({ status: "considering", estimatedAmount: 5000, categoryId: dress.id }),
+      aBudgetLine({ status: "paid", estimatedAmount: 90, categoryId: null }),
+    ];
+
+    const [usd] = spendByCategory(lines, [church, dress]);
+
+    expect(usd.currency).toBe("USD");
+    expect(usd.total).toBe(1870);
+    expect(usd.slices.map((slice) => [slice.category?.name ?? null, slice.amount])).toEqual([
+      ["Dress", 1200],
+      ["Church", 580],
+      [null, 90],
+    ]);
+  });
+
+  it("given money in two currencies, when it is summed, then each currency stands alone, the bigger first", () => {
+    const lines = [
+      aBudgetLine({ status: "paid", currency: "EUR", estimatedAmount: 600, categoryId: dress.id }),
+      aBudgetLine({ status: "paid", currency: "USD", estimatedAmount: 900, categoryId: church.id }),
+    ];
+
+    expect(spendByCategory(lines, [church, dress]).map((group) => [group.currency, group.total])).toEqual([
+      ["USD", 900],
+      ["EUR", 600],
+    ]);
+  });
+
+  it("given nothing booked yet, when it is summed, then there is nothing to show", () => {
+    expect(spendByCategory([aBudgetLine({ status: "considering" })], [])).toEqual([]);
   });
 });

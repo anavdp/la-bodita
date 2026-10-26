@@ -4,21 +4,25 @@ import { Link } from "react-router-dom";
 
 import type { Category } from "../../api/types";
 import { daysUntil } from "../../components/layout/countdown";
+import { CategoryIcon } from "../../components/playful/IconPicker";
+import { isIconName } from "../../components/playful/iconCatalog";
 import { PageHeader } from "../../components/playful/PageHeader";
 import { outlinedCard, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
-import { formatTotals, summarise } from "../budget/budgetMath";
+import { formatMoney, formatTotals, summarise } from "../budget/budgetMath";
 import { fromIso, toEntries, toIso, upcoming } from "../calendar/calendarMath";
 import type { CalendarEntry } from "../calendar/calendarMath";
 import { ComingUpCard, NextUpCard, cardLabel } from "../calendar/Upcoming";
-import { formatPaperDate } from "../documents/papers";
-import { statusDotClass } from "../guests/GuestStats";
+import { formatPaperDate, itemsWaiting } from "../documents/papers";
 import { summariseRsvps } from "../guests/guestSummary";
-import { isOverdue } from "../planning/schedule";
-import { missingPaperCount, needsYou } from "./dashboardMath";
+import { formatDueDate, isOverdue } from "../planning/schedule";
+import { CategoryBars, Donut, DonutLegend, SummaryCard } from "./charts";
+import type { DonutSegment } from "./charts";
+import { needsYou, paperProgress, spendByCategory } from "./dashboardMath";
 import type { Attention } from "./dashboardMath";
 import { useDashboard } from "./useDashboard";
+import type { DashboardData } from "./useDashboard";
 
 /** How many papers an item's row names before it says "and N more". */
 const PAPERS_NAMED = 3;
@@ -26,58 +30,189 @@ const PAPERS_NAMED = 3;
 /** The dashboard lists only the first few things coming up; the calendar has the rest. */
 const COMING_UP_SHOWN = 5;
 
+/** Theme colors as CSS, for chart marks drawn in SVG. */
+const token = (name: string) => `rgb(var(--color-play-${name}))`;
+
 /** The tagline: how long until the wedding, and which day it is. */
 function useCountdownLine(weddingDate: string | null | undefined): string {
   const { t, language } = useTranslation();
   if (!weddingDate) return t("dashboard.noDate");
-  const date = new Intl.DateTimeFormat(language, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  }).format(fromIso(weddingDate));
+  const date = new Intl.DateTimeFormat(language, { weekday: "long", month: "long", day: "numeric" }).format(
+    fromIso(weddingDate),
+  );
   const remaining = daysUntil(weddingDate);
   if (remaining > 1) return t("dashboard.countdown", { count: remaining, date });
   if (remaining === 1) return t("dashboard.tomorrow", { date });
   return t("dashboard.today");
 }
 
-interface FigureProps {
-  to: string;
-  figure: string;
-  label: string;
-  detail: string;
-  /** The detail is something to act on. */
-  isUrgent?: boolean;
-  dot?: string;
+/** A short line under a chart; coral when it is something to act on. */
+function Note({ children, isUrgent = false }: { children: ReactNode; isUrgent?: boolean }) {
+  return <p className={`text-base ${isUrgent ? "text-coral" : "text-ink/70"}`}>{children}</p>;
 }
 
-/** One figure of the strip, leading to the screen it sums up. */
-function Figure({ to, figure, label, detail, isUrgent = false, dot }: FigureProps) {
+function GuestsCard({ data }: { data: DashboardData }) {
+  const { t } = useTranslation();
+  const rsvps = summariseRsvps(data.guests);
+  const segments: DonutSegment[] = [
+    { key: "confirmed", label: t("dashboard.saidYes"), value: rsvps.confirmed, color: token("mint") },
+    { key: "pending", label: t("dashboard.stillWaiting"), value: rsvps.pending, color: token("butter-deep") },
+    { key: "declined", label: t("dashboard.cantCome"), value: rsvps.declined, color: token("coral") },
+  ];
   return (
-    // The slot carries the divider, so the link can keep its own rounded hover box.
-    <div className="flex min-w-0 px-1">
-      <Link
-        to={to}
-        className="flex min-w-0 flex-1 flex-col items-center justify-center rounded-[20px] px-2 py-2 text-center text-ink transition-colors hover:bg-cream-light/50"
-      >
-        <span className="flex items-center gap-2 font-playful-display text-[26px] leading-none sm:text-[34px]">
-          {dot !== undefined && (
-            <span aria-hidden="true" className={`h-4 w-4 rounded-full border-2 border-ink ${dot}`} />
-          )}
-          {figure}
-        </span>
-        <span className="font-playful text-base sm:text-xl">{label}</span>
-        <span className={`font-playful text-sm sm:text-base ${isUrgent ? "text-coral" : "text-ink/70"}`}>{detail}</span>
-      </Link>
-    </div>
+    <SummaryCard art="title-cheers.png" title={t("nav.guests")} to="/guests">
+      {rsvps.total === 0 ? (
+        <Note>{t("dashboard.noGuests")}</Note>
+      ) : (
+        <div className="flex items-center gap-4">
+          <Donut
+            segments={segments}
+            figure={String(rsvps.total)}
+            caption={t("dashboard.guestsCaption")}
+            label={t("dashboard.rsvpChart", { yes: rsvps.confirmed, waiting: rsvps.pending, no: rsvps.declined })}
+          />
+          <DonutLegend segments={segments} />
+        </div>
+      )}
+    </SummaryCard>
   );
 }
 
-function AttentionRow({ to, icon, title, detail }: { to: string; icon: ReactNode; title: string; detail: string }) {
+function BudgetCard({ data }: { data: DashboardData }) {
+  const { t, language } = useTranslation();
+  const [main, ...others] = spendByCategory(data.lines, data.categories);
+  const plan = summarise(data.lines);
+  return (
+    <SummaryCard art="title-budget.png" title={t("nav.budget")} to="/budget">
+      {main === undefined ? (
+        <Note>{t("dashboard.nothingBooked")}</Note>
+      ) : (
+        <>
+          <p>
+            <span className="font-playful-display text-[30px] leading-none">
+              {formatMoney(main.total, main.currency, language)}
+            </span>{" "}
+            <span className="text-lg">{t("dashboard.settled")}</span>
+          </p>
+          <CategoryBars slices={main.slices} currency={main.currency} />
+          {others.length > 0 && (
+            <Note>
+              {t("dashboard.alsoIn", {
+                amounts: others.map((group) => formatMoney(group.total, group.currency, language)).join(" + "),
+              })}
+            </Note>
+          )}
+          <Note>{t("dashboard.ofPlan", { total: formatTotals(plan, "total", language) })}</Note>
+        </>
+      )}
+    </SummaryCard>
+  );
+}
+
+function ChecklistCard({ data }: { data: DashboardData }) {
+  const { t, language } = useTranslation();
+  const today = new Date();
+  const done = data.tasks.filter((task) => task.isDone).length;
+  const open = data.tasks.filter((task) => !task.isDone);
+  const late = open.filter((task) => isOverdue(task, today)).length;
+  // The soonest dated task from today on; late ones are on the Needs you card.
+  const next = upcoming(toEntries(open, []), toIso(today))[0];
+  return (
+    <SummaryCard art="title-checklist.png" title={t("nav.checklist")} to="/checklist">
+      <div className="flex items-center gap-4">
+        <Donut
+          segments={[
+            { key: "done", label: t("dashboard.doneCaption"), value: done, color: token("sky") },
+            {
+              key: "open",
+              label: t("dashboard.toDo", { count: open.length }),
+              value: open.length,
+              color: "transparent",
+            },
+          ]}
+          figure={String(done)}
+          caption={t("dashboard.doneCaption")}
+          label={t("dashboard.tasksChart", { done, total: data.tasks.length })}
+        />
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-lg">{t("dashboard.toDo", { count: open.length })}</p>
+          <Note isUrgent={late > 0}>{late > 0 ? t("dashboard.late", { count: late }) : t("dashboard.onTime")}</Note>
+          {next !== undefined && (
+            <Note>
+              {t("dashboard.nextTask", { title: `${next.title} · ${formatDueDate(next.startDate, language)}` })}
+            </Note>
+          )}
+        </div>
+      </div>
+    </SummaryCard>
+  );
+}
+
+function PapersCard({ data, runningOut }: { data: DashboardData; runningOut: number }) {
+  const { t } = useTranslation();
+  const { inHand, missing } = paperProgress(data.requests, data.documents, data.people, toIso(new Date()));
+  const nextItem = itemsWaiting(data.requests)[0];
+  return (
+    <SummaryCard art="title-documents.png" title={t("nav.documents")} to="/documents">
+      {inHand + missing === 0 ? (
+        <Note>{t("dashboard.noPapers")}</Note>
+      ) : (
+        <div className="flex items-center gap-4">
+          <Donut
+            segments={[
+              { key: "inHand", label: t("dashboard.inHandCaption"), value: inHand, color: token("mint") },
+              {
+                key: "missing",
+                label: t("dashboard.papersMissing", { count: missing }),
+                value: missing,
+                color: "transparent",
+              },
+            ]}
+            figure={String(inHand)}
+            caption={t("dashboard.inHandCaption")}
+            label={t("dashboard.papersChart", { have: inHand, total: inHand + missing })}
+          />
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-lg">{t("dashboard.papersMissing", { count: missing })}</p>
+            {runningOut > 0 && <Note isUrgent>{t("dashboard.runningOutCount", { count: runningOut })}</Note>}
+            {nextItem !== undefined && (
+              <Note>{t("dashboard.nextPaper", { name: `${nextItem.missing[0].name} · ${nextItem.itemName}` })}</Note>
+            )}
+          </div>
+        </div>
+      )}
+    </SummaryCard>
+  );
+}
+
+interface AttentionRowProps {
+  to: string;
+  category: Category | undefined;
+  /** A Material Symbols icon, for a category without a drawing of its own. */
+  fallbackIcon: string;
+  title: string;
+  detail: string;
+}
+
+/** One thing waiting on us, in its category's color and drawing. */
+function AttentionRow({ to, category, fallbackIcon, title, detail }: AttentionRowProps) {
+  const tint = category
+    ? `color-mix(in srgb, ${category.color} 45%, rgb(var(--color-play-cream-light)))`
+    : "rgb(var(--color-play-coral-soft))";
   return (
     <li className="border-t-2 border-ink/10 first:border-t-0">
       <Link to={to} className="flex items-center gap-3 rounded-xl py-3 transition-colors hover:bg-accent/30">
-        {icon}
+        <span
+          aria-hidden="true"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-ink"
+          style={{ backgroundColor: tint }}
+        >
+          {isIconName(category?.emoji) ? (
+            <CategoryIcon value={category?.emoji} className="h-7 w-7" />
+          ) : (
+            <span className="material-symbols-outlined text-[20px] text-ink">{fallbackIcon}</span>
+          )}
+        </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-lg">{title}</span>
           <span className="block text-base text-coral">{detail}</span>
@@ -90,17 +225,13 @@ function AttentionRow({ to, icon, title, detail }: { to: string; icon: ReactNode
   );
 }
 
-const attentionIcon = (name: string) => (
-  <span
-    aria-hidden="true"
-    className="material-symbols-outlined flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-coral-soft text-[20px] text-ink"
-  >
-    {name}
-  </span>
-);
+interface NeedsYouCardProps {
+  list: Attention[];
+  categoryOf: (categoryId: number | null) => Category | undefined;
+}
 
 /** What is waiting on us: late tasks, papers running out, items still waiting on papers. */
-function NeedsYouCard({ list }: { list: Attention[] }) {
+function NeedsYouCard({ list, categoryOf }: NeedsYouCardProps) {
   const { t, language } = useTranslation();
   const headingId = useId();
 
@@ -110,7 +241,8 @@ function NeedsYouCard({ list }: { list: Attention[] }) {
         <AttentionRow
           key={entry.key}
           to="/checklist"
-          icon={attentionIcon("alarm")}
+          category={categoryOf(entry.task.categoryId)}
+          fallbackIcon="alarm"
           title={[entry.task.title, entry.task.itemName].filter(Boolean).join(" · ")}
           detail={entry.daysLate === 1 ? t("dashboard.oneDayLate") : t("dashboard.daysLate", { count: entry.daysLate })}
         />
@@ -122,7 +254,8 @@ function NeedsYouCard({ list }: { list: Attention[] }) {
         <AttentionRow
           key={entry.key}
           to="/documents"
-          icon={attentionIcon("hourglass_bottom")}
+          category={categoryOf(entry.document.categoryId)}
+          fallbackIcon="hourglass_bottom"
           title={entry.document.title}
           detail={entry.isExpired ? t("dashboard.ranOut", { date }) : t("dashboard.runsOut", { date })}
         />
@@ -140,7 +273,8 @@ function NeedsYouCard({ list }: { list: Attention[] }) {
       <AttentionRow
         key={entry.key}
         to={`/items?item=${entry.item.itemId}`}
-        icon={attentionIcon("description")}
+        category={categoryOf(entry.item.categoryId)}
+        fallbackIcon="description"
         title={entry.item.itemName}
         detail={t("dashboard.waitingOn", { papers })}
       />
@@ -162,22 +296,22 @@ function NeedsYouCard({ list }: { list: Attention[] }) {
 }
 
 /**
- * The whole wedding at a glance: how long is left, a strip summing up guests,
- * tasks, money and papers (each leading to its screen), what is next, the two
- * weeks after it, and whatever is waiting on us.
+ * The whole wedding at a glance: how long is left, what is next, whatever is
+ * waiting on us (each in its category's color) and the two weeks after; beside
+ * them a card per screen with its drawing and a chart: who is coming, what is
+ * booked per category, tasks done, papers in hand.
  */
 export function DashboardPage() {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const { wedding } = useWedding();
   const dashboard = useDashboard(wedding?.id ?? null);
-  const { categories, tasks, events, lines, guests, requests, documents, people, isLoading, hasLoadError } = dashboard;
+  const { categories, tasks, events, requests, documents, isLoading, hasLoadError } = dashboard;
   const countdownLine = useCountdownLine(wedding?.wedding_date);
 
-  const today = new Date();
-  const todayIso = toIso(today);
   const categoriesById = useMemo(() => new Map(categories.map((each) => [each.id, each])), [categories]);
-  const categoryOf = (entry: CalendarEntry): Category | undefined =>
-    entry.categoryId === null ? undefined : categoriesById.get(entry.categoryId);
+  const categoryOf = (categoryId: number | null): Category | undefined =>
+    categoryId === null ? undefined : categoriesById.get(categoryId);
+  const entryCategory = (entry: CalendarEntry) => categoryOf(entry.categoryId);
 
   const body = () => {
     if (isLoading) {
@@ -194,14 +328,10 @@ export function DashboardPage() {
       );
     }
 
-    const rsvps = summariseRsvps(guests);
-    const openTasks = tasks.filter((task) => !task.isDone);
-    const lateCount = openTasks.filter((task) => isOverdue(task, today)).length;
-    const money = summarise(lines);
+    const today = new Date();
+    const todayIso = toIso(today);
     const attention = needsYou({ tasks, requests, documents }, today);
-    const runningOutCount = attention.filter((entry) => entry.kind === "runningOut").length;
-    const missing = missingPaperCount(requests, documents, people, todayIso);
-
+    const runningOut = attention.filter((entry) => entry.kind === "runningOut").length;
     const ahead = upcoming(toEntries(tasks, events), todayIso);
     const nextUp = ahead[0] ?? null;
     const comingUp = upcoming(ahead, todayIso, 14)
@@ -210,58 +340,14 @@ export function DashboardPage() {
 
     return (
       <>
-        <div
-          role="group"
-          aria-label={t("dashboard.glance")}
-          className="grid grid-cols-2 gap-1 rounded-[28px] border-[2.5px] border-ink bg-accent p-2 md:grid-cols-4 md:divide-x-2 md:divide-ink/40"
-        >
-          <Figure
-            to="/guests"
-            dot={statusDotClass.confirmed}
-            figure={String(rsvps.confirmed)}
-            label={t("dashboard.saidYes")}
-            detail={t("dashboard.stillWaiting", { count: rsvps.pending })}
-          />
-          <Figure
-            to="/checklist"
-            figure={String(openTasks.length)}
-            label={t("dashboard.toDo")}
-            detail={lateCount > 0 ? t("dashboard.late", { count: lateCount }) : t("dashboard.onTime")}
-            isUrgent={lateCount > 0}
-          />
-          <Figure
-            to="/budget"
-            figure={formatTotals(money, "confirmed", language)}
-            label={t("dashboard.settled")}
-            detail={t("dashboard.ofPlan", {
-              total: formatTotals(money, "total", language),
-            })}
-          />
-          <Figure
-            to="/documents"
-            figure={String(missing)}
-            label={t("dashboard.papersMissing")}
-            detail={
-              runningOutCount > 0
-                ? t("dashboard.runningOutCount", { count: runningOutCount })
-                : t("dashboard.noneRunningOut")
-            }
-            isUrgent={runningOutCount > 0}
-          />
-        </div>
-
-        {/* On a phone what needs us comes straight after what is next; beside them on a wide screen. */}
-        <div className="mt-6 grid items-start gap-6 font-playful text-ink lg:grid-cols-2 lg:grid-rows-[auto_1fr]">
-          <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-            <NextUpCard entry={nextUp} category={nextUp === null ? undefined : categoryOf(nextUp)} />
-          </div>
-          <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-            <NeedsYouCard list={attention} />
-          </div>
-          <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+        {/* What is next and what needs us come first; each screen's chart card stands beside them, or after them on a phone. */}
+        <div className="grid items-start gap-6 font-playful text-ink lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div className="flex min-w-0 flex-col gap-6">
+            <NextUpCard entry={nextUp} category={nextUp === null ? undefined : entryCategory(nextUp)} />
+            <NeedsYouCard list={attention} categoryOf={categoryOf} />
             <ComingUpCard
               entries={comingUp}
-              categoryOf={categoryOf}
+              categoryOf={entryCategory}
               linkOf={(entry) => (entry.kind === "event" ? "/calendar" : "/checklist")}
               footer={
                 <Link to="/calendar" className="mt-3 inline-block text-lg text-ink underline underline-offset-4">
@@ -269,6 +355,12 @@ export function DashboardPage() {
                 </Link>
               }
             />
+          </div>
+          <div className="grid min-w-0 gap-4 md:grid-cols-2 lg:grid-cols-1">
+            <GuestsCard data={dashboard} />
+            <BudgetCard data={dashboard} />
+            <ChecklistCard data={dashboard} />
+            <PapersCard data={dashboard} runningOut={runningOut} />
           </div>
         </div>
       </>
