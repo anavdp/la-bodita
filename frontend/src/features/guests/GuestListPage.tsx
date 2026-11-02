@@ -23,6 +23,7 @@ import { useWedding } from "../../wedding/WeddingProvider";
 import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
 import { HouseholdFormDialog } from "../households/HouseholdFormDialog";
+import type { BroadcastFilter } from "../households/broadcastFilter";
 import { householdRsvpOf, householdShowsUnder, membersOf } from "../households/householdRsvp";
 import { HouseholdsPanel } from "../households/HouseholdsPanel";
 import { filterGuestsByColumns, filterGuestsByName, hasColumnFilters, noColumnFilters } from "./filtering";
@@ -87,6 +88,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
 
   /** What is ticked under the table's Type, Relationship and Side funnels. */
   const [columnFilters, setColumnFilters] = useState<GuestColumnFilters>(noColumnFilters);
+  const [broadcastFilter, setBroadcastFilter] = useState<BroadcastFilter>([]);
 
   /** Name order by default; the Name, Household and RSVP headers pick and flip it. */
   const [sort, setSort] = useState<GuestSort>({ key: "name", direction: "ascending" });
@@ -193,7 +195,8 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
           </p>
         );
       }
-      if (rsvpFilteredHouseholds.length === 0) {
+      // With the Broadcast funnel on, the table stays up so it can be changed back.
+      if (rsvpFilteredHouseholds.length === 0 && broadcastFilter.length === 0) {
         return <p className="font-playful text-xl text-ink/70">{t("households.statusNoMatches")}</p>;
       }
       return (
@@ -205,6 +208,8 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
           onEdit={(household) => setHouseholdDialog({ kind: "form", household })}
           onDelete={(household) => setHouseholdDialog({ kind: "delete", household })}
           onChangeBroadcastList={handleChangeBroadcastList}
+          broadcastFilter={broadcastFilter}
+          onChangeBroadcastFilter={setBroadcastFilter}
           />
         </div>
       );

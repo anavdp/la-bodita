@@ -4,11 +4,14 @@ import type { BroadcastList, Guest, Household } from "../../api/types";
 import { useIsPhone } from "../../components/layout/useIsPhone";
 import { iconUrl } from "../../components/playful/icons";
 import { menuItem, menuPanel } from "../../components/playful/styles";
+import { FilterHeader } from "../../components/table/FilterHeader";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { statusDotClass } from "../guests/GuestStats";
 import { rsvpPillClass } from "../guests/GuestTable";
 import { rsvpLabelKey } from "../guests/vocabulary";
+import { filterHouseholdsByBroadcast, toggleBroadcastFilter } from "./broadcastFilter";
+import type { BroadcastFilter } from "./broadcastFilter";
 import { householdRsvpOf, membersOf } from "./householdRsvp";
 import type { HouseholdRsvp } from "./householdRsvp";
 
@@ -20,9 +23,12 @@ interface HouseholdsPanelProps {
   onEdit: (household: Household) => void;
   onDelete: (household: Household) => void;
   onChangeBroadcastList: (household: Household, broadcastList: BroadcastList | null) => void;
+  /** The lists ticked under the Broadcast header's funnel. */
+  broadcastFilter: BroadcastFilter;
+  onChangeBroadcastFilter: (broadcastFilter: BroadcastFilter) => void;
 }
 
-type OpenMenu = { householdId: number; kind: "broadcast" | "actions" } | null;
+type OpenMenu = { householdId: number; kind: "broadcast" | "actions" } | { kind: "filter" } | null;
 
 const broadcastLists: BroadcastList[] = ["bride", "groom"];
 /** The bride's list is her dress, the groom's his suit. */
@@ -54,6 +60,8 @@ export function HouseholdsPanel({
   onEdit,
   onDelete,
   onChangeBroadcastList,
+  broadcastFilter,
+  onChangeBroadcastFilter,
 }: HouseholdsPanelProps) {
   const { t } = useTranslation();
   const isPhone = useIsPhone();
@@ -65,15 +73,45 @@ export function HouseholdsPanel({
   const [showSolo, setShowSolo] = useState(false);
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
 
-  const visible = showSolo ? households : households.filter((household) => household.guestIds.length > 1);
+  const families = showSolo ? households : households.filter((household) => household.guestIds.length > 1);
+  const visible = filterHouseholdsByBroadcast(families, broadcastFilter);
+  // The filter lives in the header, so the table stays up when it leaves nobody:
+  // that is where it gets changed back.
+  const isFiltered = broadcastFilter.length > 0;
 
   const isOpen = (household: Household, kind: "broadcast" | "actions") =>
-    openMenu?.householdId === household.id && openMenu.kind === kind;
+    openMenu !== null && openMenu.kind === kind && openMenu.householdId === household.id;
 
   const toggleMenu = (household: Household, kind: "broadcast" | "actions") =>
     setOpenMenu((current) =>
-      current?.householdId === household.id && current.kind === kind ? null : { householdId: household.id, kind },
+      current !== null && current.kind === kind && current.householdId === household.id
+        ? null
+        : { householdId: household.id, kind },
     );
+
+  const isFilterOpen = openMenu?.kind === "filter";
+  const toggleFilter = () => setOpenMenu(isFilterOpen ? null : { kind: "filter" });
+
+  const broadcastChoices = [
+    ...broadcastLists.map((list) => ({
+      value: list,
+      label: t(broadcastLabelKey(list)),
+      icon: <img src={broadcastIcon[list]} alt="" className="h-6 w-6 shrink-0 object-contain" />,
+    })),
+    {
+      value: "notSet",
+      label: t(broadcastLabelKey(null)),
+      isMuted: true,
+      icon: (
+        <span className="material-symbols-outlined text-ink/40" aria-hidden="true">
+          radio_button_unchecked
+        </span>
+      ),
+    },
+  ];
+
+  /** A filter menu is taller than a row menu, and a filtered table can be empty. */
+  const roomForMenu = openMenu === null ? "" : isFilterOpen ? "min-h-[20rem]" : "pb-36";
 
   const act = (action: (household: Household) => void, household: Household) => {
     setOpenMenu(null);
@@ -122,16 +160,30 @@ export function HouseholdsPanel({
         {t("households.showSolo")}
       </label>
 
-      {visible.length === 0 ? (
+      {visible.length === 0 && !isFiltered ? (
         <p className="px-6 pb-6 text-lg">{t("households.emptyFamilies")}</p>
       ) : (
-        <div className={`overflow-x-auto ${openMenu === null ? "" : "pb-36"}`}>
+        <div className={`overflow-x-auto ${roomForMenu}`}>
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-y-[2.5px] border-ink bg-cream text-[15px] uppercase tracking-wider">
                 <th className={`${headerCell} border-r-2 border-ink/20 ${edgeStart}`}>{t("households.column.name")}</th>
                 <th className={headerCell}>{t("households.column.guests")}</th>
-                <th className={`${headerCell} text-center`}>{t("households.column.broadcast")}</th>
+                <FilterHeader
+                  label={t("households.column.broadcast")}
+                  choices={broadcastChoices}
+                  ticked={broadcastFilter}
+                  isOpen={isFilterOpen}
+                  onToggleChoice={(value) =>
+                    onChangeBroadcastFilter(toggleBroadcastFilter(broadcastFilter, value as BroadcastFilter[number]))
+                  }
+                  onClear={() => onChangeBroadcastFilter([])}
+                  onToggle={toggleFilter}
+                  onClose={() => setOpenMenu(null)}
+                  className={`${headerCell} text-center`}
+                  menuPosition={isPhone ? "right-[-4.5rem]" : "left-1/2 -translate-x-1/2"}
+                  isCompact={isPhone}
+                />
                 <th className={`${headerCell} text-center`}>{t("households.column.rsvp")}</th>
                 <th className={`${headerCell} ${edgeEnd} text-right`}>{/* The ⋮ button says it on a phone, where the word would push RSVP off screen. */}
                   <span className={isPhone ? "sr-only" : undefined}>{t("households.column.actions")}</span>
@@ -242,6 +294,14 @@ export function HouseholdsPanel({
               ))}
             </tbody>
           </table>
+          {visible.length === 0 && (
+            <div className="flex flex-wrap items-center gap-4 border-t-2 border-ink/15 px-6 py-4 text-lg">
+              <p>{t("households.filter.noMatches")}</p>
+              <button type="button" onClick={() => onChangeBroadcastFilter([])} className="text-ink/70 underline">
+                {t("guests.filter.clearAll")}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

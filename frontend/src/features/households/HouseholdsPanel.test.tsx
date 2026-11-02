@@ -6,6 +6,7 @@ import { aGuest } from "../../testing/guestFactory";
 import { onAPhone } from "../../testing/onAPhone";
 import { aHousehold } from "../../testing/householdFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
+import type { BroadcastFilter } from "./broadcastFilter";
 import { HouseholdsPanel } from "./HouseholdsPanel";
 
 const rossi = aHousehold({ name: "Famiglia Rossi", guestIds: [1, 2, 3] });
@@ -29,15 +30,23 @@ const allGuests: Guest[] = Object.entries(statusOfGuest).map(([id, rsvpStatus]) 
   aGuest({ id: Number(id), rsvpStatus }),
 );
 
-function renderPanel(households: Household[] = [rossi, mendoza, ana], handlers = {}, guests: Guest[] = allGuests) {
+function renderPanel(
+  households: Household[] = [rossi, mendoza, ana],
+  handlers = {},
+  guests: Guest[] = allGuests,
+  broadcastFilter: BroadcastFilter = [],
+) {
   const callbacks = {
     onDetails: vi.fn(),
     onEdit: vi.fn(),
     onDelete: vi.fn(),
     onChangeBroadcastList: vi.fn(),
+    onChangeBroadcastFilter: vi.fn(),
     ...handlers,
   };
-  renderWithProviders(<HouseholdsPanel households={households} guests={guests} {...callbacks} />);
+  renderWithProviders(
+    <HouseholdsPanel households={households} guests={guests} broadcastFilter={broadcastFilter} {...callbacks} />,
+  );
   return callbacks;
 }
 
@@ -45,7 +54,9 @@ describe("HouseholdsPanel", () => {
   it("given households, when the table is rendered, then it shows their name, size and broadcast list", () => {
     renderPanel();
 
-    expect(screen.getAllByRole("columnheader").map((header) => header.textContent)).toEqual([
+    // The funnel's icon is a ligature, so its name is in the text too.
+    const headerText = (header: HTMLElement) => header.textContent?.replace("filter_alt", "");
+    expect(screen.getAllByRole("columnheader").map(headerText)).toEqual([
       "Name",
       "Guests",
       "Broadcast",
@@ -190,5 +201,105 @@ describe("HouseholdsPanel", () => {
     expect(pill).toHaveAttribute("data-rsvp", "mixed");
     expect(within(pill).getByText("Mixed")).toHaveClass("sr-only");
     vi.restoreAllMocks();
+  });
+
+  describe("filtering by broadcast list", () => {
+    const neri = aHousehold({ name: "Neri", guestIds: [9, 10], broadcastList: "groom" });
+    const families = [rossi, mendoza, bianchi, neri];
+    const shownNames = () =>
+      screen
+        .getAllByRole("row")
+        .slice(1)
+        .map((row) => within(row).getAllByRole("cell")[0].textContent);
+
+    it("given nothing ticked, when the Broadcast header shows, then its funnel offers to filter", () => {
+      renderPanel(families);
+
+      const funnel = screen.getByRole("button", { name: "Filter by Broadcast" });
+      expect(funnel).toHaveAttribute("aria-expanded", "false");
+      expect(screen.getAllByRole("columnheader")[2]).toHaveTextContent("Broadcast");
+    });
+
+    it("given the funnel is clicked, when the menu opens, then it offers both lists and not on a list", async () => {
+      renderPanel(families);
+
+      await userEvent.click(screen.getByRole("button", { name: "Filter by Broadcast" }));
+
+      const menu = screen.getByRole("menu", { name: "Show only" });
+      const options = within(menu).getAllByRole("menuitemcheckbox");
+      ["Bride's list", "Groom's list", "Not on a list"].forEach((name, index) =>
+        expect(options[index]).toHaveAccessibleName(name),
+      );
+      expect(options).toHaveLength(3);
+      expect(options[0].querySelector("img")).toHaveAttribute("src", "/icons/dress.png");
+      expect(options[1].querySelector("img")).toHaveAttribute("src", "/icons/suit.png");
+    });
+
+    it("given the menu is open, when a list is ticked, then the new filter is reported", async () => {
+      const { onChangeBroadcastFilter } = renderPanel(families, {}, allGuests, ["bride"]);
+
+      await userEvent.click(screen.getByRole("button", { name: "Filter by Broadcast, 1 on" }));
+      await userEvent.click(screen.getByRole("menuitemcheckbox", { name: "Not on a list" }));
+
+      expect(onChangeBroadcastFilter).toHaveBeenCalledWith(["bride", "notSet"]);
+    });
+
+    it("given a list is ticked, when the menu is cleared, then no filter is reported", async () => {
+      const { onChangeBroadcastFilter } = renderPanel(families, {}, allGuests, ["groom"]);
+
+      await userEvent.click(screen.getByRole("button", { name: "Filter by Broadcast, 1 on" }));
+      expect(screen.getByRole("menuitemcheckbox", { name: "Groom's list" })).toHaveAttribute("aria-checked", "true");
+      await userEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+      expect(onChangeBroadcastFilter).toHaveBeenCalledWith([]);
+    });
+
+    it("given the groom's list is ticked, when the table shows, then only households on it are listed", () => {
+      renderPanel(families, {}, allGuests, ["groom"]);
+
+      expect(shownNames()).toEqual(["Neri"]);
+    });
+
+    it("given not on a list is ticked, when the table shows, then households with no list are listed", () => {
+      renderPanel(families, {}, allGuests, ["notSet"]);
+
+      expect(shownNames()).toEqual(["Famiglia Rossi", "Mendoza"]);
+    });
+
+    it("given the filter menu is open, when a row's broadcast menu opens, then only one menu shows", async () => {
+      renderPanel(families);
+
+      await userEvent.click(screen.getByRole("button", { name: "Filter by Broadcast" }));
+      await userEvent.click(screen.getByRole("button", { name: /Mendoza — Not on a list/ }));
+
+      expect(screen.queryByRole("menu", { name: "Show only" })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Groom's list" })).toBeInTheDocument();
+    });
+
+    it("given a phone, when the Broadcast header shows, then its funnel sits under the word so the column stays narrow", () => {
+      onAPhone();
+      renderPanel(families);
+
+      expect(screen.getByRole("button", { name: "Filter by Broadcast" })).toHaveClass("flex-col");
+      vi.restoreAllMocks();
+    });
+
+    it("given a filter nobody matches, when the table shows, then the headers stay and offer to clear it", async () => {
+      const { onChangeBroadcastFilter } = renderPanel([rossi, mendoza], {}, allGuests, ["bride"]);
+
+      expect(screen.getByRole("button", { name: "Filter by Broadcast, 1 on" })).toBeInTheDocument();
+      expect(screen.getByText("No households match these filters.")).toBeInTheDocument();
+      await userEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+
+      expect(onChangeBroadcastFilter).toHaveBeenCalledWith([]);
+    });
+
+    it("given only one-person households match, when they are hidden, then the headers stay to clear the filter", () => {
+      renderPanel([ana], {}, allGuests, ["notSet"]);
+
+      expect(screen.getByRole("button", { name: "Filter by Broadcast, 1 on" })).toBeInTheDocument();
+      expect(screen.getByText("No households match these filters.")).toBeInTheDocument();
+      expect(screen.queryByText(/No households of two or more yet/)).not.toBeInTheDocument();
+    });
   });
 });

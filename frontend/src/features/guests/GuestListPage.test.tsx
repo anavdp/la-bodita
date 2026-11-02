@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import * as guestsApi from "../../api/guests";
 import * as householdsApi from "../../api/households";
-import type { RsvpStatus } from "../../api/types";
+import type { BroadcastList, RsvpStatus } from "../../api/types";
 import { aGuest } from "../../testing/guestFactory";
 import { aHousehold } from "../../testing/householdFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
@@ -597,6 +597,81 @@ describe("GuestListPage filtering households by RSVP", () => {
     await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
 
     expect(screen.getByText("No households have this RSVP status.")).toBeInTheDocument();
+  });
+});
+
+describe("GuestListPage filtering households by broadcast list", () => {
+  const family = (id: number, name: string, broadcastList: BroadcastList | null, statuses: RsvpStatus[]) => {
+    const members = statuses.map((rsvpStatus) => aGuest({ lastName: name, householdId: id, rsvpStatus }));
+    return {
+      members,
+      household: aHousehold({ id, name, broadcastList, guestIds: members.map((member) => member.id) }),
+    };
+  };
+  const bianchi = family(201, "Bianchi", "bride", ["confirmed", "confirmed"]);
+  const neri = family(202, "Neri", "groom", ["confirmed", "pending"]);
+  const verdi = family(203, "Verdi", null, ["pending", "pending"]);
+  const gallo = family(204, "Gallo", "bride", ["pending", "declined"]);
+  const families = [bianchi, neri, verdi, gallo];
+
+  beforeEach(() => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue(families.flatMap((each) => each.members));
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue(families.map((each) => each.household));
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  const renderHouseholds = async () => {
+    renderWithProviders(<GuestListPage tab="households" />, { route: "/guests/households" });
+    await screen.findByRole("row", { name: /Bianchi/ });
+  };
+  const shownHouseholds = () =>
+    screen
+      .getAllByRole("row")
+      .slice(1)
+      .map((row) => within(row).getByText(/Bianchi|Neri|Verdi|Gallo/).textContent);
+  const tick = async (choice: string) => {
+    await userEvent.click(screen.getByRole("button", { name: /^Filter by Broadcast/ }));
+    await userEvent.click(screen.getByRole("menuitemcheckbox", { name: choice }));
+    await userEvent.click(screen.getByRole("button", { name: "Done" }));
+  };
+
+  it("given the bride's list is ticked, when households are listed, then only hers show", async () => {
+    await renderHouseholds();
+
+    await tick("Bride's list");
+
+    expect(shownHouseholds()).toEqual(["Bianchi", "Gallo"]);
+  });
+
+  it("given a broadcast filter, when an RSVP status is picked too, then a household must match both", async () => {
+    await renderHouseholds();
+
+    await tick("Bride's list");
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+
+    expect(shownHouseholds()).toEqual(["Gallo"]);
+  });
+
+  it("given a broadcast filter, when the summary shows, then it still counts every guest", async () => {
+    await renderHouseholds();
+
+    await tick("Groom's list");
+
+    expect(screen.getByRole("group", { name: "RSVP summary" })).toHaveTextContent("8 Guests");
+  });
+
+  it("given a broadcast filter and a status that together match nobody, when listed, then the headers stay to clear it", async () => {
+    await renderHouseholds();
+
+    await tick("Not on a list");
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Confirmed/ }));
+
+    expect(screen.getByText("No households match these filters.")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(shownHouseholds()).toEqual(["Bianchi"]);
   });
 });
 
