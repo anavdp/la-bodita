@@ -30,7 +30,13 @@ const iglesia = anItem({
   doneTaskCount: 1,
   nextTask: { id: 900, title: "Meeting with Padre Luis", dueDate: "2026-10-24", dueTime: "10:00:00" },
 });
-const luz = anItem({ name: "Luz de Agua Fotografía", categoryId: photographer.id, status: "meeting_set" });
+const luz = anItem({
+  name: "Luz de Agua Fotografía",
+  categoryId: photographer.id,
+  status: "meeting_set",
+  email: "hola@luzdeagua.com",
+  phone: "https://wa.me/584141234567",
+});
 
 const certificates = aTask({ title: "Bring baptism certificates", itemId: iglesia.id, dueDate: "2026-10-24" });
 const reserved = aTask({ title: "Reserve the date", itemId: iglesia.id, isDone: true });
@@ -100,7 +106,10 @@ describe("ItemsPage", () => {
 
     const detail = await screen.findByRole("region", { name: "Iglesia San José" });
     expect(within(detail).getByText("⛪ Church")).toBeInTheDocument();
-    expect(within(detail).getByText("+58 212 555 0142")).toBeInTheDocument();
+    expect(within(detail).getByRole("link", { name: /\+58 212 555 0142/ })).toHaveAttribute(
+      "href",
+      "https://wa.me/582125550142",
+    );
     expect(within(detail).getByRole("link", { name: /parroquiasanjose/ })).toHaveAttribute(
       "href",
       "https://instagram.com/parroquiasanjose",
@@ -119,6 +128,22 @@ describe("ItemsPage", () => {
 
     const detail = screen.getByRole("region", { name: "Luz de Agua Fotografía" });
     expect(within(detail).getByRole("checkbox", { name: "Send Pinterest board" })).toBeInTheDocument();
+  });
+
+  it("given a vendor with an email and a pasted WhatsApp link, when shown, then each opens a message to them", async () => {
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    await userEvent.click(await screen.findByRole("button", { name: /Luz de Agua Fotografía/ }));
+
+    const detail = screen.getByRole("region", { name: "Luz de Agua Fotografía" });
+    expect(within(detail).getByRole("link", { name: "hola@luzdeagua.com" })).toHaveAttribute(
+      "href",
+      "mailto:hola@luzdeagua.com",
+    );
+    expect(within(detail).getByRole("link", { name: /\+584141234567/ })).toHaveAttribute(
+      "href",
+      "https://wa.me/584141234567",
+    );
   });
 
   it("given a phone, when an item is tapped, then its panel below the list is scrolled into view", async () => {
