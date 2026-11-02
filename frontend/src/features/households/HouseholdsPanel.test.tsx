@@ -1,7 +1,9 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import type { Household } from "../../api/types";
+import type { Guest, Household, RsvpStatus } from "../../api/types";
+import { aGuest } from "../../testing/guestFactory";
+import { onAPhone } from "../../testing/onAPhone";
 import { aHousehold } from "../../testing/householdFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { HouseholdsPanel } from "./HouseholdsPanel";
@@ -11,7 +13,23 @@ const mendoza = aHousehold({ name: "Mendoza", guestIds: [4, 5] });
 const ana = aHousehold({ name: "Ana Perez", guestIds: [6] });
 const bianchi = aHousehold({ name: "Bianchi", guestIds: [7, 8], broadcastList: "bride" });
 
-function renderPanel(households: Household[] = [rossi, mendoza, ana], handlers = {}) {
+/** Guests 1–8, as the households above list them: Rossi all confirmed, Mendoza
+ * mixed, Ana pending, Bianchi all declined. */
+const statusOfGuest: Record<number, RsvpStatus> = {
+  1: "confirmed",
+  2: "confirmed",
+  3: "confirmed",
+  4: "confirmed",
+  5: "declined",
+  6: "pending",
+  7: "declined",
+  8: "declined",
+};
+const allGuests: Guest[] = Object.entries(statusOfGuest).map(([id, rsvpStatus]) =>
+  aGuest({ id: Number(id), rsvpStatus }),
+);
+
+function renderPanel(households: Household[] = [rossi, mendoza, ana], handlers = {}, guests: Guest[] = allGuests) {
   const callbacks = {
     onDetails: vi.fn(),
     onEdit: vi.fn(),
@@ -19,7 +37,7 @@ function renderPanel(households: Household[] = [rossi, mendoza, ana], handlers =
     onChangeBroadcastList: vi.fn(),
     ...handlers,
   };
-  renderWithProviders(<HouseholdsPanel households={households} {...callbacks} />);
+  renderWithProviders(<HouseholdsPanel households={households} guests={guests} {...callbacks} />);
   return callbacks;
 }
 
@@ -31,6 +49,7 @@ describe("HouseholdsPanel", () => {
       "Name",
       "Guests",
       "Broadcast",
+      "RSVP",
       "Actions",
     ]);
     const row = screen.getByRole("row", { name: /Famiglia Rossi/ });
@@ -133,5 +152,43 @@ describe("HouseholdsPanel", () => {
 
     expect(screen.queryByRole("button", { name: /Groom's list/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+  });
+
+  it("given households, when the table shows, then each one's RSVP is rolled up from its guests", async () => {
+    renderPanel([rossi, mendoza, ana, bianchi]);
+    await userEvent.click(screen.getByLabelText("Show one-person households"));
+
+    const rsvpOf = (name: string) => screen.getByRole("row", { name: new RegExp(name) }).querySelector("[data-rsvp]");
+    expect(rsvpOf("Famiglia Rossi")).toHaveAttribute("data-rsvp", "confirmed");
+    expect(rsvpOf("Famiglia Rossi")).toHaveTextContent("Confirmed");
+    expect(rsvpOf("Mendoza")).toHaveAttribute("data-rsvp", "mixed");
+    expect(rsvpOf("Mendoza")).toHaveTextContent("Mixed");
+    expect(rsvpOf("Ana Perez")).toHaveAttribute("data-rsvp", "pending");
+    expect(rsvpOf("Bianchi")).toHaveAttribute("data-rsvp", "declined");
+  });
+
+  it("given a mixed household, when the table shows, then its pill says what the mix is", () => {
+    renderPanel([mendoza]);
+
+    expect(screen.getByTitle("Some confirmed, some declined")).toHaveTextContent("Mixed");
+  });
+
+  it("given a household with nobody in it, when the table shows, then its RSVP is a quiet dash", async () => {
+    renderPanel([aHousehold({ name: "Vuota", guestIds: [] })]);
+    await userEvent.click(screen.getByLabelText("Show one-person households"));
+
+    const row = screen.getByRole("row", { name: /Vuota/ });
+    expect(row.querySelector("[data-rsvp]")).toBeNull();
+    expect(within(row).getByTitle("No guests yet")).toHaveTextContent("—");
+  });
+
+  it("given a phone, when the table shows, then the RSVP pill is the dot alone but still names the status", () => {
+    onAPhone();
+    renderPanel([mendoza]);
+
+    const pill = screen.getByTitle("Some confirmed, some declined");
+    expect(pill).toHaveAttribute("data-rsvp", "mixed");
+    expect(within(pill).getByText("Mixed")).toHaveClass("sr-only");
+    vi.restoreAllMocks();
   });
 });

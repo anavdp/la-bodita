@@ -1,13 +1,21 @@
 import { useState } from "react";
 
-import type { BroadcastList, Household } from "../../api/types";
+import type { BroadcastList, Guest, Household } from "../../api/types";
+import { useIsPhone } from "../../components/layout/useIsPhone";
 import { iconUrl } from "../../components/playful/icons";
 import { menuItem, menuPanel } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
+import { statusDotClass } from "../guests/GuestStats";
+import { rsvpPillClass } from "../guests/GuestTable";
+import { rsvpLabelKey } from "../guests/vocabulary";
+import { householdRsvpOf, membersOf } from "./householdRsvp";
+import type { HouseholdRsvp } from "./householdRsvp";
 
 interface HouseholdsPanelProps {
   households: Household[];
+  /** Every guest: each household's RSVP is rolled up from its own. */
+  guests: Guest[];
   onDetails: (household: Household) => void;
   onEdit: (household: Household) => void;
   onDelete: (household: Household) => void;
@@ -21,8 +29,18 @@ const broadcastLists: BroadcastList[] = ["bride", "groom"];
 const broadcastIcon: Record<BroadcastList, string> = { bride: iconUrl("dress.png"), groom: iconUrl("suit.png") };
 const broadcastLabelKey = (list: BroadcastList | null): TranslationKey => `households.broadcast.${list ?? "none"}`;
 
-const headerCell = "px-4 py-4 font-normal";
-const cell = "px-4 py-3";
+/** Mixed is half confirmed, half declined: the pill and its dot split down the middle. */
+const mixedPillClass =
+  "bg-[linear-gradient(90deg,rgb(var(--color-play-mint-soft))_50%,rgb(var(--color-play-coral-soft))_50%)]";
+const mixedDotClass = "bg-[linear-gradient(90deg,rgb(var(--color-play-mint))_50%,rgb(var(--color-play-coral))_50%)]";
+
+const pillClassOf = (rsvp: HouseholdRsvp) => (rsvp === "mixed" ? mixedPillClass : rsvpPillClass[rsvp]);
+const dotClassOf = (rsvp: HouseholdRsvp) => (rsvp === "mixed" ? mixedDotClass : statusDotClass[rsvp]);
+const rsvpLabelOf = (rsvp: HouseholdRsvp): TranslationKey =>
+  rsvp === "mixed" ? "households.rsvp.mixed" : rsvpLabelKey(rsvp);
+
+const desktopHeaderCell = "px-4 py-4 font-normal";
+const desktopCell = "px-4 py-3";
 
 /**
  * The households, by name and size. Someone invited alone is a household too,
@@ -31,12 +49,19 @@ const cell = "px-4 py-3";
  */
 export function HouseholdsPanel({
   households,
+  guests,
   onDetails,
   onEdit,
   onDelete,
   onChangeBroadcastList,
 }: HouseholdsPanelProps) {
   const { t } = useTranslation();
+  const isPhone = useIsPhone();
+  // A phone squeezes the cells so the RSVP column still fits beside the others.
+  const headerCell = isPhone ? "px-2 py-3 font-normal text-[13px] tracking-normal" : desktopHeaderCell;
+  const cell = isPhone ? "px-2 py-3" : desktopCell;
+  const edgeStart = isPhone ? "pl-3" : "pl-6";
+  const edgeEnd = isPhone ? "pr-3" : "pr-6";
   const [showSolo, setShowSolo] = useState(false);
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
 
@@ -60,6 +85,31 @@ export function HouseholdsPanel({
     onChangeBroadcastList(household, broadcastList);
   };
 
+  /** The guests' RSVP pill, read-only: answers are changed on each guest. */
+  const rsvpPill = (rsvp: HouseholdRsvp | null) => {
+    if (rsvp === null) {
+      return (
+        <span title={t("households.rsvp.none")} className="text-ink/40">
+          —
+        </span>
+      );
+    }
+    const label = t(rsvpLabelOf(rsvp));
+    return (
+      <span
+        data-rsvp={rsvp}
+        title={rsvp === "mixed" ? t("households.rsvp.mixedHint") : label}
+        className={`inline-flex items-center gap-2 rounded-[14px] border-2 border-ink py-1 text-lg ${
+          isPhone ? "px-2.5 py-2.5" : "px-4"
+        } ${pillClassOf(rsvp)}`}
+      >
+        <span aria-hidden="true" className={`h-3 w-3 rounded-full border-2 border-ink ${dotClassOf(rsvp)}`} />
+        {/* On a phone the dot alone says it, as on the guests' pills. */}
+        <span className={isPhone ? "sr-only" : undefined}>{label}</span>
+      </span>
+    );
+  };
+
   return (
     <div className="flex flex-col font-playful text-ink">
       <label className="flex w-max items-center gap-3 px-6 py-4 text-lg">
@@ -79,10 +129,13 @@ export function HouseholdsPanel({
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-y-[2.5px] border-ink bg-cream text-[15px] uppercase tracking-wider">
-                <th className={`${headerCell} border-r-2 border-ink/20 pl-6`}>{t("households.column.name")}</th>
+                <th className={`${headerCell} border-r-2 border-ink/20 ${edgeStart}`}>{t("households.column.name")}</th>
                 <th className={headerCell}>{t("households.column.guests")}</th>
                 <th className={`${headerCell} text-center`}>{t("households.column.broadcast")}</th>
-                <th className={`${headerCell} pr-6 text-right`}>{t("households.column.actions")}</th>
+                <th className={`${headerCell} text-center`}>{t("households.column.rsvp")}</th>
+                <th className={`${headerCell} ${edgeEnd} text-right`}>{/* The ⋮ button says it on a phone, where the word would push RSVP off screen. */}
+                  <span className={isPhone ? "sr-only" : undefined}>{t("households.column.actions")}</span>
+                </th>
               </tr>
             </thead>
             <tbody className="text-lg">
@@ -91,7 +144,7 @@ export function HouseholdsPanel({
                   key={household.id}
                   className="border-b-2 border-ink/15 transition-colors last:border-b-0 hover:bg-accent/25"
                 >
-                  <td className={`${cell} border-r-2 border-ink/20 pl-6`}>{household.name}</td>
+                  <td className={`${cell} border-r-2 border-ink/20 ${edgeStart}`}>{household.name}</td>
                   <td className={cell}>{household.guestIds.length}</td>
 
                   {/* Like the guests' RSVP: the list is the emoji itself, and the emoji is
@@ -151,7 +204,9 @@ export function HouseholdsPanel({
                     </div>
                   </td>
 
-                  <td className={`${cell} pr-6 text-right`}>
+                  <td className={`${cell} text-center`}>{rsvpPill(householdRsvpOf(membersOf(household, guests)))}</td>
+
+                  <td className={`${cell} ${edgeEnd} text-right`}>
                     <div className="relative inline-block">
                       <button
                         type="button"
