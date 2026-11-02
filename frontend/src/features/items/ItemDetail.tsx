@@ -9,6 +9,7 @@ import { outlinedCard } from "../../components/playful/styles";
 import { TaskForm } from "../planning/TaskForm";
 import { categoryLabel } from "../planning/CategoryChips";
 import { formatDueDate, formatDueTime, isOverdue } from "../planning/schedule";
+import { whatsappLink } from "./contactLinks";
 import { itemStatuses, statusPill } from "./itemStatus";
 
 interface ItemDetailProps {
@@ -71,6 +72,7 @@ export function ItemDetail({
   const ordered = [...tasks.filter((task) => !task.isDone), ...tasks.filter((task) => task.isDone)];
   const next = item.nextTask;
   const instagram = item.instagramUrl ? instagramHandle(item.instagramUrl) : null;
+  const whatsapp = item.phone ? whatsappLink(item.phone) : null;
 
   return (
     <section
@@ -110,7 +112,17 @@ export function ItemDetail({
 
       <dl>
         {item.contactName && <Fact label={t("items.contactName")}>{item.contactName}</Fact>}
-        {item.phone && <Fact label={t("items.phone")}>{item.phone}</Fact>}
+        {item.phone && (
+          <Fact label={t("items.phone")}>
+            {whatsapp ? (
+              <a href={whatsapp.href} target="_blank" rel="noreferrer" className={`${linkStyle} break-all`}>
+                {whatsapp.label} ↗
+              </a>
+            ) : (
+              item.phone
+            )}
+          </Fact>
+        )}
         {item.email && (
           <Fact label={t("items.email")}>
             <a href={`mailto:${item.email}`} className={linkStyle}>
