@@ -23,6 +23,7 @@ import { useWedding } from "../../wedding/WeddingProvider";
 import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
 import { HouseholdFormDialog } from "../households/HouseholdFormDialog";
+import { householdRsvpOf, householdShowsUnder, membersOf } from "../households/householdRsvp";
 import { HouseholdsPanel } from "../households/HouseholdsPanel";
 import { filterGuestsByColumns, filterGuestsByName, hasColumnFilters, noColumnFilters } from "./filtering";
 import type { GuestColumnFilters } from "./filtering";
@@ -100,6 +101,16 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     const needle = term.trim().toLowerCase();
     return households.filter((household) => household.name.toLowerCase().includes(needle));
   }, [households, term]);
+  /** The summary's status filters households by their rolled-up RSVP: a mixed one shows under confirmed and declined. */
+  const rsvpFilteredHouseholds = useMemo(
+    () =>
+      rsvpFilter === null
+        ? visibleHouseholds
+        : visibleHouseholds.filter((household) =>
+            householdShowsUnder(householdRsvpOf(membersOf(household, guests)), rsvpFilter),
+          ),
+    [visibleHouseholds, rsvpFilter, guests],
+  );
   /** The guest form's household picker: families only, alphabetical. Being on
    * your own is the picker's own "On their own" choice. */
   const householdOptions = useMemo(
@@ -182,10 +193,14 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
           </p>
         );
       }
+      if (rsvpFilteredHouseholds.length === 0) {
+        return <p className="font-playful text-xl text-ink/70">{t("households.statusNoMatches")}</p>;
+      }
       return (
         <div className={`${outlinedCard} overflow-hidden`}>
           <HouseholdsPanel
-          households={visibleHouseholds}
+          households={rsvpFilteredHouseholds}
+          guests={guests}
           onDetails={(household) => setHouseholdDialog({ kind: "details", household })}
           onEdit={(household) => setHouseholdDialog({ kind: "form", household })}
           onDelete={(household) => setHouseholdDialog({ kind: "delete", household })}
@@ -266,9 +281,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
       <GuestStats
         guests={guests}
         activeStatus={rsvpFilter}
-        onToggleStatus={
-          tab === "guests" ? (status) => setRsvpFilter((current) => (current === status ? null : status)) : undefined
-        }
+        onToggleStatus={(status) => setRsvpFilter((current) => (current === status ? null : status))}
       />
 
       <nav aria-label={t("guests.tabs.label")} className="mb-5 mt-7 flex">

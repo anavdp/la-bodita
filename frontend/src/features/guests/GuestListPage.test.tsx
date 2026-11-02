@@ -3,7 +3,9 @@ import userEvent from "@testing-library/user-event";
 
 import * as guestsApi from "../../api/guests";
 import * as householdsApi from "../../api/households";
+import type { RsvpStatus } from "../../api/types";
 import { aGuest } from "../../testing/guestFactory";
+import { aHousehold } from "../../testing/householdFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { GuestListPage } from "./GuestListPage";
 
@@ -512,11 +514,89 @@ describe("GuestListPage filtering by RSVP", () => {
     expect(screen.getByText("No guests have this RSVP status.")).toBeInTheDocument();
   });
 
-  it("given the households tab, when it opens, then the summary has no filter to apply", async () => {
-    renderWithProviders(<GuestListPage tab="households" />, { route: "/guests/households" });
-    await screen.findByText("Confirmed");
+});
 
-    expect(screen.queryByRole("button", { name: /^\d+ Confirmed/ })).not.toBeInTheDocument();
+describe("GuestListPage filtering households by RSVP", () => {
+  const family = (id: number, name: string, statuses: RsvpStatus[]) => {
+    const members = statuses.map((rsvpStatus) => aGuest({ lastName: name, householdId: id, rsvpStatus }));
+    return {
+      members,
+      household: aHousehold({ id, name, guestIds: members.map((member) => member.id) }),
+    };
+  };
+  const bianchi = family(101, "Bianchi", ["confirmed", "declined"]);
+  const neri = family(102, "Neri", ["confirmed", "confirmed"]);
+  const verdi = family(103, "Verdi", ["confirmed", "pending"]);
+  const gallo = family(104, "Gallo", ["declined", "declined"]);
+  const families = [bianchi, neri, verdi, gallo];
+
+  beforeEach(() => {
+    vi.mocked(guestsApi.listGuests).mockResolvedValue(families.flatMap((each) => each.members));
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue(families.map((each) => each.household));
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  const renderHouseholds = async () => {
+    renderWithProviders(<GuestListPage tab="households" />, { route: "/guests/households" });
+    await screen.findByRole("row", { name: /Bianchi/ });
+  };
+  const shownHouseholds = () =>
+    screen
+      .getAllByRole("row")
+      .slice(1)
+      .map((row) => within(row).getByText(/Bianchi|Neri|Verdi|Gallo/).textContent);
+
+  it("given confirmed is clicked, when households are listed, then confirmed and mixed households show", async () => {
+    await renderHouseholds();
+
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Confirmed/ }));
+
+    expect(shownHouseholds()).toEqual(["Bianchi", "Neri"]);
+  });
+
+  it("given declined is clicked, when households are listed, then declined and mixed households show", async () => {
+    await renderHouseholds();
+
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Declined/ }));
+
+    expect(shownHouseholds()).toEqual(["Bianchi", "Gallo"]);
+  });
+
+  it("given pending is clicked twice, when households are listed, then only pending ones show and then everyone again", async () => {
+    await renderHouseholds();
+    const pending = screen.getByRole("button", { name: /^\d+ Pending/ });
+
+    await userEvent.click(pending);
+    expect(shownHouseholds()).toEqual(["Verdi"]);
+    expect(pending).toHaveAttribute("aria-pressed", "true");
+
+    await userEvent.click(pending);
+    expect(shownHouseholds()).toEqual(["Bianchi", "Neri", "Verdi", "Gallo"]);
+  });
+
+  it("given a status is picked, when the summary shows, then it still counts guests, not households", async () => {
+    await renderHouseholds();
+    const summary = screen.getByRole("group", { name: "RSVP summary" });
+
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+
+    expect(summary).toHaveTextContent("8 Guests");
+    expect(screen.getByRole("button", { name: /^\d+ Confirmed/ })).toHaveTextContent("4");
+    expect(screen.getByRole("button", { name: /^\d+ Declined/ })).toHaveTextContent("3");
+  });
+
+  it("given a status no household has, when it is clicked, then the tab says so", async () => {
+    vi.mocked(householdsApi.listHouseholds).mockResolvedValue([neri.household, gallo.household]);
+    vi.mocked(guestsApi.listGuests).mockResolvedValue([...neri.members, ...gallo.members]);
+    renderWithProviders(<GuestListPage tab="households" />, { route: "/guests/households" });
+    await screen.findByRole("row", { name: /Neri/ });
+
+    await userEvent.click(screen.getByRole("button", { name: /^\d+ Pending/ }));
+
+    expect(screen.getByText("No households have this RSVP status.")).toBeInTheDocument();
   });
 });
 

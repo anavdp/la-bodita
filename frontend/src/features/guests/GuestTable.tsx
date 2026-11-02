@@ -43,7 +43,7 @@ type OpenMenu = { guestId: number; kind: "rsvp" | "actions" } | { kind: "filter"
 const filterColumns: GuestFilterColumn[] = ["type", "relationship", "side"];
 
 /** The RSVP pill's fill: soft green, butter, or soft coral. */
-const rsvpPillClass: Record<RsvpStatus, string> = {
+export const rsvpPillClass: Record<RsvpStatus, string> = {
   confirmed: "bg-mint-soft",
   pending: "bg-butter",
   declined: "bg-coral-soft",
