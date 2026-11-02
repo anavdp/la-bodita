@@ -17,6 +17,7 @@ import { useProblemText } from "../../components/feedback/useProblemText";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useSearch } from "../../search/SearchProvider";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { screenIcons } from "../../components/playful/icons";
 import { folderTab, outlinedCard } from "../../components/playful/styles";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
@@ -241,7 +242,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
 
   return (
     <>
-      <PageHeader title={t("guests.title")} subtitle={t("guests.subtitle")} art="title-cheers.png">
+      <PageHeader title={t("guests.title")} subtitle={t("guests.subtitle")} art={screenIcons.guests}>
         {tab === "households" ? (
           <HeaderAction
             icon="add"

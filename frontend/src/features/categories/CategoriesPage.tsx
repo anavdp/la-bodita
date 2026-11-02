@@ -6,6 +6,7 @@ import { failedTo, hasFailed } from "../../components/feedback/problems";
 import type { Problem } from "../../components/feedback/problems";
 import { useProblemText } from "../../components/feedback/useProblemText";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { screenIcons } from "../../components/playful/icons";
 import { outlinedCard } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useSearch } from "../../search/SearchProvider";
@@ -90,7 +91,7 @@ export function CategoriesPage() {
 
   return (
     <>
-      <PageHeader title={t("categories.title")} subtitle={t("categories.subtitle")} art="generic.png">
+      <PageHeader title={t("categories.title")} subtitle={t("categories.subtitle")} art={screenIcons.categories}>
         <HeaderAction icon="add" label={t("categories.addOpen")} onClick={() => setDrawerTarget({ category: null })} />
       </PageHeader>
 

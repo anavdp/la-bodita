@@ -7,6 +7,7 @@ import type { Problem } from "../../components/feedback/problems";
 import { useProblemText } from "../../components/feedback/useProblemText";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField as field } from "../../components/form/styles";
+import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { filterGuestsByName, fullName } from "../guests/filtering";
@@ -80,7 +81,7 @@ export function HouseholdFormDialog({ household, guests, households, onSave, onC
   return (
     <SidePanel
       title={t(household ? "households.form.editTitle" : "households.form.createTitle")}
-      sticker="🏡"
+      icon={screenIcons.guests}
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">

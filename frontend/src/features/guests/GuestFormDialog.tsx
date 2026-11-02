@@ -8,6 +8,7 @@ import { useProblemText } from "../../components/feedback/useProblemText";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField as field } from "../../components/form/styles";
+import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import {
@@ -106,7 +107,7 @@ export function GuestFormDialog({ guest, households = [], onSave, onClose }: Gue
   return (
     <SidePanel
       title={t(guest ? "guests.form.editTitle" : "guests.form.createTitle")}
-      sticker="💌"
+      icon={screenIcons.guests}
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">

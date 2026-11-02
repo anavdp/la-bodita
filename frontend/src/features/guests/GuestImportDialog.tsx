@@ -8,6 +8,7 @@ import { failedTo } from "../../components/feedback/problems";
 import type { Problem } from "../../components/feedback/problems";
 import { useProblemText } from "../../components/feedback/useProblemText";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
+import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -205,7 +206,7 @@ export function GuestImportDialog({ weddingId, onImport, onClose }: GuestImportD
     );
 
   return (
-    <SidePanel title={t("guests.import.title")} sticker="📋" wide onClose={onClose}>
+    <SidePanel title={t("guests.import.title")} icon={screenIcons.guests} wide onClose={onClose}>
       <div className={panelBody}>
         {rows === null ? filePicker : preview(rows)}
 

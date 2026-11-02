@@ -10,6 +10,7 @@ import { useProblemText } from "../../components/feedback/useProblemText";
 import { Switch } from "../../components/form/Switch";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { screenIcons } from "../../components/playful/icons";
 import { compactButton, outlinedCard } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
@@ -353,7 +354,7 @@ export function BudgetPage() {
 
   return (
     <>
-      <PageHeader title={t("budget.title")} subtitle={t("budget.subtitle")} art="title-budget.png">
+      <PageHeader title={t("budget.title")} subtitle={t("budget.subtitle")} art={screenIcons.budget}>
         <HeaderAction icon="add" label={t("budget.add")} onClick={() => setFormTarget({ line: null })} />
       </PageHeader>
 

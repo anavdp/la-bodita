@@ -10,6 +10,7 @@ import { useProblemText } from "../../components/feedback/useProblemText";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { isIconName } from "../../components/playful/iconCatalog";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
+import { screenIcons } from "../../components/playful/icons";
 import { outlinedCard } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useSearch } from "../../search/SearchProvider";
@@ -165,7 +166,7 @@ export function ChecklistPage() {
 
   return (
     <>
-      <PageHeader title={t("checklist.title")} subtitle={t("checklist.subtitle")} art="title-checklist.png">
+      <PageHeader title={t("checklist.title")} subtitle={t("checklist.subtitle")} art={screenIcons.checklist}>
         <HeaderAction icon="add" label={t("checklist.add")} onClick={() => setSearchParams({ add: "task" })} />
       </PageHeader>
 

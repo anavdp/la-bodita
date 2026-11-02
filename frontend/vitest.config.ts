@@ -9,7 +9,8 @@ export default mergeConfig(
       globals: true,
       environment: "jsdom",
       setupFiles: ["./src/setupTests.ts"],
-      css: false,
+      // CSS stays unprocessed, except where a test reads the stylesheet as text.
+      css: { include: [/index\.css\?raw$/] },
       coverage: {
         provider: "v8",
         include: ["src/**/*.{ts,tsx}"],

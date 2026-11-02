@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>La Bodita</title>
     <!--
+      Home Screen: iOS takes the icon from apple-touch-icon (it ignores the
+      manifest's icons) and the name under it from apple-mobile-web-app-title.
+    -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="La Bodita" />
+    <meta name="theme-color" content="#fdf5e6" />
+    <!--
       Link preview for the RSVP link shared on WhatsApp. Its crawler reads this
       file without running JavaScript, so these tags must stay static here.
       og:image and twitter:image must be absolute https URLs: crawlers ignore
@@ -28,10 +37,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Allura&family=Be+Vietnam+Pro:wght@400;600&family=Chewy&family=Itim&family=Lilita+One&family=Cormorant:wght@300;400;500;600&family=Manrope:wght@400;500;600;700;800&family=Quicksand:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet"
     />
   </head>
