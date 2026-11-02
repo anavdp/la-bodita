@@ -1,8 +1,5 @@
-import { useRef } from "react";
-
 import type { GuestRelationshipType, GuestSide } from "../../api/types";
-import { useDismiss } from "../../components/form/useDismiss";
-import { menuPanel } from "../../components/playful/styles";
+import { FilterHeader } from "../../components/table/FilterHeader";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { TranslationKey } from "../../i18n/translations";
 import { toggleColumnFilter } from "./filtering";
@@ -38,114 +35,36 @@ function choiceLabelKey(column: GuestFilterColumn, choice: string): TranslationK
   return column === "relationship" ? relationshipLabelKey(choice as GuestRelationshipType) : sideLabelKey(choice as GuestSide);
 }
 
-/**
- * A column header with a funnel, the way the sortable headers have an arrow. It
- * opens a checklist of the column's values; while any is ticked the header
- * turns accent and says how many.
- */
-export function ColumnFilterHeader({
-  column,
-  label,
-  filters,
-  isOpen,
-  onChange,
-  onToggle,
-  onClose,
-  className,
-}: ColumnFilterHeaderProps) {
+/** The guest table's Type, Relationship and Side headers, each with its funnel. */
+export function ColumnFilterHeader({ column, filters, onChange, ...header }: ColumnFilterHeaderProps) {
   const { t } = useTranslation();
-  const containerRef = useRef<HTMLDivElement>(null);
-  useDismiss(containerRef, isOpen, onClose);
 
-  const ticked: string[] = filters[column];
-  const isActive = ticked.length > 0;
-
-  return (
-    <th className={className}>
-      <div ref={containerRef} className="relative inline-block">
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={isOpen}
-          aria-haspopup="menu"
-          aria-label={
-            isActive
-              ? t("guests.filter.openActive", { column: label, count: ticked.length })
-              : t("guests.filter.open", { column: label })
-          }
-          className={`inline-flex items-center gap-1 uppercase tracking-wider transition-colors ${
-            isActive ? "-mx-3 -my-1 rounded-full border-2 border-ink bg-accent px-3 py-1" : "hover:text-ink/70"
+  const choices = choicesOf[column].map((choice) => ({
+    value: choice,
+    label: t(choiceLabelKey(column, choice)),
+    isMuted: choice === "notSet",
+    icon:
+      column === "side" && choice !== "notSet" ? (
+        <span
+          aria-hidden="true"
+          className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-playful-display text-xs ${
+            sideTone[choice as GuestSide]
           }`}
         >
-          {label}
-          {isActive ? (
-            <span className="ml-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-ink px-1.5 text-sm text-cream-light">
-              {ticked.length}
-            </span>
-          ) : (
-            <span className="material-symbols-outlined text-[18px] text-ink/40" aria-hidden="true">
-              filter_alt
-            </span>
-          )}
-        </button>
+          {sideCode[choice as GuestSide]}
+        </span>
+      ) : undefined,
+  }));
 
-        {isOpen && (
-          <div
-            role="menu"
-            aria-label={t("guests.filter.showOnly")}
-            className={`${menuPanel} left-0 top-full z-20 min-w-[230px] normal-case tracking-normal`}
-          >
-            <p aria-hidden="true" className="px-3 pt-1 text-sm uppercase tracking-wider text-ink/60">
-              {t("guests.filter.showOnly")}
-            </p>
-            {choicesOf[column].map((choice) => {
-              const isTicked = ticked.includes(choice);
-              return (
-                <button
-                  key={choice}
-                  type="button"
-                  role="menuitemcheckbox"
-                  aria-checked={isTicked}
-                  onClick={() => onChange(toggleColumnFilter(filters, column, choice))}
-                  className="flex items-center gap-3 rounded-xl px-3 py-1.5 text-left text-lg text-ink transition-colors hover:bg-accent/60"
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 border-ink ${
-                      isTicked ? "bg-accent" : "bg-cream-light"
-                    }`}
-                  >
-                    {isTicked && <span className="material-symbols-outlined text-[18px]">check</span>}
-                  </span>
-                  {column === "side" && choice !== "notSet" && (
-                    <span
-                      aria-hidden="true"
-                      className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-playful-display text-xs ${
-                        sideTone[choice as GuestSide]
-                      }`}
-                    >
-                      {sideCode[choice as GuestSide]}
-                    </span>
-                  )}
-                  <span className={choice === "notSet" ? "text-ink/60" : ""}>{t(choiceLabelKey(column, choice))}</span>
-                </button>
-              );
-            })}
-            <div className="mt-1 flex justify-between gap-6 border-t-2 border-ink/15 px-3 pt-2">
-              <button
-                type="button"
-                onClick={() => onChange({ ...filters, [column]: [] })}
-                className="text-lg text-ink/70 underline"
-              >
-                {t("guests.filter.clear")}
-              </button>
-              <button type="button" onClick={onClose} className="text-lg text-sky-deep">
-                {t("guests.filter.done")}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </th>
+  return (
+    <FilterHeader
+      {...header}
+      choices={choices}
+      ticked={filters[column]}
+      onToggleChoice={(value) =>
+        onChange(toggleColumnFilter(filters, column, value as ColumnFilterValues[typeof column]))
+      }
+      onClear={() => onChange({ ...filters, [column]: [] })}
+    />
   );
 }
