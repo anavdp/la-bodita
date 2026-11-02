@@ -3,6 +3,8 @@ import type { ChangeEvent, FormEvent } from "react";
 
 import { documentFileUrl } from "../../api/documents";
 import type { DocumentChanges, DocumentKind, DocumentUpload, Item, Person, WeddingDocument } from "../../api/types";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { DatePicker } from "../../components/form/DatePicker";
 import { Dropdown } from "../../components/form/Dropdown";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
@@ -10,7 +12,6 @@ import { fieldLabel, pillField } from "../../components/form/styles";
 import { screenIcons } from "../../components/playful/icons";
 import { compactButton, primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { uploadErrorKey } from "./uploadErrors";
 import { useItemTasks } from "./useItemTasks";
 
@@ -105,7 +106,8 @@ export function AddFilesForm({
   const [personId, setPersonId] = useState(String(document?.personId ?? preset.personId ?? ""));
   const [title, setTitle] = useState(document?.title ?? preset.title ?? "");
   const [expiresOn, setExpiresOn] = useState<string | null>(document?.expiresOn ?? null);
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   const tasks = useItemTasks(weddingId, itemId === "" ? null : Number(itemId));
@@ -282,7 +284,7 @@ export function AddFilesForm({
 
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {t(error)}
+              {problemText(error)}
             </p>
           )}
         </div>

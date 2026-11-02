@@ -1,12 +1,19 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { ApiError } from "../api/client";
 import { useWedding, WeddingProvider } from "./WeddingProvider";
 
 function Probe() {
-  const { wedding, isLoading, error } = useWedding();
+  const { wedding, isLoading, error, reload } = useWedding();
   if (isLoading) return <p>loading</p>;
-  if (error) return <p>{error}</p>;
+  if (error instanceof ApiError) {
+    return (
+      <button type="button" onClick={reload}>
+        failed: {error.kind}
+      </button>
+    );
+  }
   return <p>{wedding?.name ?? "no wedding"}</p>;
 }
 
@@ -66,7 +73,26 @@ describe("WeddingProvider", () => {
       </WeddingProvider>,
     );
 
-    await waitFor(() => expect(screen.getByText("connection refused")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("failed: offline")).toBeInTheDocument());
+  });
+
+  it("given the wedding failed to load, when it is reloaded and the API answers, then the wedding arrives", async () => {
+    let reachable = false;
+    vi.stubGlobal("fetch", () =>
+      reachable
+        ? jsonResponse([{ id: 1, name: "La Bodita", wedding_date: "2026-10-29" }])
+        : Promise.reject(new TypeError("Failed to fetch")),
+    );
+    render(
+      <WeddingProvider>
+        <Probe />
+      </WeddingProvider>,
+    );
+
+    reachable = true;
+    await userEvent.click(await screen.findByRole("button", { name: "failed: offline" }));
+
+    expect(await screen.findByText("La Bodita")).toBeInTheDocument();
   });
 
   it("given a loaded wedding, when settings save it, then the change is sent and every screen sees it", async () => {

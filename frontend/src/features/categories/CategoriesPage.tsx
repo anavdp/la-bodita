@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
 
 import type { Category, CategoryDraft } from "../../api/types";
+import { LoadProblems } from "../../components/feedback/LoadProblems";
+import { failedTo, hasFailed } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
 import { screenIcons } from "../../components/playful/icons";
-import { outlinedCard, secondaryButton } from "../../components/playful/styles";
+import { outlinedCard } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { CategoryFormDialog } from "../planning/CategoryFormDialog";
@@ -24,10 +27,11 @@ export function CategoriesPage() {
   const { wedding } = useWedding();
   const { term } = useSearch();
   const planning = usePlanning(wedding?.id ?? null);
-  const { categories, items, isLoading, hasLoadError } = planning;
+  const { categories, items, isLoading, loadFailures } = planning;
 
   const [drawerTarget, setDrawerTarget] = useState<DrawerTarget>(null);
-  const [actionError, setActionError] = useState<TranslationKey | null>(null);
+  const [actionError, setActionError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
 
   const visible = useMemo(() => {
     const needle = term.trim().toLowerCase();
@@ -54,8 +58,8 @@ export function CategoriesPage() {
     setActionError(null);
     try {
       await planning.removeCategory(category.id);
-    } catch {
-      setActionError("categories.deleteFailed");
+    } catch (failure) {
+      setActionError(failedTo("categories.deleteFailed", failure));
     }
   };
 
@@ -63,16 +67,7 @@ export function CategoriesPage() {
     if (isLoading) {
       return <p className="font-playful text-xl text-ink/70">{t("categories.loading")}</p>;
     }
-    if (hasLoadError) {
-      return (
-        <div className="flex flex-col items-start gap-4">
-          <p className="font-playful text-xl text-coral">{t("planning.loadFailed")}</p>
-          <button type="button" onClick={planning.reload} className={secondaryButton}>
-            {t("planning.retry")}
-          </button>
-        </div>
-      );
-    }
+    if (hasFailed(loadFailures, "errors.part.categories")) return null;
     if (categories.length === 0) {
       return <p className="font-playful text-xl text-ink/70">{t("categories.empty")}</p>;
     }
@@ -102,9 +97,10 @@ export function CategoriesPage() {
 
       {actionError !== null && (
         <p role="alert" className="mb-4 font-playful text-lg text-coral">
-          {t(actionError)}
+          {problemText(actionError)}
         </p>
       )}
+      {!isLoading && <LoadProblems failures={loadFailures} onRetry={planning.reload} />}
       {tableArea()}
 
       {drawerTarget !== null && (

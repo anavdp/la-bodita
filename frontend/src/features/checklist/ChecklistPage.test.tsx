@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { ApiError } from "../../api/client";
 import * as categoriesApi from "../../api/categories";
 import * as documentsApi from "../../api/documents";
 import * as itemsApi from "../../api/items";
@@ -234,5 +235,22 @@ describe("ChecklistPage", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Try again" }));
 
     expect(await screen.findByText("Bring baptism certificates")).toBeInTheDocument();
+  });
+
+  it("given the categories fail to load, when the page opens, then the tasks still show and it says what failed", async () => {
+    vi.mocked(categoriesApi.listCategories).mockRejectedValue(new ApiError("Something went wrong on our side.", 500, { requestId: "1a2b3c4d" }));
+    renderWithProviders(<ChecklistPage />, { route: "/checklist" });
+
+    expect(await screen.findByText("Bring baptism certificates")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("We could not load your categories.");
+    expect(screen.getByRole("alert")).toHaveTextContent("Reference: 1a2b3c4d");
+  });
+
+  it("given the tasks fail to load, when the page opens, then it does not claim there is nothing to do", async () => {
+    vi.mocked(tasksApi.listTasks).mockRejectedValue(new ApiError("Something went wrong on our side.", 500, { requestId: "1a2b3c4d" }));
+    renderWithProviders(<ChecklistPage />, { route: "/checklist" });
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("We could not load your tasks.");
+    expect(screen.queryByText(/Nothing to do here/)).not.toBeInTheDocument();
   });
 });

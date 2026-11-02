@@ -2,12 +2,14 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import { useAuth } from "../../auth/AuthProvider";
+import { failedTo } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePanel";
 import { fieldLabel, pillField } from "../../components/form/styles";
 import { screenIcons } from "../../components/playful/icons";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 
 const hint = "mt-1.5 text-base text-ink/70";
 
@@ -21,7 +23,8 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
   const { user, saveDisplayName } = useAuth();
 
   const [name, setName] = useState(user?.displayName ?? "");
-  const [error, setError] = useState<TranslationKey | null>(null);
+  const [error, setError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
@@ -35,8 +38,8 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
     try {
       await saveDisplayName(name.trim());
       onClose();
-    } catch {
-      setError("planning.saveFailed");
+    } catch (failure) {
+      setError(failedTo("errors.save", failure));
       setIsSaving(false);
     }
   };
@@ -76,7 +79,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
           </div>
           {error !== null && (
             <p role="alert" className="text-lg text-coral">
-              {t(error)}
+              {problemText(error)}
             </p>
           )}
         </div>

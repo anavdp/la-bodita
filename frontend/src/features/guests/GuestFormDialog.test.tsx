@@ -1,6 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { ApiError } from "../../api/client";
 import { aGuest } from "../../testing/guestFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { GuestFormDialog } from "./GuestFormDialog";
@@ -116,12 +117,15 @@ describe("GuestFormDialog", () => {
   });
 
   it("given a save that fails, when the API rejects it, then the dialog stays open and explains", async () => {
-    const onSave = vi.fn().mockRejectedValue(new Error("Guest not found"));
+    const onSave = vi.fn().mockRejectedValue(new ApiError("Guest not found", 404));
     renderWithProviders(<GuestFormDialog guest={aGuest()} onSave={onSave} onClose={vi.fn()} />);
 
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(await screen.findByText("Guest not found")).toBeInTheDocument();
+    // The server's English detail stays out of the page; the reason is in the planner's language.
+    expect(
+      await screen.findByText("We could not save this guest. The server did not accept it. Check it and try again."),
+    ).toBeInTheDocument();
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 

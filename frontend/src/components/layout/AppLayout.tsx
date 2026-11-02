@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import { SearchProvider } from "../../search/SearchProvider";
+import { useWedding } from "../../wedding/WeddingProvider";
+import { LoadProblems } from "../feedback/LoadProblems";
 import { ThemeProvider } from "../../theme/ThemeProvider";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
@@ -27,6 +29,7 @@ export function AppLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(readCollapsed);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+  const { error: weddingError, reload: reloadWedding } = useWedding();
 
   const toggleCollapsed = () => {
     const next = !isCollapsed;
@@ -59,6 +62,10 @@ export function AppLayout() {
               onOpenMenu={hasSidebar ? undefined : () => setIsMenuOpen(true)}
             />
             <div className="mx-auto max-w-[1440px] px-margin-mobile pt-28 md:px-margin-desktop">
+              {/* Every screen is scoped by the wedding, so without it none can load. */}
+              {weddingError !== null && (
+                <LoadProblems failures={[{ part: "errors.part.wedding", error: weddingError }]} onRetry={reloadWedding} />
+              )}
               <Outlet />
             </div>
           </main>

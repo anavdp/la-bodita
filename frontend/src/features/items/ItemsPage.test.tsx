@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { ApiError } from "../../api/client";
 import * as categoriesApi from "../../api/categories";
 import * as documentsApi from "../../api/documents";
 import * as itemsApi from "../../api/items";
@@ -521,5 +522,13 @@ describe("ItemsPage", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Try again" }));
 
     expect(await screen.findByRole("button", { name: /Iglesia San José/ })).toBeInTheDocument();
+  });
+
+  it("given the tasks fail to load, when the page opens, then the items still show and it says what failed", async () => {
+    vi.mocked(tasksApi.listTasks).mockRejectedValue(new ApiError("Something went wrong on our side.", 500, { requestId: "1a2b3c4d" }));
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    expect((await screen.findAllByText("Iglesia San José")).length).toBeGreaterThan(0);
+    expect(screen.getByRole("alert")).toHaveTextContent("We could not load your tasks.");
   });
 });

@@ -7,12 +7,15 @@ import { listWeddings, updateWedding } from "../api/weddings";
 export interface WeddingContextValue {
   wedding: Wedding | null;
   isLoading: boolean;
-  error: string | null;
+  /** Why the wedding did not load (an ApiError, usually), or null. */
+  error: unknown;
+  /** Reads the wedding again, after a failed load. */
+  reload: () => void;
   /** Saves Settings and shares the result with every screen; rejects if it could not. */
   saveWedding: (changes: WeddingChanges) => Promise<void>;
 }
 
-type WeddingState = Omit<WeddingContextValue, "saveWedding">;
+type WeddingState = Omit<WeddingContextValue, "saveWedding" | "reload">;
 
 export const WeddingContext = createContext<WeddingContextValue | null>(null);
 
@@ -27,6 +30,9 @@ export function WeddingProvider({ children }: { children: ReactNode }) {
     error: null,
   });
 
+  // Bumped by reload, so the load below runs again.
+  const [attempt, setAttempt] = useState(0);
+
   useEffect(() => {
     let active = true;
 
@@ -36,15 +42,20 @@ export function WeddingProvider({ children }: { children: ReactNode }) {
           setState({ wedding: weddings[0] ?? null, isLoading: false, error: null });
         }
       })
-      .catch((failure: Error) => {
+      .catch((failure: unknown) => {
         if (active) {
-          setState({ wedding: null, isLoading: false, error: failure.message });
+          setState({ wedding: null, isLoading: false, error: failure });
         }
       });
 
     return () => {
       active = false;
     };
+  }, [attempt]);
+
+  const reload = useCallback(() => {
+    setState((current) => ({ ...current, isLoading: true, error: null }));
+    setAttempt((current) => current + 1);
   }, []);
 
   const weddingId = state.wedding?.id;
@@ -59,7 +70,7 @@ export function WeddingProvider({ children }: { children: ReactNode }) {
     [weddingId],
   );
 
-  const value = useMemo(() => ({ ...state, saveWedding }), [state, saveWedding]);
+  const value = useMemo(() => ({ ...state, reload, saveWedding }), [state, reload, saveWedding]);
   return <WeddingContext.Provider value={value}>{children}</WeddingContext.Provider>;
 }
 

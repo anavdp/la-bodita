@@ -1,3 +1,6 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,6 +20,15 @@ from app.api import (
 )
 from app.auth import require_user
 from app.config import settings
+from app.database import engine
+from app.errors import REQUEST_ID_HEADER, install_error_handling
+from app.schema_check import warn_if_schema_out_of_step
+
+
+@asynccontextmanager
+async def check_database_on_start(app: FastAPI) -> AsyncIterator[None]:
+    warn_if_schema_out_of_step(engine)
+    yield
 
 
 def create_app(guest_only: bool = False) -> FastAPI:
@@ -24,14 +36,17 @@ def create_app(guest_only: bool = False) -> FastAPI:
     guest RSVP routes, so the planner's routes do not exist there to be found."""
     # The interactive docs would list every route, so the public process has none.
     docs = {"docs_url": None, "redoc_url": None, "openapi_url": None} if guest_only else {}
-    app = FastAPI(title=settings.app_name, **docs)
+    app = FastAPI(title=settings.app_name, lifespan=check_database_on_start, **docs)
 
+    # Before CORS, so CORS ends up outermost and its headers reach even a crash.
+    install_error_handling(app)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_allow_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=[REQUEST_ID_HEADER],
     )
 
     if not guest_only:

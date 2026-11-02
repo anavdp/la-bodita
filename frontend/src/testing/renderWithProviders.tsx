@@ -46,6 +46,7 @@ export function renderWithProviders(ui: ReactElement, options: Options = {}): Re
     wedding: aWedding,
     isLoading: false,
     error: null,
+    reload: () => undefined,
     saveWedding: () => Promise.resolve(),
     ...wedding,
   };

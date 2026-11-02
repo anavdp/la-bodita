@@ -23,6 +23,8 @@ import type {
   Person,
   WeddingDocument,
 } from "../../api/types";
+import { keepWhatLoaded, loadPart } from "../../components/feedback/problems";
+import type { LoadFailure } from "../../components/feedback/problems";
 
 export interface DocumentsState {
   categories: Category[];
@@ -31,7 +33,8 @@ export interface DocumentsState {
   requests: PaperRequest[];
   people: Person[];
   isLoading: boolean;
-  hasLoadError: boolean;
+  /** The lists that did not load; the rest are shown. */
+  loadFailures: LoadFailure[];
   reload: () => void;
   /** Uploads each file with the same details; a paper then answers the requests named. */
   upload: (files: File[], details: DocumentUpload, answers?: number[]) => Promise<void>;
@@ -55,30 +58,28 @@ export function useDocuments(weddingId: number | null, itemId?: number, refresh?
   const [requests, setRequests] = useState<PaperRequest[]>([]);
   const [people, setPeople] = useState<Person[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadError, setHasLoadError] = useState(false);
+  const [loadFailures, setLoadFailures] = useState<LoadFailure[]>([]);
 
   const load = useCallback(async () => {
     if (weddingId === null) return;
-    try {
-      const [loadedCategories, loadedItems, loadedDocuments, loadedRequests, loadedPeople] = await Promise.all([
-        // One item's detail already has its categories and items around it.
-        itemId === undefined ? listCategories(weddingId) : [],
-        itemId === undefined ? listItems(weddingId) : [],
-        listDocuments(weddingId, { itemId }),
-        listPaperRequests(weddingId, { itemId }),
-        listPeople(weddingId),
-      ]);
-      setCategories(loadedCategories);
-      setItems(loadedItems);
-      setDocuments(loadedDocuments);
-      setRequests(loadedRequests);
-      setPeople(loadedPeople);
-      setHasLoadError(false);
-    } catch {
-      setHasLoadError(true);
-    } finally {
-      setIsLoading(false);
-    }
+    const [categoriesResult, itemsResult, documentsResult, requestsResult, peopleResult] = await Promise.allSettled([
+      // One item's detail already has its categories and items around it.
+      itemId === undefined ? listCategories(weddingId) : [],
+      itemId === undefined ? listItems(weddingId) : [],
+      listDocuments(weddingId, { itemId }),
+      listPaperRequests(weddingId, { itemId }),
+      listPeople(weddingId),
+    ]);
+    setLoadFailures(
+      keepWhatLoaded([
+        loadPart("errors.part.categories", categoriesResult, setCategories),
+        loadPart("errors.part.items", itemsResult, setItems),
+        loadPart("errors.part.documents", documentsResult, setDocuments),
+        loadPart("errors.part.papers", requestsResult, setRequests),
+        loadPart("errors.part.people", peopleResult, setPeople),
+      ]),
+    );
+    setIsLoading(false);
   }, [weddingId, itemId]);
 
   useEffect(() => {
@@ -105,7 +106,7 @@ export function useDocuments(weddingId: number | null, itemId?: number, refresh?
     requests,
     people,
     isLoading,
-    hasLoadError,
+    loadFailures,
     reload: () => {
       setIsLoading(true);
       void load();

@@ -11,12 +11,15 @@ import type {
   HouseholdDraft,
   RsvpStatus,
 } from "../../api/types";
+import { keepWhatLoaded, loadPart } from "../../components/feedback/problems";
+import type { LoadFailure } from "../../components/feedback/problems";
 
 export interface GuestsState {
   guests: Guest[];
   households: Household[];
   isLoading: boolean;
-  hasLoadError: boolean;
+  /** The lists that did not load; the rest are shown. */
+  loadFailures: LoadFailure[];
   reload: () => void;
   addGuest: (draft: GuestDraft) => Promise<void>;
   addGuests: (drafts: GuestImportDraft[]) => Promise<void>;
@@ -39,7 +42,7 @@ export function useGuests(weddingId: number | null): GuestsState {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [households, setHouseholds] = useState<Household[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadError, setHasLoadError] = useState(false);
+  const [loadFailures, setLoadFailures] = useState<LoadFailure[]>([]);
 
   const load = useCallback(async () => {
     if (weddingId === null) {
@@ -47,19 +50,17 @@ export function useGuests(weddingId: number | null): GuestsState {
     }
 
     setIsLoading(true);
-    try {
-      const [loadedGuests, loadedHouseholds] = await Promise.all([
-        listGuests(weddingId),
-        listHouseholds(weddingId),
-      ]);
-      setGuests(loadedGuests);
-      setHouseholds(loadedHouseholds);
-      setHasLoadError(false);
-    } catch {
-      setHasLoadError(true);
-    } finally {
-      setIsLoading(false);
-    }
+    const [guestsResult, householdsResult] = await Promise.allSettled([
+      listGuests(weddingId),
+      listHouseholds(weddingId),
+    ]);
+    setLoadFailures(
+      keepWhatLoaded([
+        loadPart("errors.part.guests", guestsResult, setGuests),
+        loadPart("errors.part.households", householdsResult, setHouseholds),
+      ]),
+    );
+    setIsLoading(false);
   }, [weddingId]);
 
   useEffect(() => {
@@ -181,7 +182,7 @@ export function useGuests(weddingId: number | null): GuestsState {
     guests,
     households,
     isLoading,
-    hasLoadError,
+    loadFailures,
     reload: () => void load(),
     addGuest,
     addGuests,

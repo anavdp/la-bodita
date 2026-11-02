@@ -2,14 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import type { Item, ItemDraft, ItemStatus, Task } from "../../api/types";
+import { LoadProblems } from "../../components/feedback/LoadProblems";
+import { failedTo, hasFailed } from "../../components/feedback/problems";
+import type { Problem } from "../../components/feedback/problems";
+import { useProblemText } from "../../components/feedback/useProblemText";
 import { CalendarMark } from "../../components/playful/CalendarMark";
 import { CategoryIcon } from "../../components/playful/IconPicker";
 import { isIconName } from "../../components/playful/iconCatalog";
 import { HeaderAction, PageHeader } from "../../components/playful/PageHeader";
 import { screenIcons } from "../../components/playful/icons";
-import { outlinedCard, secondaryButton } from "../../components/playful/styles";
+import { outlinedCard } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { useSearch } from "../../search/SearchProvider";
 import { useWedding } from "../../wedding/WeddingProvider";
 import { ItemPapers } from "../documents/ItemPapers";
@@ -36,7 +39,7 @@ export function ItemsPage() {
   const { wedding } = useWedding();
   const { term } = useSearch();
   const planning = usePlanning(wedding?.id ?? null);
-  const { categories, items, tasks, isLoading, hasLoadError } = planning;
+  const { categories, items, tasks, isLoading, loadFailures } = planning;
 
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   // `?item=7`: the documents screen links straight to the item waiting on a paper.
@@ -51,7 +54,8 @@ export function ItemsPage() {
   const [isRevealPending, setIsRevealPending] = useState(false);
   const [dialogTarget, setDialogTarget] = useState<DialogTarget>(null);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
-  const [actionError, setActionError] = useState<TranslationKey | null>(null);
+  const [actionError, setActionError] = useState<Problem | null>(null);
+  const problemText = useProblemText();
 
   const categoriesById = useMemo(() => new Map(categories.map((each) => [each.id, each])), [categories]);
   const searched = useMemo(() => {
@@ -86,8 +90,8 @@ export function ItemsPage() {
     setActionError(null);
     try {
       await change();
-    } catch {
-      setActionError("planning.saveFailed");
+    } catch (failure) {
+      setActionError(failedTo("errors.save", failure));
     }
   };
 
@@ -124,16 +128,7 @@ export function ItemsPage() {
     if (isLoading) {
       return <p className="font-playful text-xl text-ink/70">{t("items.loading")}</p>;
     }
-    if (hasLoadError) {
-      return (
-        <div className="flex flex-col items-start gap-4">
-          <p className="font-playful text-xl text-coral">{t("planning.loadFailed")}</p>
-          <button type="button" onClick={planning.reload} className={secondaryButton}>
-            {t("planning.retry")}
-          </button>
-        </div>
-      );
-    }
+    if (hasFailed(loadFailures, "errors.part.items")) return null;
     if (items.length === 0) {
       return <p className="font-playful text-xl text-ink/70">{t("items.empty")}</p>;
     }
@@ -213,9 +208,11 @@ export function ItemsPage() {
 
       {actionError !== null && (
         <p role="alert" className="mb-4 font-playful text-lg text-coral">
-          {t(actionError)}
+          {problemText(actionError)}
         </p>
       )}
+
+      {!isLoading && <LoadProblems failures={loadFailures} onRetry={planning.reload} />}
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className={card}>{listArea()}</div>

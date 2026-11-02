@@ -1,6 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { ApiError } from "../../api/client";
 import { renderWithProviders } from "../../testing/renderWithProviders";
 import { AppLayout } from "./AppLayout";
 
@@ -97,5 +98,17 @@ describe("AppLayout", () => {
     await user.click(screen.getByRole("button", { name: "Menu" }));
 
     expect(screen.queryByRole("button", { name: "Collapse menu" })).not.toBeInTheDocument();
+  });
+
+  it("given the wedding could not load, when any screen opens, then the layout says so and offers to try again", async () => {
+    const reload = vi.fn();
+    renderWithProviders(<AppLayout />, {
+      wedding: { wedding: null, error: new ApiError("", 502), reload },
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent("We could not load your wedding.");
+    expect(screen.getByRole("alert")).toHaveTextContent("isn't answering");
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });
