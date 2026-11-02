@@ -7,6 +7,7 @@ import type {
   GuestDraft,
   GuestImportDraft,
   Household,
+  HouseholdBooking,
   HouseholdDraft,
   RsvpStatus,
 } from "../../api/types";
@@ -24,6 +25,11 @@ import { HouseholdDeleteDialog } from "../households/HouseholdDeleteDialog";
 import { HouseholdDetailsDialog } from "../households/HouseholdDetailsDialog";
 import { HouseholdFormDialog } from "../households/HouseholdFormDialog";
 import { HouseholdsPanel } from "../households/HouseholdsPanel";
+import { filterBooked, summariseBookings } from "../weBook/weBook";
+import type { BookingFilter } from "../weBook/weBook";
+import { WeBookDialog } from "../weBook/WeBookDialog";
+import { WeBookPanel } from "../weBook/WeBookPanel";
+import { WeBookStats } from "../weBook/WeBookStats";
 import { filterGuestsByColumns, filterGuestsByName, hasColumnFilters, noColumnFilters } from "./filtering";
 import type { GuestColumnFilters } from "./filtering";
 import { GuestFormDialog } from "./GuestFormDialog";
@@ -44,12 +50,18 @@ type HouseholdDialog =
   | { kind: "details" | "delete"; household: Household }
   | null;
 
-export type GuestListTab = "guests" | "households";
+export type GuestListTab = "guests" | "households" | "weBook";
+
+/** The We book drawer, if open: a booked household to edit, or null to add one. */
+type WeBookTarget = { household: Household | null } | null;
+
+/** Nothing booked: what taking a household off the We book list sends. */
+const nothingBooked: HouseholdBooking = { hotelRooms: 0, needsRide: false, rideWith: "" };
 
 /**
- * The guest list, in two tabs that share the header and the RSVP cards: the
- * guests themselves, and the households they are invited in. Each tab has its
- * own address, so either can be linked to or reloaded.
+ * The guest list, in three tabs that share the header: the guests themselves,
+ * the households they are invited in, and the households we book a hotel room
+ * or a ride for. Each tab has its own address, so it can be linked to or reloaded.
  */
 export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   const { t } = useTranslation();
@@ -83,6 +95,10 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
 
   /** The RSVP status picked in the header summary, if any: the table shows only those guests. */
   const [rsvpFilter, setRsvpFilter] = useState<RsvpStatus | null>(null);
+
+  /** The We book summary figure picked, if any: the We book table shows only those households. */
+  const [bookingFilter, setBookingFilter] = useState<BookingFilter | null>(null);
+  const [weBookTarget, setWeBookTarget] = useState<WeBookTarget>(null);
 
   /** What is ticked under the table's Type, Relationship and Side funnels. */
   const [columnFilters, setColumnFilters] = useState<GuestColumnFilters>(noColumnFilters);
@@ -152,6 +168,20 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     }
   };
 
+  const handleSaveBooking = async (householdId: number, booking: HouseholdBooking) => {
+    await editHousehold(householdId, booking);
+    setWeBookTarget(null);
+  };
+
+  const handleRemoveBooking = async (household: Household) => {
+    setActionError(null);
+    try {
+      await editHousehold(household.id, nothingBooked);
+    } catch (failure) {
+      setActionError(failedTo("weBook.removeFailed", failure));
+    }
+  };
+
   const handleSaveHousehold = async (draft: HouseholdDraft) => {
     if (householdDialog?.kind === "form" && householdDialog.household !== null) {
       await editHousehold(householdDialog.household.id, draft);
@@ -173,6 +203,28 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     if (hasFailed(loadFailures, "errors.part.guests")) return null;
     if (guests.length === 0) {
       return <p className="font-playful text-xl text-ink/70">{t("guests.empty")}</p>;
+    }
+    if (tab === "weBook") {
+      const booked = filterBooked(visibleHouseholds, bookingFilter);
+      if (booked.length === 0) {
+        const emptyText =
+          term.trim() !== ""
+            ? t("weBook.noMatches", { term })
+            : bookingFilter !== null
+              ? t("weBook.filterEmpty")
+              : t("weBook.empty");
+        return <p className="font-playful text-xl text-ink/70">{emptyText}</p>;
+      }
+      return (
+        <div className={`${outlinedCard} overflow-hidden`}>
+          <WeBookPanel
+            households={booked}
+            guests={guests}
+            onEdit={(household) => setWeBookTarget({ household })}
+            onRemove={handleRemoveBooking}
+          />
+        </div>
+      );
     }
     if (tab === "households") {
       if (visibleHouseholds.length === 0) {
@@ -243,7 +295,9 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   return (
     <>
       <PageHeader title={t("guests.title")} subtitle={t("guests.subtitle")} art={screenIcons.guests}>
-        {tab === "households" ? (
+        {tab === "weBook" ? (
+          <HeaderAction icon="add" label={t("weBook.add")} onClick={() => setWeBookTarget({ household: null })} />
+        ) : tab === "households" ? (
           <HeaderAction
             icon="add"
             label={t("households.add")}
@@ -263,20 +317,31 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
         )}
       </PageHeader>
 
-      <GuestStats
-        guests={guests}
-        activeStatus={rsvpFilter}
-        onToggleStatus={
-          tab === "guests" ? (status) => setRsvpFilter((current) => (current === status ? null : status)) : undefined
-        }
-      />
+      {tab === "weBook" ? (
+        <WeBookStats
+          summary={summariseBookings(households, guests)}
+          activeFilter={bookingFilter}
+          onToggleFilter={(filter) => setBookingFilter((current) => (current === filter ? null : filter))}
+        />
+      ) : (
+        <GuestStats
+          guests={guests}
+          activeStatus={rsvpFilter}
+          onToggleStatus={
+            tab === "guests" ? (status) => setRsvpFilter((current) => (current === status ? null : status)) : undefined
+          }
+        />
+      )}
 
       <nav aria-label={t("guests.tabs.label")} className="mb-5 mt-7 flex">
         <NavLink to="/guests" end className={folderTab("rounded-l-[18px]")}>
           {t("guests.tabs.guests")}
         </NavLink>
-        <NavLink to="/guests/households" className={folderTab("-ml-[2.5px] rounded-r-[18px]")}>
+        <NavLink to="/guests/households" className={folderTab("-ml-[2.5px]")}>
           {t("guests.tabs.households")}
+        </NavLink>
+        <NavLink to="/guests/we-book" className={folderTab("-ml-[2.5px] rounded-r-[18px]")}>
+          {t("guests.tabs.weBook")}
         </NavLink>
       </nav>
       {actionError !== null && (
@@ -319,6 +384,15 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
           household={householdDialog.household}
           onConfirm={(deleteGuests) => handleDeleteHousehold(householdDialog.household, deleteGuests)}
           onClose={() => setHouseholdDialog(null)}
+        />
+      )}
+
+      {weBookTarget !== null && (
+        <WeBookDialog
+          household={weBookTarget.household}
+          households={households}
+          onSave={handleSaveBooking}
+          onClose={() => setWeBookTarget(null)}
         />
       )}
 

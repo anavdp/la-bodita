@@ -5,5 +5,15 @@ let nextId = 1;
 /** A plausible household; each test overrides only the fields it is about. */
 export function aHousehold(overrides: Partial<Household> = {}): Household {
   const id = nextId++;
-  return { id, name: "Famiglia Rossi", rsvpToken: `token-${id}`, broadcastList: null, guestIds: [], ...overrides };
+  return {
+    id,
+    name: "Famiglia Rossi",
+    rsvpToken: `token-${id}`,
+    broadcastList: null,
+    hotelRooms: 0,
+    needsRide: false,
+    rideWith: null,
+    guestIds: [],
+    ...overrides,
+  };
 }

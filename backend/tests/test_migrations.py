@@ -219,7 +219,9 @@ def test_given_an_empty_database_when_migrations_run_then_the_household_table_ex
 
     inspector = inspect(create_engine(database_url))
     columns = {column["name"] for column in inspector.get_columns("household")}
-    assert columns == {"id", "wedding_id", "name", "rsvp_token", "broadcast_list", "created_at", "updated_at"}
+    assert columns == {
+        "id", "wedding_id", "name", "rsvp_token", "broadcast_list", "hotel_rooms", "needs_ride", "ride_with", "created_at", "updated_at"
+    }
     guest_foreign_keys = {key["name"]: key["referred_table"] for key in inspector.get_foreign_keys("guest")}
     assert guest_foreign_keys["fk_guest_household_id_household"] == "household"
     assert guest_column_nullability(database_url)["household_id"] is False

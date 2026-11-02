@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, StringConstraints
 
 from app.models.guest import RsvpStatus
 from app.models.household import BroadcastList
-from app.schemas.guest import RequiredText
+from app.schemas.guest import OptionalText, RequiredText
 
 # A household exists for its guests: it is created with at least one, and to
 # empty it you delete it.
@@ -20,6 +20,9 @@ class HouseholdRead(BaseModel):
     name: str
     rsvp_token: str
     broadcast_list: BroadcastList | None
+    hotel_rooms: int
+    needs_ride: bool
+    ride_with: str | None
     guest_ids: list[int]
 
 
@@ -31,13 +34,16 @@ class HouseholdCreate(BaseModel):
 
 
 class HouseholdUpdate(BaseModel):
-    """A rename, a new membership, a broadcast list, or any mix. `guest_ids` is the full
+    """A rename, a new membership, a broadcast list, what we book for it, or any mix. `guest_ids` is the full
     list of members: newcomers move in, and anyone left out splits off into a household
     of their own. `broadcast_list` sent as null takes the household off every list."""
 
     name: RequiredText | None = None
     guest_ids: Members | None = None
     broadcast_list: BroadcastList | None = None
+    hotel_rooms: Annotated[int, Field(ge=0, le=50)] | None = None
+    needs_ride: bool | None = None
+    ride_with: OptionalText | None = None
 
 
 class RsvpGuest(BaseModel):

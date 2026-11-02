@@ -63,6 +63,7 @@ export function AppRoutes() {
               <Route index element={<Navigate to="/guests" replace />} />
               <Route path="/guests" element={<GuestListPage tab="guests" />} />
               <Route path="/guests/households" element={<GuestListPage tab="households" />} />
+              <Route path="/guests/we-book" element={<GuestListPage tab="weBook" />} />
               <Route path="/dashboard" element={<ComingSoon titleKey="nav.dashboard" />} />
               <Route path="/items" element={<ItemsPage />} />
               <Route path="/checklist" element={<ChecklistPage />} />

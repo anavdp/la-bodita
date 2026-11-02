@@ -52,6 +52,12 @@ export interface Household {
   rsvpToken: string;
   /** Null until the household is added to one of the couple's lists. */
   broadcastList: BroadcastList | null;
+  /** Hotel rooms we book on the household's behalf; 0 means they book their own. */
+  hotelRooms: number;
+  /** They have no car there, so we arrange their rides. */
+  needsRide: boolean;
+  /** Who drives them, once someone is assigned. */
+  rideWith: string | null;
   guestIds: number[];
 }
 
@@ -63,7 +69,15 @@ export interface HouseholdDraft {
 }
 
 /** A PATCH changes only what it names; a null broadcast list takes the household off every list. */
-export type HouseholdChanges = Partial<HouseholdDraft> & { broadcastList?: BroadcastList | null };
+export type HouseholdChanges = Partial<HouseholdDraft> &
+  Partial<HouseholdBooking> & { broadcastList?: BroadcastList | null };
+
+/** What the We book tab sets for a household. An empty driver clears it. */
+export interface HouseholdBooking {
+  hotelRooms: number;
+  needsRide: boolean;
+  rideWith: string;
+}
 
 /** How the invitation speaks to a household: to family, to friends, or to anyone. */
 export type RsvpGreeting = "family" | "friends" | "general";

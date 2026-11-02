@@ -291,3 +291,89 @@ def test_given_an_unknown_broadcast_list_when_a_household_is_put_on_it_then_it_i
     response = client.patch(household_url(wedding, maria.household_id), json={"broadcast_list": "aunt"})
 
     assert response.status_code == 422
+
+
+def test_given_a_new_household_when_it_is_listed_then_we_book_nothing_for_it(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    a_guest(db_session, wedding, "Maria")
+
+    household = client.get(HOUSEHOLDS_URL.format(wedding_id=wedding.id)).json()[0]
+
+    assert household["hotel_rooms"] == 0
+    assert household["needs_ride"] is False
+
+
+def test_given_a_household_when_we_book_rooms_and_a_ride_for_it_then_both_are_kept(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+
+    response = client.patch(household_url(wedding, maria.household_id), json={"hotel_rooms": 2, "needs_ride": True})
+
+    assert response.status_code == 200
+    assert response.json()["hotel_rooms"] == 2
+    assert response.json()["needs_ride"] is True
+    assert response.json()["name"] == "Maria Rossi"
+
+
+def test_given_a_household_we_book_for_when_it_is_renamed_then_its_bookings_stay(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+    maria.household.hotel_rooms = 1
+    maria.household.needs_ride = True
+    db_session.commit()
+
+    response = client.patch(household_url(wedding, maria.household_id), json={"name": "Famiglia Rossi"})
+
+    assert response.json()["hotel_rooms"] == 1
+    assert response.json()["needs_ride"] is True
+
+
+def test_given_a_negative_number_of_rooms_when_it_is_saved_then_it_is_rejected(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+
+    response = client.patch(household_url(wedding, maria.household_id), json={"hotel_rooms": -1})
+
+    assert response.status_code == 422
+
+
+def test_given_a_household_that_needs_a_ride_when_its_driver_is_noted_then_it_is_kept(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+
+    response = client.patch(
+        household_url(wedding, maria.household_id), json={"needs_ride": True, "ride_with": "  Tío Carlos  "}
+    )
+
+    assert response.json()["ride_with"] == "Tío Carlos"
+
+
+def test_given_a_noted_driver_when_it_is_cleared_then_the_household_rides_with_nobody_yet(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+    maria.household.ride_with = "Tío Carlos"
+    db_session.commit()
+
+    response = client.patch(household_url(wedding, maria.household_id), json={"ride_with": ""})
+
+    assert response.json()["ride_with"] is None
+
+
+def test_given_a_household_when_it_no_longer_needs_a_ride_then_its_driver_is_forgotten(
+    client: TestClient, db_session: Session, wedding: Wedding
+):
+    maria = a_guest(db_session, wedding, "Maria")
+    maria.household.needs_ride = True
+    maria.household.ride_with = "Tío Carlos"
+    db_session.commit()
+
+    response = client.patch(household_url(wedding, maria.household_id), json={"needs_ride": False})
+
+    assert response.json()["needs_ride"] is False
+    assert response.json()["ride_with"] is None

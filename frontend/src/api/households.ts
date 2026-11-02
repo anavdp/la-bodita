@@ -6,6 +6,9 @@ interface HouseholdPayload {
   name: string;
   rsvp_token: string;
   broadcast_list: BroadcastList | null;
+  hotel_rooms: number;
+  needs_ride: boolean;
+  ride_with: string | null;
   guest_ids: number[];
 }
 
@@ -15,6 +18,9 @@ function toHousehold(payload: HouseholdPayload): Household {
     name: payload.name,
     rsvpToken: payload.rsvp_token,
     broadcastList: payload.broadcast_list,
+    hotelRooms: payload.hotel_rooms,
+    needsRide: payload.needs_ride,
+    rideWith: payload.ride_with,
     guestIds: payload.guest_ids,
   };
 }
@@ -25,6 +31,9 @@ function toPayload(changes: HouseholdChanges): Record<string, unknown> {
     ...(changes.name === undefined ? {} : { name: changes.name }),
     ...(changes.guestIds === undefined ? {} : { guest_ids: changes.guestIds }),
     ...(changes.broadcastList === undefined ? {} : { broadcast_list: changes.broadcastList }),
+    ...(changes.hotelRooms === undefined ? {} : { hotel_rooms: changes.hotelRooms }),
+    ...(changes.needsRide === undefined ? {} : { needs_ride: changes.needsRide }),
+    ...(changes.rideWith === undefined ? {} : { ride_with: changes.rideWith }),
   };
 }
 

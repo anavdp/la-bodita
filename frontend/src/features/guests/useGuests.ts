@@ -8,6 +8,7 @@ import type {
   GuestDraft,
   GuestImportDraft,
   Household,
+  HouseholdChanges,
   HouseholdDraft,
   RsvpStatus,
 } from "../../api/types";
@@ -27,7 +28,7 @@ export interface GuestsState {
   removeGuest: (guestId: number) => Promise<void>;
   setRsvpStatus: (guestId: number, rsvpStatus: RsvpStatus) => Promise<void>;
   addHousehold: (draft: HouseholdDraft) => Promise<void>;
-  editHousehold: (householdId: number, draft: HouseholdDraft) => Promise<void>;
+  editHousehold: (householdId: number, changes: HouseholdChanges) => Promise<void>;
   removeHousehold: (householdId: number, deleteGuests: boolean) => Promise<void>;
   setBroadcastList: (householdId: number, broadcastList: BroadcastList | null) => Promise<void>;
 }
@@ -144,8 +145,8 @@ export function useGuests(weddingId: number | null): GuestsState {
   );
 
   const editHousehold = useCallback(
-    (householdId: number, draft: HouseholdDraft) =>
-      changeThenReload((id) => updateHousehold(id, householdId, draft)),
+    (householdId: number, changes: HouseholdChanges) =>
+      changeThenReload((id) => updateHousehold(id, householdId, changes)),
     [changeThenReload],
   );
 

@@ -161,6 +161,13 @@ describe("AppRoutes", () => {
     expect(screen.getByRole("link", { name: "Households" })).toHaveAttribute("aria-current", "page");
   });
 
+  it("given the we-book route, when it is visited, then the guest list opens on its We book tab", async () => {
+    renderAt("/guests/we-book");
+
+    expect(await screen.findByRole("group", { name: "What we book" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "We book" })).toHaveAttribute("aria-current", "page");
+  });
+
   it("given the root, when it is visited, then the guest list is where the app opens", async () => {
     renderAt("/");
 

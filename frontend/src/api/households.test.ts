@@ -8,8 +8,26 @@ const jsonResponse = (body: unknown, status = 200) =>
     }),
   );
 
-const payload = { id: 4, name: "Rossi", rsvp_token: "secret-token", broadcast_list: "bride", guest_ids: [1, 2] };
-const household = { id: 4, name: "Rossi", rsvpToken: "secret-token", broadcastList: "bride", guestIds: [1, 2] };
+const payload = {
+  id: 4,
+  name: "Rossi",
+  rsvp_token: "secret-token",
+  broadcast_list: "bride",
+  hotel_rooms: 2,
+  needs_ride: true,
+  ride_with: "Tío Carlos",
+  guest_ids: [1, 2],
+};
+const household = {
+  id: 4,
+  name: "Rossi",
+  rsvpToken: "secret-token",
+  broadcastList: "bride",
+  hotelRooms: 2,
+  needsRide: true,
+  rideWith: "Tío Carlos",
+  guestIds: [1, 2],
+};
 
 describe("the household API", () => {
   afterEach(() => {
@@ -68,6 +86,16 @@ describe("the household API", () => {
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(JSON.parse(init.body as string)).toEqual({ broadcast_list: "groom" });
+  });
+
+  it("given what we book for a household, when it is saved, then the rooms, ride and driver go in API terms", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse(payload));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await updateHousehold(3, 4, { hotelRooms: 1, needsRide: true, rideWith: "Tío Carlos" });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toEqual({ hotel_rooms: 1, needs_ride: true, ride_with: "Tío Carlos" });
   });
 
   it("given a household on a list, when the list is cleared, then null is sent so it comes off", async () => {

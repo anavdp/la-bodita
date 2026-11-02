@@ -38,6 +38,6 @@ export const menuItem =
 export const folderTab =
   (edge: string) =>
   ({ isActive }: { isActive: boolean }) =>
-    `border-[2.5px] border-ink px-10 py-2 font-playful text-[22px] text-ink transition-colors ${edge} ${
+    `border-[2.5px] whitespace-nowrap border-ink px-4 py-2 font-playful text-lg text-ink md:px-10 md:text-[22px] transition-colors ${edge} ${
       isActive ? "bg-accent" : "bg-cream-light hover:bg-accent/40"
     }`;

@@ -2,6 +2,7 @@ import secrets
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from sqlalchemy import false
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -42,6 +43,13 @@ class Household(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     broadcast_list: Mapped[BroadcastList | None] = mapped_column(
         stored_as_text(BroadcastList, "broadcast_list"), default=None
     )
+    # What the couple books on the household's behalf, where most guests book their
+    # own: hotel rooms (0 = they book themselves), and whether they need driving
+    # around because they have no car there.
+    hotel_rooms: Mapped[int] = mapped_column(default=0, server_default="0")
+    needs_ride: Mapped[bool] = mapped_column(default=False, server_default=false())
+    # Who drives them, once someone is assigned: free text, e.g. "Tío Carlos".
+    ride_with: Mapped[str | None] = mapped_column(default=None)
 
     guests: Mapped[list["Guest"]] = relationship(
         back_populates="household",

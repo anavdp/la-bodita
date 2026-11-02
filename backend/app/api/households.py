@@ -16,6 +16,9 @@ def to_read(household: Household) -> HouseholdRead:
         name=household.name,
         rsvp_token=household.rsvp_token,
         broadcast_list=household.broadcast_list,
+        hotel_rooms=household.hotel_rooms,
+        needs_ride=household.needs_ride,
+        ride_with=household.ride_with,
         guest_ids=[guest.id for guest in household.guests],
     )
 
@@ -78,6 +81,15 @@ def update_household(
     # Null is a real answer here ("on no list"), so only a field left out is ignored.
     if "broadcast_list" in payload.model_fields_set:
         household.broadcast_list = payload.broadcast_list
+    if payload.hotel_rooms is not None:
+        household.hotel_rooms = payload.hotel_rooms
+    if payload.ride_with is not None:
+        household.ride_with = payload.ride_with or None
+    if payload.needs_ride is not None:
+        household.needs_ride = payload.needs_ride
+    # A driver only means something while the household needs a ride.
+    if not household.needs_ride:
+        household.ride_with = None
     if payload.guest_ids is not None:
         members = find_guests(session, wedding, payload.guest_ids)
         for guest in household.guests:
