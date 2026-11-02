@@ -212,11 +212,10 @@ export function ItemsPage() {
         </p>
       )}
 
+      {!isLoading && <LoadProblems failures={loadFailures} onRetry={planning.reload} />}
+
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className={card}>
-          {!isLoading && <LoadProblems failures={loadFailures} onRetry={planning.reload} />}
-          {listArea()}
-        </div>
+        <div className={card}>{listArea()}</div>
         {selected && !isLoading && (
           <div ref={detailRef} className="scroll-mt-24">
             <ItemDetail

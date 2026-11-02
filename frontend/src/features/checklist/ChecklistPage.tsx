@@ -217,8 +217,9 @@ export function ChecklistPage() {
         </p>
       )}
 
+      {!isLoading && <LoadProblems failures={loadFailures} onRetry={planning.reload} />}
+
       <div className={`${outlinedCard} p-4 sm:p-6`}>
-        {!isLoading && <LoadProblems failures={loadFailures} onRetry={planning.reload} />}
         {listArea()}
       </div>
     </>

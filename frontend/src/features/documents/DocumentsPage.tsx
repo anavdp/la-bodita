@@ -137,9 +137,7 @@ export function DocumentsPage({ tab }: { tab: DocumentsTab }) {
         </p>
       )}
 
-      {!state.isLoading && (
-        <LoadProblems failures={state.loadFailures} onRetry={state.reload} className={`${outlinedCard} mb-6 p-6`} />
-      )}
+      {!state.isLoading && <LoadProblems failures={state.loadFailures} onRetry={state.reload} />}
       {body()}
 
       <div className="fixed inset-x-4 bottom-4 z-30 flex items-center gap-3 md:hidden">

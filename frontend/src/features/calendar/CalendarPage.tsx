@@ -337,27 +337,24 @@ export function CalendarPage() {
       return <p className="p-2 font-playful text-xl text-ink/70">{t("calendar.loading")}</p>;
     }
     return (
-      <>
-        <LoadProblems failures={loadFailures} onRetry={calendar.reload} />
-        <div role="grid" aria-label={monthTitle} data-month className="flex flex-col gap-1 sm:gap-1.5">
-          <div role="row" className="grid grid-cols-7 gap-1 sm:gap-1.5">
-            {weekdays.map((weekday) => (
-              <span
-                key={weekday}
-                role="columnheader"
-                className="py-1 text-center font-playful text-sm uppercase tracking-wider text-ink/70"
-              >
-                {weekday}
-              </span>
-            ))}
-          </div>
-          {weeks.map((week) => (
-            <div key={week[0]} role="row" className="grid grid-cols-7 gap-1 sm:gap-1.5">
-              {week.map(dayCell)}
-            </div>
+      <div role="grid" aria-label={monthTitle} data-month className="flex flex-col gap-1 sm:gap-1.5">
+        <div role="row" className="grid grid-cols-7 gap-1 sm:gap-1.5">
+          {weekdays.map((weekday) => (
+            <span
+              key={weekday}
+              role="columnheader"
+              className="py-1 text-center font-playful text-sm uppercase tracking-wider text-ink/70"
+            >
+              {weekday}
+            </span>
           ))}
         </div>
-      </>
+        {weeks.map((week) => (
+          <div key={week[0]} role="row" className="grid grid-cols-7 gap-1 sm:gap-1.5">
+            {week.map(dayCell)}
+          </div>
+        ))}
+      </div>
     );
   };
 
@@ -378,6 +375,8 @@ export function CalendarPage() {
           {problemText(actionError)}
         </p>
       )}
+
+      {!isLoading && <LoadProblems failures={loadFailures} onRetry={calendar.reload} />}
 
       <div className="flex flex-col items-start gap-6 xl:flex-row">
         <section className={`${outlinedCard} w-full min-w-0 flex-1 p-3 font-playful text-ink sm:p-5`}>

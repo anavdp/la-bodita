@@ -401,12 +401,9 @@ export function BudgetPage() {
         </p>
       )}
 
-      <div className="flex flex-col gap-4">
-        {!isLoading && (
-          <LoadProblems failures={loadFailures} onRetry={budget.reload} className={`${outlinedCard} p-6`} />
-        )}
-        {listArea()}
-      </div>
+      {!isLoading && <LoadProblems failures={loadFailures} onRetry={budget.reload} />}
+
+      <div className="flex flex-col gap-4">{listArea()}</div>
 
       {formTarget !== null && (
         <BudgetLineForm
