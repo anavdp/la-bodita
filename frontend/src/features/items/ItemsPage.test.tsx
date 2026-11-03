@@ -95,7 +95,7 @@ describe("ItemsPage", () => {
 
     const chips = screen.getByRole("group", { name: "Filter by category" });
     expect(within(chips).getByRole("button", { name: "All 2" })).toHaveAttribute("aria-pressed", "true");
-    await userEvent.click(within(chips).getByRole("button", { name: "📸 Photographer 1" }));
+    await userEvent.click(within(chips).getByRole("button", { name: "Photographer 1" }));
 
     expect(screen.queryByRole("button", { name: /Iglesia San José/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Luz de Agua Fotografía/ })).toBeInTheDocument();

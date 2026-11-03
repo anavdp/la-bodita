@@ -11,6 +11,21 @@ export const chip = (isActive: boolean) =>
   }`;
 
 /**
+ * A category chip with no name and no border, just its icon: a dozen of them
+ * fit in one row. The name lives in its label and tooltip.
+ */
+const iconChip = (isActive: boolean) =>
+  `relative inline-flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
+    isActive ? "bg-accent ring-[2.5px] ring-ink" : "hover:bg-accent/40"
+  }`;
+
+/** How many things a chip stands for, tucked in its corner; faded when there are none. */
+const countBadge = (isActive: boolean, count: number) =>
+  `absolute -right-1 -top-1 min-w-[1.25rem] rounded-full px-1 font-playful text-xs leading-5 ${
+    isActive ? "bg-ink text-cream-light" : count === 0 ? "bg-ink/15 text-ink/60" : "bg-ink/80 text-cream-light"
+  }`;
+
+/**
  * "⛪ Church" for a category still on an emoji, just "Church" for one with an
  * icon (drawn beside it by CategoryIcon) or with neither.
  */
@@ -63,29 +78,41 @@ export function CategoryChips({ categories, activeId, onChange, counts, showAll 
   }
 
   return (
-    <div role="group" aria-label={t("planning.filterLabel")} className="flex flex-wrap gap-2">
+    <div role="group" aria-label={t("planning.filterLabel")} className="flex flex-wrap items-center gap-1">
       {showAll && (
         <button
           type="button"
           aria-pressed={activeId === null}
           onClick={() => onChange(null)}
-          className={chip(activeId === null)}
+          className={`${iconChip(activeId === null)} w-auto px-4 font-playful text-lg text-ink`}
         >
           {withCount(t("planning.allCategories"), counts?.all)}
         </button>
       )}
-      {categories.map((category) => (
-        <button
-          key={category.id}
-          type="button"
-          aria-pressed={activeId === category.id}
-          onClick={() => onChange(activeId === category.id ? null : category.id)}
-          className={chip(activeId === category.id)}
-        >
-          <CategoryIcon value={category.emoji} />
-          {withCount(categoryLabel(category), counts && (counts.byCategory.get(category.id) ?? 0))}
-        </button>
-      ))}
+      {categories.map((category) => {
+        const count = counts && (counts.byCategory.get(category.id) ?? 0);
+        const isActive = activeId === category.id;
+        return (
+          <button
+            key={category.id}
+            type="button"
+            aria-pressed={isActive}
+            aria-label={withCount(category.name, count)}
+            title={category.name}
+            onClick={() => onChange(isActive ? null : category.id)}
+            className={iconChip(isActive)}
+          >
+            {isIconName(category.emoji) ? (
+              <CategoryIcon value={category.emoji} className="h-8 w-8" />
+            ) : (
+              <span aria-hidden="true" className="text-2xl leading-none">
+                {category.emoji || category.name.charAt(0)}
+              </span>
+            )}
+            {count !== undefined && <span className={countBadge(isActive, count)}>{count}</span>}
+          </button>
+        );
+      })}
     </div>
   );
 }
