@@ -3,9 +3,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.api.guests import SessionDependency, WeddingDependency, remove_household_if_empty
-from app.models import Guest, Household, Wedding
+from app.models import Guest, Household, HouseholdRoom, RoomType, Wedding
 from app.models.guest import household_of_one
-from app.schemas import HouseholdCreate, HouseholdRead, HouseholdUpdate
+from app.schemas import BookedRooms, HouseholdCreate, HouseholdRead, HouseholdUpdate
 
 router = APIRouter(prefix="/api/weddings/{wedding_id}/households", tags=["households"])
 
@@ -16,7 +16,7 @@ def to_read(household: Household) -> HouseholdRead:
         name=household.name,
         rsvp_token=household.rsvp_token,
         broadcast_list=household.broadcast_list,
-        hotel_rooms=household.hotel_rooms,
+        rooms=[BookedRooms.model_validate(room) for room in household.rooms],
         needs_ride=household.needs_ride,
         ride_with=household.ride_with,
         guest_ids=[guest.id for guest in household.guests],
@@ -38,6 +38,21 @@ def find_guests(session: SessionDependency, wedding: Wedding, guest_ids: list[in
     return guests
 
 
+def book_rooms(session: SessionDependency, household: Household, rooms: list[BookedRooms]) -> None:
+    """Replaces what is booked for the household; room types must be this wedding's."""
+    wanted = [room for room in rooms if room.count > 0]
+    type_ids = {room.room_type_id for room in wanted}
+    found = set(session.scalars(select(RoomType.id).where(RoomType.id.in_(type_ids), RoomType.wedding_id == household.wedding_id)))
+    if found != type_ids:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Room type not found")
+    household.rooms.clear()
+    session.flush()
+    for room in wanted:
+        household.rooms.append(
+            HouseholdRoom(wedding_id=household.wedding_id, room_type_id=room.room_type_id, count=room.count)
+        )
+
+
 def move_into(session: SessionDependency, household: Household, guests: list[Guest]) -> None:
     """Moves guests in and commits; a household a guest left empty goes too."""
     left_behind = {guest.household_id for guest in guests} - {household.id}
@@ -53,7 +68,7 @@ def list_households(wedding: WeddingDependency, session: SessionDependency) -> l
     statement = (
         select(Household)
         .where(Household.wedding_id == wedding.id)
-        .options(selectinload(Household.guests))
+        .options(selectinload(Household.guests), selectinload(Household.rooms))
         .order_by(Household.name, Household.id)
     )
     return [to_read(household) for household in session.scalars(statement)]
@@ -81,8 +96,8 @@ def update_household(
     # Null is a real answer here ("on no list"), so only a field left out is ignored.
     if "broadcast_list" in payload.model_fields_set:
         household.broadcast_list = payload.broadcast_list
-    if payload.hotel_rooms is not None:
-        household.hotel_rooms = payload.hotel_rooms
+    if payload.rooms is not None:
+        book_rooms(session, household, payload.rooms)
     if payload.ride_with is not None:
         household.ride_with = payload.ride_with or None
     if payload.needs_ride is not None:

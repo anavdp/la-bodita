@@ -52,8 +52,8 @@ export interface Household {
   rsvpToken: string;
   /** Null until the household is added to one of the couple's lists. */
   broadcastList: BroadcastList | null;
-  /** Hotel rooms we book on the household's behalf; 0 means they book their own. */
-  hotelRooms: number;
+  /** Hotel rooms we book on the household's behalf, by type; none means they book their own. */
+  rooms: BookedRooms[];
   /** They have no car there, so we arrange their rides. */
   needsRide: boolean;
   /** Who drives them, once someone is assigned. */
@@ -72,9 +72,26 @@ export interface HouseholdDraft {
 export type HouseholdChanges = Partial<HouseholdDraft> &
   Partial<HouseholdBooking> & { broadcastList?: BroadcastList | null };
 
-/** What the We book tab sets for a household. An empty driver clears it. */
+/** Rooms of one type booked for a household. */
+export interface BookedRooms {
+  roomTypeId: number;
+  count: number;
+}
+
+/** A kind of hotel room, and how many the hotel holds for the wedding night. */
+export interface RoomType {
+  id: number;
+  name: string;
+  /** What sleeps in it, e.g. "1 double + 2 single". */
+  beds: string | null;
+  available: number;
+}
+
+export type RoomTypeDraft = Omit<RoomType, "id" | "beds"> & { beds: string };
+
+/** What the We book tab sets for a household. `rooms` is the full list; an empty driver clears it. */
 export interface HouseholdBooking {
-  hotelRooms: number;
+  rooms: BookedRooms[];
   needsRide: boolean;
   rideWith: string;
 }

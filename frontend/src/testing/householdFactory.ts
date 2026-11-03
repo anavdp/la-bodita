@@ -10,7 +10,7 @@ export function aHousehold(overrides: Partial<Household> = {}): Household {
     name: "Famiglia Rossi",
     rsvpToken: `token-${id}`,
     broadcastList: null,
-    hotelRooms: 0,
+    rooms: [],
     needsRide: false,
     rideWith: null,
     guestIds: [],

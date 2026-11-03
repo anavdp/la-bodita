@@ -10,11 +10,27 @@ const paolo = aGuest({ id: 1, firstName: "Paolo", lastName: "Bianchi", rsvpStatu
 const chiara = aGuest({ id: 2, firstName: "Chiara", lastName: "Bianchi", rsvpStatus: "declined" });
 const ana = aGuest({ id: 3, firstName: "Ana", lastName: "Mendoza", rsvpStatus: "pending" });
 const bianchi = aHousehold({ name: "Bianchi", needsRide: true, rideWith: "Tío Carlos", guestIds: [1, 2] });
-const abuelas = aHousehold({ name: "Las abuelas", hotelRooms: 2, guestIds: [3] });
+const abuelas = aHousehold({
+  name: "Las abuelas",
+  rooms: [
+    { roomTypeId: 1, count: 1 },
+    { roomTypeId: 2, count: 2 },
+  ],
+  guestIds: [3],
+});
+const king = { id: 1, name: "Junior King", beds: null, available: 19 };
+const suite = { id: 2, name: "Suite for 5", beds: null, available: 1 };
 
 function renderPanel(handlers = {}) {
-  const callbacks = { onEdit: vi.fn(), onRemove: vi.fn(), ...handlers };
-  renderWithProviders(<WeBookPanel households={[bianchi, abuelas]} guests={[paolo, chiara, ana]} {...callbacks} />);
+  const callbacks = { onEdit: vi.fn(), onRemove: vi.fn(), onEditRooms: vi.fn(), ...handlers };
+  renderWithProviders(
+    <WeBookPanel
+      households={[bianchi, abuelas]}
+      guests={[paolo, chiara, ana]}
+      roomTypes={[king, suite]}
+      {...callbacks}
+    />,
+  );
   return callbacks;
 }
 
@@ -42,12 +58,29 @@ describe("WeBookPanel", () => {
     expect(ride).toHaveTextContent("with Tío Carlos");
   });
 
-  it("given a household with rooms booked, when the table shows, then the rooms are counted and the ride is blank", () => {
+  it("given a household with rooms booked, when the table shows, then each type is counted and the ride is blank", () => {
     renderPanel();
 
     const row = screen.getByRole("row", { name: /Las abuelas/ });
-    expect(within(row).getByTestId("rooms")).toHaveTextContent("2");
+    expect(within(row).getByTestId("rooms")).toHaveTextContent("1 Junior King");
+    expect(within(row).getByTestId("rooms")).toHaveTextContent("2 Suite for 5");
     expect(within(row).getByTestId("ride")).toHaveTextContent("—");
+  });
+
+  it("given rooms booked, when the table shows, then a receipt adds them up by type and flags what is overbooked", () => {
+    renderPanel();
+
+    const receipt = screen.getByTestId("room-receipt");
+    expect(receipt).toHaveTextContent("1 Junior King");
+    expect(receipt).toHaveTextContent("2 Suite for 5 (2 of 1)");
+  });
+
+  it("given the receipt, when Edit rooms is clicked, then the page is told", async () => {
+    const { onEditRooms } = renderPanel();
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit rooms" }));
+
+    expect(onEditRooms).toHaveBeenCalled();
   });
 
   it("given a booked household, when it is taken off the list, then the page is told", async () => {

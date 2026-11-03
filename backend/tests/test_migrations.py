@@ -220,11 +220,25 @@ def test_given_an_empty_database_when_migrations_run_then_the_household_table_ex
     inspector = inspect(create_engine(database_url))
     columns = {column["name"] for column in inspector.get_columns("household")}
     assert columns == {
-        "id", "wedding_id", "name", "rsvp_token", "broadcast_list", "hotel_rooms", "needs_ride", "ride_with", "created_at", "updated_at"
+        "id", "wedding_id", "name", "rsvp_token", "broadcast_list", "needs_ride", "ride_with", "created_at", "updated_at"
     }
     guest_foreign_keys = {key["name"]: key["referred_table"] for key in inspector.get_foreign_keys("guest")}
     assert guest_foreign_keys["fk_guest_household_id_household"] == "household"
     assert guest_column_nullability(database_url)["household_id"] is False
+
+
+def test_given_an_empty_database_when_migrations_run_then_the_room_tables_exist(tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'room_schema_check.db'}"
+
+    command.upgrade(build_alembic_config(database_url), "head")
+
+    inspector = inspect(create_engine(database_url))
+    room_type_columns = {column["name"] for column in inspector.get_columns("room_type")}
+    assert room_type_columns == {"id", "wedding_id", "name", "beds", "available", "created_at", "updated_at"}
+    household_room_columns = {column["name"] for column in inspector.get_columns("household_room")}
+    assert household_room_columns == {
+        "id", "wedding_id", "household_id", "room_type_id", "count", "created_at", "updated_at"
+    }
 
 
 def test_given_existing_guests_when_the_household_migration_runs_then_each_gets_a_household_of_one(tmp_path):

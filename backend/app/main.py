@@ -15,6 +15,7 @@ from app.api import (
     items,
     paper_requests,
     requirements,
+    room_types,
     rsvp,
     weddings,
 )
@@ -63,6 +64,7 @@ def create_app(guest_only: bool = False) -> FastAPI:
             calendar_events,
             documents,
             paper_requests,
+            room_types,
         )
         for planner_router in planner_routers:
             app.include_router(planner_router.router, dependencies=signed_in)

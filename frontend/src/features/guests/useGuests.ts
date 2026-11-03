@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { createGuest, deleteGuest, importGuests, listGuests, updateGuest } from "../../api/guests";
 import { createHousehold, deleteHousehold, listHouseholds, updateHousehold } from "../../api/households";
+import { listRoomTypes } from "../../api/roomTypes";
 import type {
   BroadcastList,
   Guest,
@@ -10,6 +11,7 @@ import type {
   Household,
   HouseholdChanges,
   HouseholdDraft,
+  RoomType,
   RsvpStatus,
 } from "../../api/types";
 import { keepWhatLoaded, loadPart } from "../../components/feedback/problems";
@@ -18,6 +20,8 @@ import type { LoadFailure } from "../../components/feedback/problems";
 export interface GuestsState {
   guests: Guest[];
   households: Household[];
+  /** The hotel's room types, for the We book tab. */
+  roomTypes: RoomType[];
   isLoading: boolean;
   /** The lists that did not load; the rest are shown. */
   loadFailures: LoadFailure[];
@@ -42,6 +46,7 @@ export interface GuestsState {
 export function useGuests(weddingId: number | null): GuestsState {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [households, setHouseholds] = useState<Household[]>([]);
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailures, setLoadFailures] = useState<LoadFailure[]>([]);
 
@@ -51,14 +56,16 @@ export function useGuests(weddingId: number | null): GuestsState {
     }
 
     setIsLoading(true);
-    const [guestsResult, householdsResult] = await Promise.allSettled([
+    const [guestsResult, householdsResult, roomTypesResult] = await Promise.allSettled([
       listGuests(weddingId),
       listHouseholds(weddingId),
+      listRoomTypes(weddingId),
     ]);
     setLoadFailures(
       keepWhatLoaded([
         loadPart("errors.part.guests", guestsResult, setGuests),
         loadPart("errors.part.households", householdsResult, setHouseholds),
+        loadPart("errors.part.roomTypes", roomTypesResult, setRoomTypes),
       ]),
     );
     setIsLoading(false);
@@ -182,6 +189,7 @@ export function useGuests(weddingId: number | null): GuestsState {
   return {
     guests,
     households,
+    roomTypes,
     isLoading,
     loadFailures,
     reload: () => void load(),

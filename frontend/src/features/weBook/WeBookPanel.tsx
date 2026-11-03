@@ -1,19 +1,21 @@
 import { useState } from "react";
 
-import type { Guest, Household } from "../../api/types";
+import type { Guest, Household, RoomType } from "../../api/types";
 import { useIsPhone } from "../../components/layout/useIsPhone";
 import { menuItem, menuPanel } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { statusDotClass } from "../guests/GuestStats";
-import { comingMembers } from "./weBook";
+import { comingMembers, roomCount, roomUsage } from "./weBook";
 import { hotelIcon, rideIcon } from "./WeBookStats";
 
 interface WeBookPanelProps {
   /** The booked households to show, already filtered. */
   households: Household[];
   guests: Guest[];
+  roomTypes: RoomType[];
   onEdit: (household: Household) => void;
   onRemove: (household: Household) => void;
+  onEditRooms: () => void;
 }
 
 const nothing = <span className="text-ink/30">—</span>;
@@ -22,11 +24,13 @@ const nothing = <span className="text-ink/30">—</span>;
  * The households we book for, each with its guests by name and RSVP dot: on the
  * day, this is the list to check against the hotel's and to plan the cars from.
  */
-export function WeBookPanel({ households, guests, onEdit, onRemove }: WeBookPanelProps) {
+export function WeBookPanel({ households, guests, roomTypes, onEdit, onRemove, onEditRooms }: WeBookPanelProps) {
   const { t } = useTranslation();
   // A phone has no room for the column words, so the icons stand in for them.
   const isPhone = useIsPhone();
   const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const roomName = new Map(roomTypes.map((roomType) => [roomType.id, roomType.name]));
+  const usage = roomUsage(households, roomTypes);
   const pad = isPhone ? "px-3" : "px-4";
   const headerCell = `${pad} py-4 font-normal`;
   const cell = `${pad} py-3 align-top`;
@@ -82,10 +86,16 @@ export function WeBookPanel({ households, guests, onEdit, onRemove }: WeBookPane
                   </ul>
                 </td>
                 <td className={`${cell} text-center`} data-testid="rooms">
-                  {household.hotelRooms > 0 ? (
-                    <span className="inline-flex items-center gap-2">
+                  {roomCount(household) > 0 ? (
+                    <span className="inline-flex items-start gap-2 text-left">
                       {!isPhone && <img src={hotelIcon} alt="" className={iconStyle} />}
-                      <span className="text-xl">{household.hotelRooms}</span>
+                      <ul className="flex flex-col text-base leading-snug">
+                        {household.rooms.map((room) => (
+                          <li key={room.roomTypeId}>
+                            {room.count} {roomName.get(room.roomTypeId)}
+                          </li>
+                        ))}
+                      </ul>
                     </span>
                   ) : (
                     nothing
@@ -140,7 +150,28 @@ export function WeBookPanel({ households, guests, onEdit, onRemove }: WeBookPane
           })}
         </tbody>
       </table>
-      <p className="border-t-2 border-ink/15 px-6 py-4 text-lg text-ink/70">{t("weBook.footnote")}</p>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t-2 border-ink/15 px-6 py-3 text-lg">
+        <img src={hotelIcon} alt="" className="h-7 w-7 object-contain" />
+        <p data-testid="room-receipt" className="flex flex-1 flex-wrap gap-x-2">
+          <span className="sr-only">{t("weBook.receipt.label")}: </span>
+          {usage.length === 0 && <span className="text-ink/60">{t("weBook.receipt.none")}</span>}
+          {usage.map(({ roomType, used, isOver }, index) => (
+            <span key={roomType.id} className={isOver ? "text-coral" : ""}>
+              {index > 0 && <span className="pr-2 text-ink/40">·</span>}
+              <b>{used}</b> {roomType.name}
+              {isOver && ` (${t("weBook.receipt.over", { used, available: roomType.available })})`}
+            </span>
+          ))}
+        </p>
+        <button
+          type="button"
+          onClick={onEditRooms}
+          className="flex items-center gap-1 rounded-full px-3 py-1 text-base text-ink/70 underline hover:bg-accent/40 hover:text-ink"
+        >
+          {t("weBook.editRooms")}
+        </button>
+      </div>
+      <p className="border-t-2 border-ink/15 px-6 py-3 text-base text-ink/60">{t("weBook.footnote")}</p>
     </div>
   );
 }

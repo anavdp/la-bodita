@@ -13,7 +13,7 @@ const payload = {
   name: "Rossi",
   rsvp_token: "secret-token",
   broadcast_list: "bride",
-  hotel_rooms: 2,
+  rooms: [{ room_type_id: 7, count: 2 }],
   needs_ride: true,
   ride_with: "Tío Carlos",
   guest_ids: [1, 2],
@@ -23,7 +23,7 @@ const household = {
   name: "Rossi",
   rsvpToken: "secret-token",
   broadcastList: "bride",
-  hotelRooms: 2,
+  rooms: [{ roomTypeId: 7, count: 2 }],
   needsRide: true,
   rideWith: "Tío Carlos",
   guestIds: [1, 2],
@@ -92,10 +92,14 @@ describe("the household API", () => {
     const fetchMock = vi.fn((_url: string, _init?: RequestInit) => jsonResponse(payload));
     vi.stubGlobal("fetch", fetchMock);
 
-    await updateHousehold(3, 4, { hotelRooms: 1, needsRide: true, rideWith: "Tío Carlos" });
+    await updateHousehold(3, 4, { rooms: [{ roomTypeId: 7, count: 1 }], needsRide: true, rideWith: "Tío Carlos" });
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(JSON.parse(init.body as string)).toEqual({ hotel_rooms: 1, needs_ride: true, ride_with: "Tío Carlos" });
+    expect(JSON.parse(init.body as string)).toEqual({
+      rooms: [{ room_type_id: 7, count: 1 }],
+      needs_ride: true,
+      ride_with: "Tío Carlos",
+    });
   });
 
   it("given a household on a list, when the list is cleared, then null is sent so it comes off", async () => {

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import * as guestsApi from "../../api/guests";
 import * as householdsApi from "../../api/households";
+import * as roomTypesApi from "../../api/roomTypes";
 import { aGuest } from "../../testing/guestFactory";
 import { aHousehold } from "../../testing/householdFactory";
 import { renderWithProviders } from "../../testing/renderWithProviders";
@@ -10,6 +11,7 @@ import { GuestListPage } from "./GuestListPage";
 
 vi.mock("../../api/guests");
 vi.mock("../../api/households");
+vi.mock("../../api/roomTypes");
 
 const maria = aGuest({ firstName: "Maria", lastName: "Rossi", rsvpStatus: "confirmed" });
 const carlos = aGuest({
@@ -24,6 +26,7 @@ describe("GuestListPage", () => {
   beforeEach(() => {
     vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria]);
     vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
+    vi.mocked(roomTypesApi.listRoomTypes).mockResolvedValue([]);
   });
 
   it("given guests in households, when the list loads, then the number of households is shown", async () => {
@@ -317,7 +320,7 @@ describe("the Households tab", () => {
     name: "Famiglia Rossi",
     rsvpToken: "rossi-token",
     broadcastList: null,
-    hotelRooms: 0,
+    rooms: [],
     needsRide: false,
     rideWith: null,
     guestIds: [maria.id, paolo.id],
@@ -569,8 +572,8 @@ describe("GuestListPage sorting by answer", () => {
     const carlos = { ...waiting, householdId: 80 };
     vi.mocked(guestsApi.listGuests).mockResolvedValue([zeta, carlos, sofia]);
     vi.mocked(householdsApi.listHouseholds).mockResolvedValue([
-      { id: 70, name: "Zeta", rsvpToken: "z", broadcastList: null, hotelRooms: 0, needsRide: false, rideWith: null, guestIds: [zeta.id] },
-      { id: 80, name: "Famiglia M", rsvpToken: "m", broadcastList: null, hotelRooms: 0, needsRide: false, rideWith: null, guestIds: [carlos.id, sofia.id] },
+      { id: 70, name: "Zeta", rsvpToken: "z", broadcastList: null, rooms: [], needsRide: false, rideWith: null, guestIds: [zeta.id] },
+      { id: 80, name: "Famiglia M", rsvpToken: "m", broadcastList: null, rooms: [], needsRide: false, rideWith: null, guestIds: [carlos.id, sofia.id] },
     ]);
     renderWithProviders(<GuestListPage />);
     await screen.findByText("Anna Bianchi");
@@ -668,13 +671,20 @@ describe("GuestListPage column filters", () => {
 
 describe("the We book tab", () => {
   const paolo = aGuest({ firstName: "Paolo", lastName: "Rossi", householdId: maria.householdId });
-  const rossi = aHousehold({ id: maria.householdId, name: "Famiglia Rossi", hotelRooms: 2, guestIds: [maria.id, paolo.id] });
+  const king = { id: 1, name: "Junior King", beds: null, available: 19 };
+  const rossi = aHousehold({
+    id: maria.householdId,
+    name: "Famiglia Rossi",
+    rooms: [{ roomTypeId: king.id, count: 2 }],
+    guestIds: [maria.id, paolo.id],
+  });
   const mendoza = aHousehold({ id: carlos.householdId, name: "Carlos Mendoza", needsRide: true, guestIds: [carlos.id] });
   const neri = aHousehold({ name: "Neri", guestIds: [] });
 
   beforeEach(() => {
     vi.mocked(guestsApi.listGuests).mockResolvedValue([carlos, maria, paolo]);
     vi.mocked(householdsApi.listHouseholds).mockResolvedValue([mendoza, rossi, neri]);
+    vi.mocked(roomTypesApi.listRoomTypes).mockResolvedValue([king]);
   });
 
   afterEach(() => {
@@ -715,11 +725,12 @@ describe("the We book tab", () => {
     await userEvent.click(screen.getByRole("button", { name: "Add Household" }));
     await userEvent.click(screen.getByRole("combobox", { name: "Household" }));
     await userEvent.click(screen.getByRole("option", { name: "Neri" }));
+    await userEvent.click(screen.getByRole("button", { name: "One more Junior King" }));
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() =>
       expect(householdsApi.updateHousehold).toHaveBeenCalledWith(1, neri.id, {
-        hotelRooms: 1,
+        rooms: [{ roomTypeId: king.id, count: 1 }],
         needsRide: false,
         rideWith: "",
       }),
@@ -737,11 +748,27 @@ describe("the We book tab", () => {
 
     await waitFor(() =>
       expect(householdsApi.updateHousehold).toHaveBeenCalledWith(1, rossi.id, {
-        hotelRooms: 0,
+        rooms: [],
         needsRide: false,
         rideWith: "",
       }),
     );
+  });
+
+  it("given the hotel's rooms, when one is added from Edit rooms, then it is created and the list reloads", async () => {
+    vi.mocked(roomTypesApi.createRoomType).mockResolvedValue({ id: 2, name: "Doble", beds: null, available: 10 });
+    renderTab();
+    await screen.findByRole("row", { name: /Famiglia Rossi/ });
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit rooms" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add room type" }));
+    await userEvent.type(screen.getAllByLabelText("Room type").at(-1) as HTMLElement, "Doble");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(roomTypesApi.createRoomType).toHaveBeenCalledWith(1, { name: "Doble", beds: "", available: 0 }),
+    );
+    await waitFor(() => expect(roomTypesApi.listRoomTypes).toHaveBeenCalledTimes(2));
   });
 
   it("given nobody is booked for yet, when the tab opens, then it says how to start", async () => {

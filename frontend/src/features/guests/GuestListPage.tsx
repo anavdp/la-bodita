@@ -30,6 +30,8 @@ import type { BookingFilter } from "../weBook/weBook";
 import { WeBookDialog } from "../weBook/WeBookDialog";
 import { WeBookPanel } from "../weBook/WeBookPanel";
 import { WeBookStats } from "../weBook/WeBookStats";
+import { RoomTypesDialog } from "../weBook/RoomTypesDialog";
+import { createRoomType, deleteRoomType, updateRoomType } from "../../api/roomTypes";
 import { filterGuestsByColumns, filterGuestsByName, hasColumnFilters, noColumnFilters } from "./filtering";
 import type { GuestColumnFilters } from "./filtering";
 import { GuestFormDialog } from "./GuestFormDialog";
@@ -56,7 +58,7 @@ export type GuestListTab = "guests" | "households" | "weBook";
 type WeBookTarget = { household: Household | null } | null;
 
 /** Nothing booked: what taking a household off the We book list sends. */
-const nothingBooked: HouseholdBooking = { hotelRooms: 0, needsRide: false, rideWith: "" };
+const nothingBooked: HouseholdBooking = { rooms: [], needsRide: false, rideWith: "" };
 
 /**
  * The guest list, in three tabs that share the header: the guests themselves,
@@ -72,6 +74,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   const {
     guests,
     households,
+    roomTypes,
     isLoading,
     loadFailures,
     reload,
@@ -99,6 +102,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
   /** The We book summary figure picked, if any: the We book table shows only those households. */
   const [bookingFilter, setBookingFilter] = useState<BookingFilter | null>(null);
   const [weBookTarget, setWeBookTarget] = useState<WeBookTarget>(null);
+  const [isEditingRooms, setIsEditingRooms] = useState(false);
 
   /** What is ticked under the table's Type, Relationship and Side funnels. */
   const [columnFilters, setColumnFilters] = useState<GuestColumnFilters>(noColumnFilters);
@@ -213,15 +217,24 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
             : bookingFilter !== null
               ? t("weBook.filterEmpty")
               : t("weBook.empty");
-        return <p className="font-playful text-xl text-ink/70">{emptyText}</p>;
+        return (
+          <div className="flex flex-wrap items-center gap-4 font-playful text-xl text-ink/70">
+            <p>{emptyText}</p>
+            <button type="button" onClick={() => setIsEditingRooms(true)} className="text-lg underline">
+              {t("weBook.editRooms")}
+            </button>
+          </div>
+        );
       }
       return (
         <div className={`${outlinedCard} overflow-hidden`}>
           <WeBookPanel
             households={booked}
             guests={guests}
+            roomTypes={roomTypes}
             onEdit={(household) => setWeBookTarget({ household })}
             onRemove={handleRemoveBooking}
+            onEditRooms={() => setIsEditingRooms(true)}
           />
         </div>
       );
@@ -391,8 +404,24 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
         <WeBookDialog
           household={weBookTarget.household}
           households={households}
+          guests={guests}
+          roomTypes={roomTypes}
           onSave={handleSaveBooking}
           onClose={() => setWeBookTarget(null)}
+        />
+      )}
+
+      {isEditingRooms && weddingId !== null && (
+        <RoomTypesDialog
+          roomTypes={roomTypes}
+          onCreate={(draft) => createRoomType(weddingId, draft)}
+          onUpdate={(roomTypeId, draft) => updateRoomType(weddingId, roomTypeId, draft)}
+          onDelete={(roomTypeId) => deleteRoomType(weddingId, roomTypeId)}
+          onSaved={() => {
+            setIsEditingRooms(false);
+            reload();
+          }}
+          onClose={() => setIsEditingRooms(false)}
         />
       )}
 
