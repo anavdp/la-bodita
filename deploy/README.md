@@ -229,30 +229,47 @@ This bucket is the opposite of the photos bucket: never add `allUsers` to it.
 3. Open the service account, **Keys → Add key → Create new key → JSON**. A
    `.json` file downloads. It's a password: don't email it or commit it.
 
-**On the Pi**, in `/opt/la-bodita`, put the key in a `secrets` folder:
+**On the Pi**, everything goes in the same `~/la-bodita` folder as in step 2
+(the one with `docker-compose.yml` and `.env`). Testing on your laptop doesn't
+set up the Pi: it needs its own copy of the key, the bucket's name in its own
+`.env`, and the newer `docker-compose.yml`.
 
-```bash
-mkdir -p secrets
-# from your Mac:  scp ~/Downloads/<the-key>.json pi@<your-pi>:/opt/la-bodita/secrets/gcs-key.json
-chmod 600 secrets/gcs-key.json
-```
+1. Copy the key over, from your Mac:
 
-Add the bucket's name to `.env`:
+   ```bash
+   ssh pi@<your-pi> mkdir -p la-bodita/secrets
+   scp ~/Downloads/<the-key>.json pi@<your-pi>:la-bodita/secrets/gcs-key.json
+   ```
 
-```
-DOCUMENTS_BUCKET=gerardoyvicky-documents
-```
+   The name must be exactly `gcs-key.json`.
 
-then take the new `docker-compose.yml`, run `docker compose up -d`, and check it:
+2. On the Pi, add the bucket's name to `.env` (`nano ~/la-bodita/.env`):
 
-```bash
-docker compose exec backend python -m app.storage check
-```
+   ```
+   DOCUMENTS_BUCKET=gerardoyvicky-documents
+   ```
+
+3. Fetch `docker-compose.yml` again, because Watchtower only updates images,
+   never this file, and only the newer one passes the key to the planner:
+
+   ```bash
+   cd ~/la-bodita
+   gh api repos/anavdp/la-bodita/contents/docker-compose.yml -H "Accept: application/vnd.github.raw" > docker-compose.yml
+   chmod 600 secrets/gcs-key.json
+   docker compose up -d --force-recreate backend
+   ```
+
+4. Check it:
+
+   ```bash
+   docker compose exec backend python -m app.storage check
+   ```
 
 It saves a small test file, makes a download link and deletes the file again.
 "All good" means the planner can use the bucket. Otherwise it says what's
-wrong (the bucket's name, the key file, or the role). Once it works, delete
-the key from your Mac's Downloads.
+wrong (the bucket's name, the key file, or the role); fix that and run step 3's
+last command and the check again. Once it works, delete the key from your
+Mac's Downloads.
 
 ## Updating
 
