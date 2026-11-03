@@ -46,14 +46,17 @@ export function WeBookPanel({ households, guests, roomTypes, onEdit, onRemove }:
       {usage.length > 0 && (
         <div className={`flex items-center gap-3 border-b-[2.5px] border-ink py-3 ${isPhone ? "px-4" : "px-6"}`}>
           {!isPhone && <img src={hotelIcon} alt="" className="h-7 w-7 shrink-0 object-contain" />}
-          <ul aria-label={t("weBook.receipt.label")} className="flex flex-wrap gap-2 text-base">
-            {usage.map(({ roomType, used, isOver }) => (
+          <ul aria-label={t("weBook.receipt.label")} className="flex flex-wrap gap-x-3 gap-y-1 text-base">
+            {usage.map(({ roomType, used, isOver }, index) => (
               <li
                 key={roomType.id}
-                className={`flex items-baseline gap-1.5 rounded-full border-2 px-3 py-0.5 ${
-                  isOver ? "border-coral bg-coral/15 text-coral" : used > 0 ? "border-ink bg-accent/40" : "border-ink/25"
-                }`}
+                className={`flex items-baseline gap-1.5 ${isOver ? "text-coral" : used > 0 ? "" : "text-ink/50"}`}
               >
+                {index > 0 && (
+                  <span aria-hidden="true" className="pr-1.5 text-ink/30">
+                    |
+                  </span>
+                )}
                 <b>
                   {used}/{roomType.available}
                 </b>
