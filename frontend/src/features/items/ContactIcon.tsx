@@ -2,9 +2,9 @@ import { iconUrl } from "../../components/playful/icons";
 import type { TranslationKey } from "../../i18n/translations";
 import type { ContactChannel } from "./contactLinks";
 
-/** What each way to reach someone is called, in the form, the detail and the checklist. */
+/** What each way to reach someone is called beside its icon, in the detail and the checklist. */
 export const contactLabelKey: Record<ContactChannel, TranslationKey> = {
-  phone: "items.phone",
+  phone: "items.whatsapp",
   instagramUrl: "items.instagram",
   email: "items.email",
   websiteUrl: "items.website",

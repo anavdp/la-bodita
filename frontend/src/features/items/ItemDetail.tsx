@@ -123,7 +123,7 @@ export function ItemDetail({
           </Fact>
         ))}
         {item.phone && !links.some(({ channel }) => channel === "phone") && (
-          <Fact label={t("items.phone")} icon={<ContactIcon channel="phone" />}>
+          <Fact label={t("items.whatsapp")} icon={<ContactIcon channel="phone" />}>
             {item.phone}
           </Fact>
         )}

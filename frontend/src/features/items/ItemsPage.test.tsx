@@ -296,49 +296,45 @@ describe("ItemsPage", () => {
     expect(itemsApi.updateItem).toHaveBeenCalledWith(1, luz.id, { status: "booked" });
   });
 
-  it("given a new item, when the panel opens, then WhatsApp is picked unless the last new item started with another way", async () => {
-    vi.mocked(itemsApi.createItem).mockResolvedValue(anItem());
+  it("given a new item, when the panel opens, then it asks for one contact, a phone unless another type was picked before", async () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
 
     await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const panel = screen.getByRole("dialog", { name: "New item" });
-    const ways = within(panel).getByRole("group", { name: "Contact type" });
-    expect(within(ways).getByRole("button", { name: "WhatsApp" })).toHaveAttribute("aria-pressed", "true");
-    expect(within(ways).getByRole("button", { name: "Email" })).toHaveAttribute("aria-pressed", "false");
-    expect(within(panel).getByLabelText("WhatsApp")).toBeInTheDocument();
+
+    expect(within(panel).getByRole("combobox", { name: "Contact type" })).toHaveTextContent("Phone");
+    expect(within(panel).getByLabelText("Phone")).toBeInTheDocument();
     expect(within(panel).getByRole("combobox", { name: "Category" })).toHaveTextContent("No category");
 
-    await userEvent.click(within(ways).getByRole("button", { name: "WhatsApp" }));
-    await userEvent.click(within(ways).getByRole("button", { name: "Email" }));
-    expect(within(panel).queryByLabelText("WhatsApp")).not.toBeInTheDocument();
-    await userEvent.type(within(panel).getByLabelText("Name"), "Dulce Rosa Pastelería");
-    await userEvent.type(within(panel).getByLabelText("Email"), "hola@dulcerosa.com");
-    await userEvent.click(within(panel).getByRole("button", { name: "Save" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await userEvent.click(within(panel).getByRole("combobox", { name: "Contact type" }));
+    await userEvent.click(within(panel).getByRole("option", { name: "Email" }));
+    expect(within(panel).getByLabelText("Email")).toBeInTheDocument();
+    await userEvent.click(within(panel).getByRole("button", { name: "Cancel" }));
 
     await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
-    expect(screen.getByRole("button", { name: "Email" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Contact type" })).toHaveTextContent("Email");
   });
 
-  it("given the contact icons, when one is pressed, then its field appears, and pressing it again takes the field away", async () => {
+  it("given one contact, when another is added and removed, then each new one takes a type not used yet", async () => {
     renderWithProviders(<ItemsPage />, { route: "/items" });
     await screen.findByRole("button", { name: /Iglesia San José/ });
     await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
     const panel = screen.getByRole("dialog", { name: "New item" });
-    const ways = within(panel).getByRole("group", { name: "Contact type" });
 
-    await userEvent.click(within(ways).getByRole("button", { name: "Website" }));
-    await userEvent.click(within(ways).getByRole("button", { name: "Instagram" }));
+    await userEvent.click(within(panel).getByRole("button", { name: "+ Add contact" }));
+    await userEvent.click(within(panel).getByRole("button", { name: "+ Add contact" }));
+    await userEvent.click(within(panel).getByRole("button", { name: "+ Add contact" }));
 
-    expect(within(ways).getByRole("button", { name: "Website" })).toHaveAttribute("aria-pressed", "true");
-    expect(within(panel).getAllByRole("textbox").map((field) => field.getAttribute("aria-label"))).toEqual(
-      expect.arrayContaining(["WhatsApp", "Website", "Instagram"]),
-    );
-    await userEvent.click(within(ways).getByRole("button", { name: "Instagram" }));
+    expect(within(panel).getAllByRole("combobox", { name: "Contact type" }).map((field) => field.textContent)).toEqual([
+      "Phone",
+      "Instagram",
+      "Email",
+      "Website",
+    ]);
+    expect(within(panel).queryByRole("button", { name: "+ Add contact" })).not.toBeInTheDocument();
+    await userEvent.click(within(panel).getByRole("button", { name: "Remove Instagram" }));
     expect(within(panel).queryByLabelText("Instagram")).not.toBeInTheDocument();
-    expect(within(ways).getByRole("button", { name: "Instagram" })).toHaveAttribute("aria-pressed", "false");
   });
 
   it("given a new vendor, when it is added, then it is created with its category and Instagram", async () => {
@@ -352,7 +348,8 @@ describe("ItemsPage", () => {
     await userEvent.click(within(dialog).getByRole("combobox", { name: "Category" }));
     await userEvent.type(within(dialog).getByRole("searchbox"), "photo");
     await userEvent.click(within(dialog).getByRole("option", { name: "📸 Photographer" }));
-    await userEvent.click(within(dialog).getByRole("button", { name: "Instagram" }));
+    await userEvent.click(within(dialog).getByRole("combobox", { name: "Contact type" }));
+    await userEvent.click(within(dialog).getByRole("option", { name: "Instagram" }));
     await userEvent.type(within(dialog).getByLabelText("Instagram"), "https://instagram.com/dulcerosa");
     await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
 
