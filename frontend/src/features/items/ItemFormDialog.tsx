@@ -10,10 +10,12 @@ import { SidePanel, panelBody, panelFooter } from "../../components/form/SidePan
 import { fieldLabel, pillField, textArea } from "../../components/form/styles";
 import { screenIcons } from "../../components/playful/icons";
 import { useTranslation } from "../../i18n/LanguageProvider";
-import type { TranslationKey } from "../../i18n/translations";
 import { primaryButton, secondaryButton } from "../../components/playful/styles";
-import { categoryLabel } from "../planning/CategoryChips";
+import { categoryLabel, iconChip } from "../planning/CategoryChips";
 import { PrivacySwitch } from "../planning/Privacy";
+import { ContactIcon, contactLabelKey } from "./ContactIcon";
+import { contactChannels } from "./contactLinks";
+import type { ContactChannel } from "./contactLinks";
 import { itemStatuses } from "./itemStatus";
 
 interface ItemFormDialogProps {
@@ -24,15 +26,15 @@ interface ItemFormDialogProps {
   onClose: () => void;
 }
 
-type Channel = "phone" | "instagramUrl" | "email" | "websiteUrl";
+type Channel = ContactChannel;
 
-/** The ways to reach a vendor, the usual one first: it is the one a new item asks for. */
-const channels: { name: Channel; labelKey: TranslationKey; type: string }[] = [
-  { name: "phone", labelKey: "items.phone", type: "tel" },
-  { name: "instagramUrl", labelKey: "items.instagram", type: "text" },
-  { name: "email", labelKey: "items.email", type: "email" },
-  { name: "websiteUrl", labelKey: "items.website", type: "url" },
-];
+/** The input type for each way to reach a vendor. */
+const inputType: Record<Channel, string> = {
+  phone: "tel",
+  instagramUrl: "text",
+  email: "email",
+  websiteUrl: "url",
+};
 
 interface ContactRow {
   channel: Channel;
@@ -41,11 +43,11 @@ interface ContactRow {
 
 const defaultChannelKey = "la-bodita.contactType";
 
-/** The type picked for the last new item's first contact, so the next one starts there. */
+/** The way the last new item was first reached, so the next one starts there. */
 function rememberedChannel(): Channel {
   try {
     const saved = localStorage.getItem(defaultChannelKey);
-    return channels.some(({ name }) => name === saved) ? (saved as Channel) : "phone";
+    return contactChannels.some((channel) => channel === saved) ? (saved as Channel) : "phone";
   } catch {
     return "phone";
   }
@@ -55,7 +57,7 @@ function rememberChannel(channel: Channel): void {
   try {
     localStorage.setItem(defaultChannelKey, channel);
   } catch {
-    // Private windows refuse storage; the default just stays the phone.
+    // Private windows refuse storage; the default just stays WhatsApp.
   }
 }
 
@@ -63,8 +65,8 @@ const blankToNull = (value: string) => (value.trim() === "" ? null : value.trim(
 
 /**
  * A vendor, place or anything else being decided on, in a panel beside the list.
- * It asks for one way to reach them and offers the rest on demand, so a new item
- * stays a short form.
+ * The ways to reach them are a row of icons: each one pressed opens its field,
+ * so a new item stays a short form.
  */
 export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDialogProps) {
   const { t } = useTranslation();
@@ -76,17 +78,20 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
   const [contactName, setContactName] = useState(item?.contactName ?? "");
   // The ones already filled in, or one empty contact of the type picked last time.
   const [contacts, setContacts] = useState<ContactRow[]>(() => {
-    const filled = channels
-      .map(({ name: channel }) => ({ channel, value: item?.[channel] ?? "" }))
+    const filled = contactChannels
+      .map((channel) => ({ channel, value: item?.[channel] ?? "" }))
       .filter((row) => row.value !== "");
     return filled.length > 0 ? filled : [{ channel: rememberedChannel(), value: "" }];
   });
-  const unused = channels.filter(({ name: channel }) => !contacts.some((row) => row.channel === channel));
-
-  const changeContact = (index: number, change: Partial<ContactRow>) => {
-    if (change.channel && item === null && index === 0) rememberChannel(change.channel);
-    setContacts((current) => current.map((row, at) => (at === index ? { ...row, ...change } : row)));
-  };
+  const isPicked = (channel: Channel) => contacts.some((row) => row.channel === channel);
+  const toggleChannel = (channel: Channel) =>
+    setContacts((current) =>
+      current.some((row) => row.channel === channel)
+        ? current.filter((row) => row.channel !== channel)
+        : [...current, { channel, value: "" }],
+    );
+  const changeContact = (channel: Channel, value: string) =>
+    setContacts((current) => current.map((row) => (row.channel === channel ? { ...row, value } : row)));
   const [notes, setNotes] = useState(item?.notes ?? "");
   const [isPrivate, setIsPrivate] = useState(item?.isPrivate ?? false);
   const [error, setError] = useState<Problem | null>(null);
@@ -112,6 +117,7 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
     }
     setError(null);
     setIsSaving(true);
+    if (item === null && contacts.length > 0) rememberChannel(contacts[0].channel);
     const pickedCategoryId = categoryId === "" ? null : Number(categoryId);
     try {
       await onSave({
@@ -176,53 +182,33 @@ export function ItemFormDialog({ item, categories, onSave, onClose }: ItemFormDi
                 className={pillField}
               />
             </div>
-            {contacts.map((row, index) => {
-              const own = channels.find(({ name }) => name === row.channel)!;
-              return (
-                <div key={row.channel} className="flex items-center gap-2">
-                  <div className="w-52 shrink-0">
-                    <Dropdown
-                      hideLabel
-                      label={t("items.contactType")}
-                      value={row.channel}
-                      options={[own, ...unused].map(({ name, labelKey }) => ({
-                        value: name,
-                        label: t(labelKey),
-                      }))}
-                      onChange={(next) => changeContact(index, { channel: next as Channel })}
-                    />
-                  </div>
-                  <input
-                    aria-label={t(own.labelKey)}
-                    type={own.type}
-                    value={row.value}
-                    onChange={(e) => changeContact(index, { value: e.target.value })}
-                    className={`${pillField} min-w-0 flex-1`}
-                  />
-                  {contacts.length > 1 && (
-                    <button
-                      type="button"
-                      aria-label={t("items.removeContact", {
-                        label: t(own.labelKey),
-                      })}
-                      onClick={() => setContacts((current) => current.filter((_, at) => at !== index))}
-                      className="h-10 w-10 rounded-full text-xl text-ink/70 transition-colors hover:bg-coral-soft hover:text-ink"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-            {unused.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setContacts((current) => [...current, { channel: unused[0].name, value: "" }])}
-                className="self-start rounded-full border-[2.5px] border-dashed border-ink px-4 py-1.5 text-lg text-ink transition-colors hover:bg-accent/40"
-              >
-                {t("items.addContact")}
-              </button>
-            )}
+            <div role="group" aria-label={t("items.contactType")} className="flex flex-wrap gap-2">
+              {contactChannels.map((channel) => (
+                <button
+                  key={channel}
+                  type="button"
+                  aria-pressed={isPicked(channel)}
+                  title={t(contactLabelKey[channel])}
+                  onClick={() => toggleChannel(channel)}
+                  className={iconChip(isPicked(channel))}
+                >
+                  <ContactIcon channel={channel} />
+                  <span className="sr-only">{t(contactLabelKey[channel])}</span>
+                </button>
+              ))}
+            </div>
+            {contacts.map((row) => (
+              <div key={row.channel} className="flex items-center gap-3">
+                <ContactIcon channel={row.channel} size="sm" />
+                <input
+                  aria-label={t(contactLabelKey[row.channel])}
+                  type={inputType[row.channel]}
+                  value={row.value}
+                  onChange={(e) => changeContact(row.channel, e.target.value)}
+                  className={`${pillField} min-w-0 flex-1`}
+                />
+              </div>
+            ))}
           </fieldset>
 
           <div>

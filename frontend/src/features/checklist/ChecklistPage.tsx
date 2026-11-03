@@ -19,24 +19,29 @@ import { TaskForm } from "../planning/TaskForm";
 import { CategoryChips, chip } from "../planning/CategoryChips";
 import { formatDueDate, formatDueTime, groupOpenTasks, isOverdue } from "../planning/schedule";
 import { usePlanning } from "../planning/usePlanning";
+import { ContactIcon, contactLabelKey } from "../items/ContactIcon";
+import { contactLinks, opensOutside } from "../items/contactLinks";
+import type { ContactLink } from "../items/contactLinks";
 
 type Showing = "toDo" | "done";
 
 interface TaskRowProps {
   task: Task;
   category: Category | undefined;
+  /** How to reach the task's item, so a "call them" task is one tap away. */
+  contacts: ContactLink[];
   onToggle: (task: Task) => void;
   onEdit: (task: Task) => void;
 }
 
-function TaskRow({ task, category, onToggle, onEdit }: TaskRowProps) {
+function TaskRow({ task, category, contacts, onToggle, onEdit }: TaskRowProps) {
   const { t, language } = useTranslation();
   const due = task.dueDate
     ? [formatDueDate(task.dueDate, language), task.dueTime && formatDueTime(task.dueTime)].filter(Boolean).join(" · ")
     : "–";
 
   return (
-    <li className="group grid grid-cols-[1fr_auto_auto] items-center gap-x-4 gap-y-1 border-b-2 border-ink/10 py-3 font-playful text-ink last:border-b-0 sm:grid-cols-[1fr_14rem_8rem_auto]">
+    <li className="group grid grid-cols-[1fr_auto_auto] items-center gap-x-4 gap-y-1 border-b-2 border-ink/10 py-3 font-playful text-ink last:border-b-0 sm:grid-cols-[1fr_24rem_8rem_auto]">
       <label className="flex cursor-pointer items-center gap-4">
         <input
           type="checkbox"
@@ -48,13 +53,33 @@ function TaskRow({ task, category, onToggle, onEdit }: TaskRowProps) {
           {task.title}
         </span>
       </label>
-      <span className="col-start-1 row-start-2 flex min-w-0 items-center gap-2 pl-10 text-base text-ink/70 sm:col-start-2 sm:row-start-1 sm:pl-0">
+      <span className="col-span-3 col-start-1 row-start-2 flex min-w-0 items-center gap-2 pl-10 text-base text-ink/70 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:pl-0">
         {task.itemName && (
           <>
             <CategoryIcon value={category?.emoji} />
-            <span className="truncate">
+            {/* A set width on wider screens, so each row's contact icons line up. */}
+            <span className="truncate sm:w-48 sm:flex-none">
               {[isIconName(category?.emoji) ? null : category?.emoji, task.itemName].filter(Boolean).join(" ")}
             </span>
+            {contacts.length > 0 && (
+              <span className="flex shrink-0 items-center">
+                {contacts.map(({ channel, href }) => {
+                  const label = t("items.contactOn", { name: task.itemName ?? "", channel: t(contactLabelKey[channel]) });
+                  return (
+                    <a
+                      key={channel}
+                      {...opensOutside(channel)}
+                      href={href}
+                      aria-label={label}
+                      title={label}
+                      className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-accent/40"
+                    >
+                      <ContactIcon channel={channel} size="sm" />
+                    </a>
+                  );
+                })}
+              </span>
+            )}
           </>
         )}
       </span>
@@ -111,6 +136,7 @@ export function ChecklistPage() {
   const [editing, setEditing] = useState<Task | null>(null);
 
   const categoriesById = useMemo(() => new Map(categories.map((each) => [each.id, each])), [categories]);
+  const contactsByItem = useMemo(() => new Map(items.map((each) => [each.id, contactLinks(each)])), [items]);
   const filtered = useMemo(() => {
     const needle = term.trim().toLowerCase();
     return tasks.filter(
@@ -136,6 +162,7 @@ export function ChecklistPage() {
       key={task.id}
       task={task}
       category={task.categoryId === null ? undefined : categoriesById.get(task.categoryId)}
+      contacts={(task.itemId !== null && contactsByItem.get(task.itemId)) || []}
       onToggle={handleToggle}
       onEdit={setEditing}
     />

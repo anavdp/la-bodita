@@ -1,4 +1,5 @@
-import { whatsappLink } from "./contactLinks";
+import { anItem } from "../../testing/planningFactory";
+import { contactLinks, whatsappLink } from "./contactLinks";
 
 describe("whatsappLink", () => {
   it("given a number with its country code, when linked, then it opens that chat and keeps the number as typed", () => {
@@ -50,5 +51,37 @@ describe("whatsappLink", () => {
 
   it("given text with no digits, when linked, then there is no chat to open", () => {
     expect(whatsappLink("ask at the shop")).toBeNull();
+  });
+});
+
+describe("contactLinks", () => {
+  it("given an item with every way to reach them, when linked, then each opens its own place, WhatsApp first", () => {
+    const item = anItem({
+      phone: "0414 123 4567",
+      instagramUrl: "@luzdeagua",
+      email: "hola@luzdeagua.com",
+      websiteUrl: "https://luzdeagua.com",
+    });
+
+    expect(contactLinks(item).map(({ channel, href }) => [channel, href])).toEqual([
+      ["phone", "https://wa.me/584141234567"],
+      ["instagramUrl", "https://instagram.com/luzdeagua"],
+      ["email", "mailto:hola@luzdeagua.com"],
+      ["websiteUrl", "https://luzdeagua.com"],
+    ]);
+  });
+
+  it("given only an email, when linked, then there is just the one link", () => {
+    expect(contactLinks(anItem({ email: " hola@luzdeagua.com " }))).toEqual([
+      { channel: "email", label: "hola@luzdeagua.com", href: "mailto:hola@luzdeagua.com" },
+    ]);
+  });
+
+  it("given a website typed without https, when linked, then it still opens as a web page", () => {
+    expect(contactLinks(anItem({ websiteUrl: "luzdeagua.com" }))[0].href).toBe("https://luzdeagua.com");
+  });
+
+  it("given a phone with no digits, when linked, then it is left out", () => {
+    expect(contactLinks(anItem({ phone: "ask at the shop" }))).toEqual([]);
   });
 });

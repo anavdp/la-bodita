@@ -14,7 +14,7 @@ export const chip = (isActive: boolean) =>
  * A category chip with no name and no border, just its icon: a dozen of them
  * fit in one row. The name lives in its label and tooltip.
  */
-const iconChip = (isActive: boolean) =>
+export const iconChip = (isActive: boolean) =>
   `relative inline-flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
     isActive ? "bg-accent ring-[2.5px] ring-ink" : "hover:bg-accent/40"
   }`;

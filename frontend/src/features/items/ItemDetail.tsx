@@ -9,7 +9,8 @@ import { outlinedCard } from "../../components/playful/styles";
 import { TaskForm } from "../planning/TaskForm";
 import { categoryLabel } from "../planning/CategoryChips";
 import { formatDueDate, formatDueTime, isOverdue } from "../planning/schedule";
-import { whatsappLink } from "./contactLinks";
+import { ContactIcon, contactLabelKey } from "./ContactIcon";
+import { contactLinks, opensOutside } from "./contactLinks";
 import { itemStatuses, statusPill } from "./itemStatus";
 
 interface ItemDetailProps {
@@ -30,18 +31,20 @@ interface ItemDetailProps {
   children?: ReactNode;
 }
 
-/** "https://instagram.com/luzdeagua" (or "@luzdeagua") as "@luzdeagua", linking to the profile. */
-export function instagramHandle(value: string): { handle: string; href: string } {
-  const name = value.startsWith("http") ? (new URL(value).pathname.split("/").find(Boolean) ?? value) : value;
-  const bare = name.replace(/^@/, "");
-  return { handle: `@${bare}`, href: value.startsWith("http") ? value : `https://instagram.com/${bare}` };
-}
-
-function Fact({ label, children }: { label: string; children: ReactNode }) {
+function Fact({ label, icon, children }: { label: string; icon?: ReactNode; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[7rem_1fr] gap-3 border-b-2 border-ink/10 py-3 last:border-b-0">
-      <dt className="text-base text-ink/70">{label}</dt>
-      <dd className="text-lg text-ink">{children}</dd>
+    <div className="grid grid-cols-[7rem_1fr] items-center gap-3 border-b-2 border-ink/10 py-3 last:border-b-0">
+      <dt className="text-base text-ink/70">
+        {icon ? (
+          <span title={label}>
+            {icon}
+            <span className="sr-only">{label}</span>
+          </span>
+        ) : (
+          label
+        )}
+      </dt>
+      <dd className="min-w-0 text-lg text-ink">{children}</dd>
     </div>
   );
 }
@@ -71,8 +74,7 @@ export function ItemDetail({
   // Done tasks sink to the bottom, the rest keep the API's soonest-first order.
   const ordered = [...tasks.filter((task) => !task.isDone), ...tasks.filter((task) => task.isDone)];
   const next = item.nextTask;
-  const instagram = item.instagramUrl ? instagramHandle(item.instagramUrl) : null;
-  const whatsapp = item.phone ? whatsappLink(item.phone) : null;
+  const links = contactLinks(item);
 
   return (
     <section
@@ -112,36 +114,17 @@ export function ItemDetail({
 
       <dl>
         {item.contactName && <Fact label={t("items.contactName")}>{item.contactName}</Fact>}
-        {item.phone && (
-          <Fact label={t("items.phone")}>
-            {whatsapp ? (
-              <a href={whatsapp.href} target="_blank" rel="noreferrer" className={`${linkStyle} break-all`}>
-                {whatsapp.label} ↗
-              </a>
-            ) : (
-              item.phone
-            )}
-          </Fact>
-        )}
-        {item.email && (
-          <Fact label={t("items.email")}>
-            <a href={`mailto:${item.email}`} className={linkStyle}>
-              {item.email}
+        {links.map(({ channel, label, href }) => (
+          <Fact key={channel} label={t(contactLabelKey[channel])} icon={<ContactIcon channel={channel} />}>
+            <a {...opensOutside(channel)} href={href} className={`${linkStyle} break-all`}>
+              {label}
+              {channel === "email" ? "" : " ↗"}
             </a>
           </Fact>
-        )}
-        {instagram && (
-          <Fact label={t("items.instagram")}>
-            <a href={instagram.href} target="_blank" rel="noreferrer" className={linkStyle}>
-              {instagram.handle} ↗
-            </a>
-          </Fact>
-        )}
-        {item.websiteUrl && (
-          <Fact label={t("items.website")}>
-            <a href={item.websiteUrl} target="_blank" rel="noreferrer" className={`${linkStyle} break-all`}>
-              {item.websiteUrl} ↗
-            </a>
+        ))}
+        {item.phone && !links.some(({ channel }) => channel === "phone") && (
+          <Fact label={t("items.phone")} icon={<ContactIcon channel="phone" />}>
+            {item.phone}
           </Fact>
         )}
         {next && (
