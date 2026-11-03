@@ -1,11 +1,14 @@
 import { request } from "./client";
-import type { BroadcastList, Household, HouseholdChanges, HouseholdDraft } from "./types";
+import type { BookedRooms, BroadcastList, Household, HouseholdChanges, HouseholdDraft } from "./types";
 
 interface HouseholdPayload {
   id: number;
   name: string;
   rsvp_token: string;
   broadcast_list: BroadcastList | null;
+  rooms: { room_type_id: number; count: number }[];
+  needs_ride: boolean;
+  ride_with: string | null;
   guest_ids: number[];
 }
 
@@ -15,9 +18,14 @@ function toHousehold(payload: HouseholdPayload): Household {
     name: payload.name,
     rsvpToken: payload.rsvp_token,
     broadcastList: payload.broadcast_list,
+    rooms: payload.rooms.map((room) => ({ roomTypeId: room.room_type_id, count: room.count })),
+    needsRide: payload.needs_ride,
+    rideWith: payload.ride_with,
     guestIds: payload.guest_ids,
   };
 }
+
+const toRoomsPayload = (room: BookedRooms) => ({ room_type_id: room.roomTypeId, count: room.count });
 
 /** Only the fields being changed, so a rename leaves the members alone. */
 function toPayload(changes: HouseholdChanges): Record<string, unknown> {
@@ -25,6 +33,9 @@ function toPayload(changes: HouseholdChanges): Record<string, unknown> {
     ...(changes.name === undefined ? {} : { name: changes.name }),
     ...(changes.guestIds === undefined ? {} : { guest_ids: changes.guestIds }),
     ...(changes.broadcastList === undefined ? {} : { broadcast_list: changes.broadcastList }),
+    ...(changes.rooms === undefined ? {} : { rooms: changes.rooms.map(toRoomsPayload) }),
+    ...(changes.needsRide === undefined ? {} : { needs_ride: changes.needsRide }),
+    ...(changes.rideWith === undefined ? {} : { ride_with: changes.rideWith }),
   };
 }
 

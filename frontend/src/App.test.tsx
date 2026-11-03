@@ -11,6 +11,7 @@ import * as categoriesApi from "./api/categories";
 import * as documentsApi from "./api/documents";
 import * as guestsApi from "./api/guests";
 import * as householdsApi from "./api/households";
+import * as roomTypesApi from "./api/roomTypes";
 import * as itemsApi from "./api/items";
 import * as rsvpApi from "./api/rsvp";
 import * as tasksApi from "./api/tasks";
@@ -27,6 +28,7 @@ vi.mock("./api/categories");
 vi.mock("./api/documents");
 vi.mock("./api/guests");
 vi.mock("./api/households");
+vi.mock("./api/roomTypes");
 vi.mock("./api/items");
 vi.mock("./api/rsvp");
 vi.mock("./api/tasks");
@@ -50,6 +52,7 @@ describe("AppRoutes", () => {
     ]);
     vi.mocked(guestsApi.listGuests).mockResolvedValue([]);
     vi.mocked(householdsApi.listHouseholds).mockResolvedValue([]);
+    vi.mocked(roomTypesApi.listRoomTypes).mockResolvedValue([]);
     vi.mocked(categoriesApi.listCategories).mockResolvedValue([]);
     vi.mocked(itemsApi.listItems).mockResolvedValue([]);
     vi.mocked(tasksApi.listTasks).mockResolvedValue([]);
@@ -159,6 +162,13 @@ describe("AppRoutes", () => {
 
     expect(await screen.findByRole("button", { name: "Add Household" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Households" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("given the we-book route, when it is visited, then the guest list opens on its We book tab", async () => {
+    renderAt("/guests/we-book");
+
+    expect(await screen.findByRole("group", { name: "What we book" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "We book" })).toHaveAttribute("aria-current", "page");
   });
 
   it("given the root, when it is visited, then the guest list is where the app opens", async () => {

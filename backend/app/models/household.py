@@ -2,6 +2,7 @@ import secrets
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from sqlalchemy import false
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -9,6 +10,7 @@ from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixi
 
 if TYPE_CHECKING:
     from app.models.guest import Guest
+    from app.models.room_type import HouseholdRoom
 
 
 def new_rsvp_token() -> str:
@@ -42,9 +44,22 @@ class Household(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
     broadcast_list: Mapped[BroadcastList | None] = mapped_column(
         stored_as_text(BroadcastList, "broadcast_list"), default=None
     )
+    # What the couple books on the household's behalf, where most guests book their
+    # own: hotel rooms (see `rooms`), and whether they need driving around because
+    # they have no car there.
+    needs_ride: Mapped[bool] = mapped_column(default=False, server_default=false())
+    # Who drives them, once someone is assigned: free text, e.g. "Tío Carlos".
+    ride_with: Mapped[str | None] = mapped_column(default=None)
 
     guests: Mapped[list["Guest"]] = relationship(
         back_populates="household",
         order_by="(Guest.last_name, Guest.first_name, Guest.id)",
+        passive_deletes=True,
+    )
+
+    rooms: Mapped[list["HouseholdRoom"]] = relationship(
+        back_populates="household",
+        order_by="HouseholdRoom.id",
+        cascade="all, delete-orphan",
         passive_deletes=True,
     )

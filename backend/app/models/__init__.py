@@ -13,6 +13,7 @@ from app.models.household import Household
 from app.models.item import Item, ItemStatus
 from app.models.paper_request import PaperRequest
 from app.models.requirement import Requirement
+from app.models.room_type import HouseholdRoom, RoomType
 from app.models.user_account import UserAccount, UserSession
 from app.models.mixins import PrimaryKeyMixin, TimestampMixin, WeddingScopedMixin
 from app.models.wedding import Wedding
@@ -29,11 +30,13 @@ __all__ = [
     "GuestRelationshipType",
     "GuestSide",
     "Household",
+    "HouseholdRoom",
     "Item",
     "ItemStatus",
     "PaperRequest",
     "PrimaryKeyMixin",
     "Requirement",
+    "RoomType",
     "RsvpStatus",
     "Subcategory",
     "TimestampMixin",

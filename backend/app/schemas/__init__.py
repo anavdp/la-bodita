@@ -14,6 +14,7 @@ from app.schemas.guest import GuestCreate, GuestRead, GuestUpdate
 from app.schemas.guest_import import GuestImportGuest, GuestImportPreview, GuestImportRow, GuestImportRowError
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate, NextTask
 from app.schemas.paper_request import PaperRequestCreate, PaperRequestRead, PaperRequestUpdate
+from app.schemas.room_type import BookedRooms, RoomTypeCreate, RoomTypeRead, RoomTypeUpdate
 from app.schemas.requirement import RequirementCreate, RequirementRead, RequirementUpdate
 from app.schemas.household import (
     HouseholdCreate,
@@ -31,6 +32,10 @@ from app.schemas.household import (
 from app.schemas.wedding import WeddingRead, WeddingUpdate
 
 __all__ = [
+    "BookedRooms",
+    "RoomTypeCreate",
+    "RoomTypeRead",
+    "RoomTypeUpdate",
     "BudgetLineCreate",
     "BudgetLineRead",
     "BudgetLineUpdate",

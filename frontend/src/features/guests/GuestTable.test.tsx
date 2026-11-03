@@ -308,8 +308,8 @@ describe("GuestTable households", () => {
         onSort={noop}
         guests={[maria, carlos]}
         households={[
-          { id: 10, name: "Famiglia Rossi", rsvpToken: "a", broadcastList: null, guestIds: [maria.id, 99] },
-          { id: 20, name: "Carlos Mendoza", rsvpToken: "b", broadcastList: null, guestIds: [carlos.id] },
+          { id: 10, name: "Famiglia Rossi", rsvpToken: "a", broadcastList: null, rooms: [], needsRide: false, rideWith: null, guestIds: [maria.id, 99] },
+          { id: 20, name: "Carlos Mendoza", rsvpToken: "b", broadcastList: null, rooms: [], needsRide: false, rideWith: null, guestIds: [carlos.id] },
         ]}
         onEdit={noop}
         onDelete={noop}
@@ -333,7 +333,7 @@ describe("GuestTable one-person households", () => {
         sort={byName}
         onSort={noop}
         guests={[carlos]}
-        households={[{ id: 20, name: "Carlos Mendoza", rsvpToken: "b", broadcastList: null, guestIds: [carlos.id] }]}
+        households={[{ id: 20, name: "Carlos Mendoza", rsvpToken: "b", broadcastList: null, rooms: [], needsRide: false, rideWith: null, guestIds: [carlos.id] }]}
         onEdit={noop}
         onDelete={noop}
         onChangeRsvp={noop}
