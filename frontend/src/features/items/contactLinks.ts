@@ -30,3 +30,56 @@ function internationalDigits(typed: string, digits: string): string {
   if (digits.startsWith("0")) return localCountryCode + digits.slice(1);
   return digits;
 }
+
+/** "https://instagram.com/luzdeagua" (or "@luzdeagua") as "@luzdeagua", linking to the profile. */
+export function instagramHandle(value: string): { handle: string; href: string } {
+  const name = value.startsWith("http") ? (new URL(value).pathname.split("/").find(Boolean) ?? value) : value;
+  const bare = name.replace(/^@/, "");
+  return { handle: `@${bare}`, href: value.startsWith("http") ? value : `https://instagram.com/${bare}` };
+}
+
+/** The ways an item can be reached, the usual one first. */
+export type ContactChannel = "phone" | "instagramUrl" | "email" | "websiteUrl";
+export const contactChannels: ContactChannel[] = ["phone", "instagramUrl", "email", "websiteUrl"];
+
+export interface ContactLink {
+  channel: ContactChannel;
+  label: string;
+  href: string;
+}
+
+type Reachable = Partial<Record<ContactChannel, string | null>>;
+
+function linkFor(channel: ContactChannel, value: string): ContactLink | null {
+  switch (channel) {
+    case "phone": {
+      const chat = whatsappLink(value);
+      return chat && { channel, ...chat };
+    }
+    case "instagramUrl": {
+      const { handle, href } = instagramHandle(value);
+      return { channel, label: handle, href };
+    }
+    case "email":
+      return { channel, label: value, href: `mailto:${value}` };
+    case "websiteUrl":
+      return { channel, label: value, href: /^https?:\/\//i.test(value) ? value : `https://${value}` };
+  }
+}
+
+/** Every way to reach an item that is filled in, each as the link that opens it. */
+export function contactLinks(item: Reachable): ContactLink[] {
+  return contactChannels.flatMap((channel) => {
+    const value = item[channel]?.trim();
+    const link = value ? linkFor(channel, value) : null;
+    return link ? [link] : [];
+  });
+}
+
+/**
+ * Web links open in a new tab so the planner stays put; an email opens the mail
+ * app instead, and a new tab for it would just be left blank.
+ */
+export function opensOutside(channel: ContactChannel): { target?: string; rel?: string } {
+  return channel === "email" ? {} : { target: "_blank", rel: "noreferrer" };
+}

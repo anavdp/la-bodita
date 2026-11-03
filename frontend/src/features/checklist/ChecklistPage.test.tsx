@@ -80,6 +80,29 @@ describe("ChecklistPage", () => {
     expect(row).toHaveTextContent("Fri, Oct 30 · 16:00");
   });
 
+  it("given a task of a vendor with ways to reach them, when it is listed, then each one is an icon that opens it in a new tab", async () => {
+    vi.mocked(itemsApi.listItems).mockResolvedValue([
+      dulceRosa,
+      { ...iglesia, phone: "0414 123 4567", email: "parroquia@sanjose.org" },
+    ]);
+    renderWithProviders(<ChecklistPage />, { route: "/checklist" });
+
+    const row = (await screen.findByText("Bring baptism certificates")).closest("li") as HTMLElement;
+    const whatsapp = await within(row).findByRole("link", { name: "Iglesia San José on WhatsApp" });
+    expect(whatsapp).toHaveAttribute("href", "https://wa.me/584141234567");
+    expect(whatsapp).toHaveAttribute("target", "_blank");
+    expect(within(row).getByRole("link", { name: "Iglesia San José on Email" })).toHaveAttribute(
+      "href",
+      "mailto:parroquia@sanjose.org",
+    );
+    expect(within(row).queryByRole("link", { name: /Instagram|Website/ })).not.toBeInTheDocument();
+
+    const cakeRow = screen.getByText("Pick 3 flavors").closest("li") as HTMLElement;
+    expect(within(cakeRow).queryByRole("link")).not.toBeInTheDocument();
+    const noItemRow = screen.getByText("Buy the rings").closest("li") as HTMLElement;
+    expect(within(noItemRow).queryByRole("link")).not.toBeInTheDocument();
+  });
+
   it("given the done chip, when it is picked, then only done tasks are listed", async () => {
     renderWithProviders(<ChecklistPage />, { route: "/checklist" });
     await screen.findByText("Bring baptism certificates");

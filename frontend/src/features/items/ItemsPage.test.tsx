@@ -146,6 +146,16 @@ describe("ItemsPage", () => {
     );
   });
 
+  it("given a phone with no number in it, when shown, then it stays as plain text beside the WhatsApp icon", async () => {
+    vi.mocked(itemsApi.listItems).mockResolvedValue([anItem({ name: "Flores Lola", phone: "ask at the shop" })]);
+    renderWithProviders(<ItemsPage />, { route: "/items" });
+
+    const detail = await screen.findByRole("region", { name: "Flores Lola" });
+    expect(within(detail).getByText("ask at the shop")).toBeInTheDocument();
+    expect(within(detail).getByTitle("WhatsApp")).toBeInTheDocument();
+    expect(within(detail).queryByRole("link", { name: /ask at the shop/ })).not.toBeInTheDocument();
+  });
+
   it("given a phone, when an item is tapped, then its panel below the list is scrolled into view", async () => {
     const scrollIntoView = vi.spyOn(Element.prototype, "scrollIntoView");
     renderWithProviders(<ItemsPage />, { route: "/items" });
