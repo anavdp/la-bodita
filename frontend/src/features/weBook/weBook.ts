@@ -60,16 +60,14 @@ export function filterBooked(households: Household[], filter: BookingFilter | nu
   return booked;
 }
 
-/** How many rooms of each type we book, like a receipt: only the types in use, in the hotel's order. */
+/** How many rooms of each type we book against what the hotel holds, in the hotel's order. */
 export function roomUsage(households: Household[], roomTypes: RoomType[]): RoomUse[] {
   const used = new Map<number, number>();
   for (const room of households.flatMap((household) => household.rooms)) {
     used.set(room.roomTypeId, (used.get(room.roomTypeId) ?? 0) + room.count);
   }
-  return roomTypes
-    .filter((roomType) => (used.get(roomType.id) ?? 0) > 0)
-    .map((roomType) => {
-      const count = used.get(roomType.id) ?? 0;
-      return { roomType, used: count, isOver: count > roomType.available };
-    });
+  return roomTypes.map((roomType) => {
+    const count = used.get(roomType.id) ?? 0;
+    return { roomType, used: count, isOver: count > roomType.available };
+  });
 }

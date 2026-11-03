@@ -15,7 +15,6 @@ interface WeBookPanelProps {
   roomTypes: RoomType[];
   onEdit: (household: Household) => void;
   onRemove: (household: Household) => void;
-  onEditRooms: () => void;
 }
 
 const nothing = <span className="text-ink/30">—</span>;
@@ -24,7 +23,7 @@ const nothing = <span className="text-ink/30">—</span>;
  * The households we book for, each with its guests by name and RSVP dot: on the
  * day, this is the list to check against the hotel's and to plan the cars from.
  */
-export function WeBookPanel({ households, guests, roomTypes, onEdit, onRemove, onEditRooms }: WeBookPanelProps) {
+export function WeBookPanel({ households, guests, roomTypes, onEdit, onRemove }: WeBookPanelProps) {
   const { t } = useTranslation();
   // A phone has no room for the column words, so the icons stand in for them.
   const isPhone = useIsPhone();
@@ -43,6 +42,27 @@ export function WeBookPanel({ households, guests, roomTypes, onEdit, onRemove, o
 
   return (
     <div className={`font-playful text-ink ${openMenu === null ? "" : "pb-24"}`}>
+      {/* The hotel's room types in one compact line: booked of available, red when over. */}
+      {usage.length > 0 && (
+        <div className={`flex items-center gap-3 border-b-[2.5px] border-ink py-3 ${isPhone ? "px-4" : "px-6"}`}>
+          {!isPhone && <img src={hotelIcon} alt="" className="h-7 w-7 shrink-0 object-contain" />}
+          <ul aria-label={t("weBook.receipt.label")} className="flex flex-wrap gap-2 text-base">
+            {usage.map(({ roomType, used, isOver }) => (
+              <li
+                key={roomType.id}
+                className={`flex items-baseline gap-1.5 rounded-full border-2 px-3 py-0.5 ${
+                  isOver ? "border-coral bg-coral/15 text-coral" : used > 0 ? "border-ink bg-accent/40" : "border-ink/25"
+                }`}
+              >
+                <b>
+                  {used}/{roomType.available}
+                </b>
+                <span>{roomType.name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <table className="w-full border-collapse text-left">
         <thead>
           <tr className="border-b-[2.5px] border-ink bg-cream text-[15px] uppercase tracking-wider">
@@ -150,27 +170,6 @@ export function WeBookPanel({ households, guests, roomTypes, onEdit, onRemove, o
           })}
         </tbody>
       </table>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t-2 border-ink/15 px-6 py-3 text-lg">
-        <img src={hotelIcon} alt="" className="h-7 w-7 object-contain" />
-        <p data-testid="room-receipt" className="flex flex-1 flex-wrap gap-x-2">
-          <span className="sr-only">{t("weBook.receipt.label")}: </span>
-          {usage.length === 0 && <span className="text-ink/60">{t("weBook.receipt.none")}</span>}
-          {usage.map(({ roomType, used, isOver }, index) => (
-            <span key={roomType.id} className={isOver ? "text-coral" : ""}>
-              {index > 0 && <span className="pr-2 text-ink/40">·</span>}
-              <b>{used}</b> {roomType.name}
-              {isOver && ` (${t("weBook.receipt.over", { used, available: roomType.available })})`}
-            </span>
-          ))}
-        </p>
-        <button
-          type="button"
-          onClick={onEditRooms}
-          className="flex items-center gap-1 rounded-full px-3 py-1 text-base text-ink/70 underline hover:bg-accent/40 hover:text-ink"
-        >
-          {t("weBook.editRooms")}
-        </button>
-      </div>
       <p className="border-t-2 border-ink/15 px-6 py-3 text-base text-ink/60">{t("weBook.footnote")}</p>
     </div>
   );

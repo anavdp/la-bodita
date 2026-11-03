@@ -22,7 +22,7 @@ const king = { id: 1, name: "Junior King", beds: null, available: 19 };
 const suite = { id: 2, name: "Suite for 5", beds: null, available: 1 };
 
 function renderPanel(handlers = {}) {
-  const callbacks = { onEdit: vi.fn(), onRemove: vi.fn(), onEditRooms: vi.fn(), ...handlers };
+  const callbacks = { onEdit: vi.fn(), onRemove: vi.fn(), ...handlers };
   renderWithProviders(
     <WeBookPanel
       households={[bianchi, abuelas]}
@@ -67,20 +67,14 @@ describe("WeBookPanel", () => {
     expect(within(row).getByTestId("ride")).toHaveTextContent("—");
   });
 
-  it("given rooms booked, when the table shows, then a receipt adds them up by type and flags what is overbooked", () => {
+  it("given rooms booked, when the table shows, then a summary on top counts each type against what the hotel has", () => {
     renderPanel();
 
-    const receipt = screen.getByTestId("room-receipt");
-    expect(receipt).toHaveTextContent("1 Junior King");
-    expect(receipt).toHaveTextContent("2 Suite for 5 (2 of 1)");
-  });
-
-  it("given the receipt, when Edit rooms is clicked, then the page is told", async () => {
-    const { onEditRooms } = renderPanel();
-
-    await userEvent.click(screen.getByRole("button", { name: "Edit rooms" }));
-
-    expect(onEditRooms).toHaveBeenCalled();
+    const summary = screen.getByRole("list", { name: "Rooms we book" });
+    expect(within(summary).getByText("Junior King").closest("li")).toHaveTextContent("1/19");
+    const overbooked = within(summary).getByText("Suite for 5").closest("li");
+    expect(overbooked).toHaveTextContent("2/1");
+    expect(overbooked).toHaveClass("text-coral");
   });
 
   it("given a booked household, when it is taken off the list, then the page is told", async () => {

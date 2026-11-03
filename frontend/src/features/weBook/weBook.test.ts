@@ -50,10 +50,11 @@ describe("what we book for households", () => {
     expect(filterBooked(households, null)).toEqual([parents, friends, sisters]);
   });
 
-  it("given room types, when their use is counted, then only booked types show, in the hotel's order, flagged when over", () => {
+  it("given room types, when their use is counted, then every type shows in the hotel's order, flagged when over", () => {
     expect(roomUsage(households, [king, suite, twin])).toEqual([
       { roomType: king, used: 2, isOver: false },
       { roomType: suite, used: 2, isOver: true },
+      { roomType: twin, used: 0, isOver: false },
     ]);
   });
 

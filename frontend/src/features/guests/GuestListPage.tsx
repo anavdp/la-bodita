@@ -217,14 +217,7 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
             : bookingFilter !== null
               ? t("weBook.filterEmpty")
               : t("weBook.empty");
-        return (
-          <div className="flex flex-wrap items-center gap-4 font-playful text-xl text-ink/70">
-            <p>{emptyText}</p>
-            <button type="button" onClick={() => setIsEditingRooms(true)} className="text-lg underline">
-              {t("weBook.editRooms")}
-            </button>
-          </div>
-        );
+        return <p className="font-playful text-xl text-ink/70">{emptyText}</p>;
       }
       return (
         <div className={`${outlinedCard} overflow-hidden`}>
@@ -234,7 +227,6 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
             roomTypes={roomTypes}
             onEdit={(household) => setWeBookTarget({ household })}
             onRemove={handleRemoveBooking}
-            onEditRooms={() => setIsEditingRooms(true)}
           />
         </div>
       );
@@ -309,7 +301,15 @@ export function GuestListPage({ tab = "guests" }: { tab?: GuestListTab }) {
     <>
       <PageHeader title={t("guests.title")} subtitle={t("guests.subtitle")} art={screenIcons.guests}>
         {tab === "weBook" ? (
-          <HeaderAction icon="add" label={t("weBook.add")} onClick={() => setWeBookTarget({ household: null })} />
+          <>
+            <HeaderAction
+              icon="bed"
+              label={t("weBook.editRooms")}
+              variant="secondary"
+              onClick={() => setIsEditingRooms(true)}
+            />
+            <HeaderAction icon="add" label={t("weBook.add")} onClick={() => setWeBookTarget({ household: null })} />
+          </>
         ) : tab === "households" ? (
           <HeaderAction
             icon="add"
