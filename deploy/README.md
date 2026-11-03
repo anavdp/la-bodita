@@ -200,6 +200,14 @@ Cloudflare, **Zero Trust → Access controls → Applications**, delete
 
 ## 10. Keep documents in a private bucket
 
+> **The Pi now runs from [pi-stack](https://github.com/gerardovitale/pi-stack).**
+> There, La Bodita's files live in `/opt/stack/stacks/la-bodita/` (`compose.yml`,
+> `.env`, `secrets/gcs-key.json`), the compose file changes only through a merge
+> to pi-stack's `main`, and `make up s=la-bodita` in `/opt/stack` replaces
+> `docker compose up -d`. Its `compose.yml` needs the same `DOCUMENTS_BUCKET`,
+> `DOCUMENTS_KEY_FILE` and `./secrets:/run/secrets:ro` lines as this repo's
+> `docker-compose.yml`.
+
 Passports, certificates and vendor photos are stored in Google Cloud Storage,
 not on the Pi's SD card. The bucket is private: nobody can open a file from it
 directly. The planner hands out a download link that works for 5 minutes.
