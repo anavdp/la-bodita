@@ -97,7 +97,7 @@ describe("ChecklistPage", () => {
     await screen.findByText("Bring baptism certificates");
 
     await userEvent.click(
-      within(screen.getByRole("group", { name: "Filter by category" })).getByRole("button", { name: "🎂 Cake" }),
+      within(screen.getByRole("group", { name: "Filter by category" })).getByRole("button", { name: "Cake" }),
     );
 
     expect(screen.getByText("Pick 3 flavors")).toBeInTheDocument();
