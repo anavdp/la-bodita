@@ -94,4 +94,15 @@ describe("WeBookPanel", () => {
 
     expect(onEdit).toHaveBeenCalledWith(abuelas);
   });
+
+  it("given the room summary, when export is clicked, then the room list opens in the print dialog to save as PDF", async () => {
+    const print = vi.spyOn(window, "print").mockImplementation(() => {});
+    renderPanel();
+
+    await userEvent.click(screen.getByRole("button", { name: "Export room list (PDF)" }));
+
+    expect(print).toHaveBeenCalled();
+    expect(document.body.querySelector(".print-sheet")).toHaveTextContent("Junior King");
+    print.mockRestore();
+  });
 });

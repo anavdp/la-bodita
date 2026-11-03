@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 import type { Guest, Household, RoomType } from "../../api/types";
 import { useIsPhone } from "../../components/layout/useIsPhone";
 import { menuItem, menuPanel } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { statusDotClass } from "../guests/GuestStats";
+import { RoomListSheet } from "./RoomListSheet";
 import { comingMembers, roomCount, roomUsage } from "./weBook";
 import { hotelIcon, rideIcon } from "./WeBookStats";
 
@@ -64,7 +66,25 @@ export function WeBookPanel({ households, guests, roomTypes, onEdit, onRemove }:
               </li>
             ))}
           </ul>
+          <button
+            type="button"
+            aria-label={t("weBook.exportRooms")}
+            title={t("weBook.exportRooms")}
+            onClick={() => window.print()}
+            className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink/70 transition-colors hover:bg-accent/60 hover:text-ink"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">
+              ios_share
+            </span>
+          </button>
         </div>
+      )}
+      {/* Only the print stylesheet shows it: the screen prints as the room list, not as the app. */}
+      {createPortal(
+        <div className="print-sheet" aria-hidden="true">
+          <RoomListSheet households={households} guests={guests} roomTypes={roomTypes} />
+        </div>,
+        document.body,
       )}
       <table className="w-full border-collapse text-left">
         <thead>

@@ -233,3 +233,19 @@
     background-color: rgb(var(--color-primary) / 0.05);
   }
 }
+
+/* A sheet made for paper (e.g. the We book room list) stays out of sight on
+   screen; when the page is printed, it is all that prints. */
+.print-sheet {
+  display: none;
+}
+
+@media print {
+  body:has(> .print-sheet) > #root {
+    display: none;
+  }
+
+  .print-sheet {
+    display: block;
+  }
+}
