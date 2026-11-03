@@ -1,12 +1,18 @@
 /** Most vendors are in Venezuela, so a number written the local way (0414…) gets its code. */
 const localCountryCode = "58";
 
+/**
+ * A Venezuelan number typed without its 0: ten digits, area code starting with
+ * 2 (landline) or 4 (mobile), e.g. 414-3077895. Longer runs are already international.
+ */
+const localWithoutZeroPattern = /^[24]\d{9}$/;
+
 /** A pasted link, with or without its https://. */
 const linkPattern = /^(https?:\/\/|wa\.me\/|(api|web)\.whatsapp\.com\/)/i;
 
 /**
  * A vendor's phone as a WhatsApp chat: a number typed any way (+58 414…, 0039…,
- * 0414-…) becomes a wa.me link, and a pasted WhatsApp link opens as it is.
+ * 0414-…, 414-…) becomes a wa.me link, and a pasted WhatsApp link opens as it is.
  * Null when there is nothing to dial.
  */
 export function whatsappLink(value: string): { label: string; href: string } | null {
@@ -28,6 +34,7 @@ function internationalDigits(typed: string, digits: string): string {
   if (typed.startsWith("+")) return digits;
   if (digits.startsWith("00")) return digits.slice(2);
   if (digits.startsWith("0")) return localCountryCode + digits.slice(1);
+  if (localWithoutZeroPattern.test(digits)) return localCountryCode + digits;
   return digits;
 }
 

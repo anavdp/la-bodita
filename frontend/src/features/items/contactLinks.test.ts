@@ -17,6 +17,15 @@ describe("whatsappLink", () => {
     expect(whatsappLink("0414-123.45.67")?.href).toBe("https://wa.me/584141234567");
   });
 
+  it("given a Venezuelan number typed without its leading 0, when linked, then it still gets Venezuela's 58", () => {
+    expect(whatsappLink("414-3077895")?.href).toBe("https://wa.me/584143077895");
+    expect(whatsappLink("(212) 555 0142")?.href).toBe("https://wa.me/582125550142");
+  });
+
+  it("given a Venezuelan number with 58 but no +, when linked, then 58 is not added twice", () => {
+    expect(whatsappLink("58 414 307 7895")?.href).toBe("https://wa.me/584143077895");
+  });
+
   it("given digits with no prefix at all, when linked, then they are taken as already international", () => {
     expect(whatsappLink("(34) 612 345 678")?.href).toBe("https://wa.me/34612345678");
   });
