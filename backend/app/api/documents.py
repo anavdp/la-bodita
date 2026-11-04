@@ -1,4 +1,5 @@
 import logging
+import mimetypes
 from datetime import date
 from functools import lru_cache
 from pathlib import PurePath
@@ -170,7 +171,31 @@ def upload_document(
 ) -> DocumentRead:
     """Saves the file to the bucket, then its row. A PDF counts as a paper unless told otherwise."""
     bucket = require_storage(storage)
+    content_type, size = check_file(file)
+    document = new_document(bucket, wedding, account, file, content_type, size, title, kind)
+    document.person = find_person(session, wedding, person_id)
+    document.issued_on, document.expires_on = issued_on, expires_on
+    place(
+        document,
+        find_item(session, wedding, account, item_id),
+        find_requirement(session, wedding, account, requirement_id),
+    )
+    save_documents(session, bucket, [(document, file)])
+    return to_read(document)
+
+
+def file_type(file: UploadFile) -> str:
+    """The file's type, or - when it came as plain bytes (a Shortcut may send it so) - the one its name says."""
     content_type = (file.content_type or "").lower()
+    if content_type in ALLOWED_TYPES:
+        return content_type
+    guessed, _ = mimetypes.guess_type((file.filename or "").lower())
+    return guessed if guessed in ALLOWED_TYPES and content_type in ("", "application/octet-stream") else content_type
+
+
+def check_file(file: UploadFile) -> tuple[str, int]:
+    """Its type and size, or the reason it can't be kept."""
+    content_type = file_type(file)
     if content_type not in ALLOWED_TYPES:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Only photos and PDFs can be uploaded"
@@ -180,9 +205,21 @@ def upload_document(
         raise HTTPException(status_code=status.HTTP_413_CONTENT_TOO_LARGE, detail="Files can be up to 25 MB")
     if size == 0:
         raise unprocessable("The file is empty")
+    return content_type, size
 
+
+def new_document(
+    bucket: DocumentStorage,
+    wedding: Wedding,
+    account: UserAccount | None,
+    file: UploadFile,
+    content_type: str,
+    size: int,
+    title: str | None = None,
+    kind: DocumentKind | None = None,
+) -> Document:
     file_name = PurePath(file.filename or "file").name
-    document = Document(
+    return Document(
         wedding_id=wedding.id,
         title=(title or "").strip() or PurePath(file_name).stem or file_name,
         kind=kind or (DocumentKind.PAPER if content_type == "application/pdf" else DocumentKind.PHOTO),
@@ -190,29 +227,28 @@ def upload_document(
         content_type=content_type,
         size_bytes=size,
         storage_key=bucket.new_key(wedding.id),
-        person=find_person(session, wedding, person_id),
-        issued_on=issued_on,
-        expires_on=expires_on,
         uploaded_by=account,
     )
-    place(
-        document,
-        find_item(session, wedding, account, item_id),
-        find_requirement(session, wedding, account, requirement_id),
-    )
 
-    file.file.seek(0)
-    bucket.save(document.storage_key, file.file, content_type)
-    session.add(document)
+
+def save_documents(session: Session, bucket: DocumentStorage, uploads: list[tuple[Document, UploadFile]]) -> None:
+    """Saves the files to the bucket, then their rows, all or none."""
+    saved: list[str] = []
     try:
+        for document, file in uploads:
+            file.file.seek(0)
+            bucket.save(document.storage_key, file.file, document.content_type)
+            saved.append(document.storage_key)
+            session.add(document)
         session.commit()
     except Exception:
         # No row means no way to find the file again: don't leave it in the bucket.
         session.rollback()
-        bucket.delete(document.storage_key)
+        for key in saved:
+            bucket.delete(key)
         raise
-    session.refresh(document)
-    return to_read(document)
+    for document, _ in uploads:
+        session.refresh(document)
 
 
 @router.get("/{document_id}/file", response_class=RedirectResponse, status_code=status.HTTP_307_TEMPORARY_REDIRECT)

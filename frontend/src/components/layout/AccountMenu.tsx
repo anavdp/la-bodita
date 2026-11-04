@@ -1,17 +1,19 @@
 import { useCallback, useRef, useState } from "react";
 
 import { useAuth } from "../../auth/AuthProvider";
+import { PhoneSharePanel } from "../../features/account/PhoneSharePanel";
 import { ProfilePanel } from "../../features/account/ProfilePanel";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { useDismiss } from "../form/useDismiss";
 import { menuItem, menuPanel } from "../playful/styles";
 
-/** The signed-in user's initial in the top bar, opening who they are, their profile and sign-out. */
+/** The signed-in user's initial in the top bar, opening who they are, their profile, sharing from the phone and sign-out. */
 export function AccountMenu() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isPhoneShareOpen, setIsPhoneShareOpen] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
   const close = useCallback(() => setIsOpen(false), []);
   useDismiss(wrapper, isOpen, close);
@@ -57,6 +59,20 @@ export function AccountMenu() {
             role="menuitem"
             onClick={() => {
               close();
+              setIsPhoneShareOpen(true);
+            }}
+            className={menuItem}
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">
+              ios_share
+            </span>
+            {t("phoneShare.menu")}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              close();
               void signOut().catch(() => undefined);
             }}
             className={menuItem}
@@ -69,6 +85,7 @@ export function AccountMenu() {
         </div>
       )}
       {isProfileOpen && <ProfilePanel onClose={() => setIsProfileOpen(false)} />}
+      {isPhoneShareOpen && <PhoneSharePanel onClose={() => setIsPhoneShareOpen(false)} />}
     </div>
   );
 }

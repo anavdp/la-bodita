@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 from app.schemas.guest import RequiredText
@@ -28,3 +30,15 @@ class Person(BaseModel):
 
     id: int
     display_name: str
+
+
+class PhoneKeyStatus(BaseModel):
+    """When the share Shortcut's key was made, or None while there is none."""
+
+    created_at: datetime | None
+
+
+class PhoneKey(BaseModel):
+    """A new key, shown once: only its hash is kept."""
+
+    key: str

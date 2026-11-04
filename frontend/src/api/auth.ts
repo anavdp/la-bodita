@@ -29,3 +29,23 @@ export function signOut(): Promise<void> {
 export function googleSignInUrl(): string {
   return apiUrl("/api/auth/google/start");
 }
+
+export interface PhoneKeyStatus {
+  /** When the share Shortcut's key was made, or null while there is none. */
+  createdAt: string | null;
+}
+
+export async function getPhoneKey(): Promise<PhoneKeyStatus> {
+  const payload = await request<{ created_at: string | null }>("/api/auth/phone-key");
+  return { createdAt: payload.created_at };
+}
+
+/** A new key for the iPhone share Shortcut, shown this once; the old one stops working. */
+export async function makePhoneKey(): Promise<string> {
+  const payload = await request<{ key: string }>("/api/auth/phone-key", { method: "POST" });
+  return payload.key;
+}
+
+export function removePhoneKey(): Promise<void> {
+  return request<void>("/api/auth/phone-key", { method: "DELETE" });
+}

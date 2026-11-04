@@ -1,4 +1,4 @@
-from app.schemas.auth import Person, SignedInUser, SignedInUserUpdate
+from app.schemas.auth import Person, PhoneKey, PhoneKeyStatus, SignedInUser, SignedInUserUpdate
 from app.schemas.budget_line import BudgetLineCreate, BudgetLineRead, BudgetLineUpdate
 from app.schemas.calendar_event import CalendarEventCreate, CalendarEventRead, CalendarEventUpdate
 from app.schemas.category import (
@@ -32,6 +32,8 @@ from app.schemas.household import (
 from app.schemas.wedding import WeddingRead, WeddingUpdate
 
 __all__ = [
+    "PhoneKey",
+    "PhoneKeyStatus",
     "BookedRooms",
     "RoomTypeCreate",
     "RoomTypeRead",

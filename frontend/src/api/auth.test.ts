@@ -1,4 +1,12 @@
-import { getSignedInUser, googleSignInUrl, signOut, updateDisplayName } from "./auth";
+import {
+  getPhoneKey,
+  getSignedInUser,
+  googleSignInUrl,
+  makePhoneKey,
+  removePhoneKey,
+  signOut,
+  updateDisplayName,
+} from "./auth";
 
 function respondWith(body: unknown, status = 200) {
   return Promise.resolve(new Response(status === 204 ? null : JSON.stringify(body), { status }));
@@ -46,5 +54,28 @@ describe("auth api", () => {
 
   it("given the login page, when Google sign-in is offered, then it points at the API's start", () => {
     expect(googleSignInUrl()).toBe("http://localhost:8000/api/auth/google/start");
+  });
+
+  it("given no phone key, when it is asked about, then it says there is none", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => respondWith({ created_at: null })));
+
+    await expect(getPhoneKey()).resolves.toEqual({ createdAt: null });
+  });
+
+  it("given a signed-in user, when they make a phone key, then the new key comes back once", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => respondWith({ key: "k3y" }, 201));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(makePhoneKey()).resolves.toBe("k3y");
+    expect(fetchMock.mock.calls[0][0]).toBe("http://localhost:8000/api/auth/phone-key");
+    expect(fetchMock.mock.calls[0][1]?.method).toBe("POST");
+  });
+
+  it("given a phone key, when it is removed, then the server forgets it", async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => respondWith(null, 204));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await removePhoneKey();
+    expect(fetchMock.mock.calls[0][1]?.method).toBe("DELETE");
   });
 });

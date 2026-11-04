@@ -18,6 +18,10 @@ class UserAccount(WeddingScopedMixin, TimestampMixin, PrimaryKeyMixin, Base):
 
     email: Mapped[str] = mapped_column(unique=True)
     display_name: Mapped[str]
+    # The key an iOS Shortcut sends to share files from the phone's share menu.
+    # Like a session, only its hash is kept; making a new one replaces the old.
+    phone_key_hash: Mapped[str | None] = mapped_column(unique=True, default=None)
+    phone_key_created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
 
     @validates("email")
     def normalize_email(self, key: str, email: str) -> str:

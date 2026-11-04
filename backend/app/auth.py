@@ -91,3 +91,20 @@ def require_user(request: Request, session: Annotated[Session, Depends(get_sessi
 
 
 CurrentUser = Annotated[UserAccount, Depends(require_user)]
+
+
+def require_phone_key(request: Request, session: Annotated[Session, Depends(get_session)]) -> UserAccount:
+    """The account whose phone key came in the Authorization header, or 401.
+
+    It opens only the share routes: a lost phone must not give away the planner.
+    """
+    scheme, _, key = request.headers.get("Authorization", "").partition(" ")
+    account = None
+    if scheme.lower() == "bearer" and key.strip():
+        account = session.scalars(select(UserAccount).where(UserAccount.phone_key_hash == hash_token(key.strip()))).first()
+    if account is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Make a phone key in the planner first")
+    return account
+
+
+PhoneUser = Annotated[UserAccount, Depends(require_phone_key)]
