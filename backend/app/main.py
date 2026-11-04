@@ -17,6 +17,7 @@ from app.api import (
     requirements,
     room_types,
     rsvp,
+    share,
     weddings,
 )
 from app.auth import require_user
@@ -69,6 +70,8 @@ def create_app(guest_only: bool = False) -> FastAPI:
         for planner_router in planner_routers:
             app.include_router(planner_router.router, dependencies=signed_in)
         app.include_router(auth.router)
+        # Its own lock: the phone key, not the sign-in cookie.
+        app.include_router(share.router)
     app.include_router(rsvp.router)
 
     @app.get("/")

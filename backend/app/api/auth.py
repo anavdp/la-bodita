@@ -21,6 +21,7 @@ from app.auth import (
     CurrentUser,
     clear_session_cookie,
     end_session,
+    hash_token,
     set_session_cookie,
     start_session,
     uses_https,
@@ -34,7 +35,8 @@ from app.google_sign_in import (
     read_claims,
 )
 from app.models import UserAccount
-from app.schemas import SignedInUser, SignedInUserUpdate
+from app.models.mixins import utc_now
+from app.schemas import PhoneKey, PhoneKeyStatus, SignedInUser, SignedInUserUpdate
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -135,3 +137,27 @@ def sign_out(request: Request, session: SessionDependency) -> Response:
     response = Response(status_code=status.HTTP_204_NO_CONTENT)
     clear_session_cookie(response)
     return response
+
+
+@router.get("/phone-key", response_model=PhoneKeyStatus)
+def read_phone_key(account: CurrentUser) -> PhoneKeyStatus:
+    """Whether this person's phone can share files, never the key itself."""
+    return PhoneKeyStatus(created_at=account.phone_key_created_at)
+
+
+@router.post("/phone-key", response_model=PhoneKey, status_code=status.HTTP_201_CREATED)
+def make_phone_key(account: CurrentUser, session: SessionDependency) -> PhoneKey:
+    """A new key for the share Shortcut, shown this once. The old one stops working."""
+    key = secrets.token_urlsafe(32)
+    account.phone_key_hash = hash_token(key)
+    account.phone_key_created_at = utc_now()
+    session.commit()
+    return PhoneKey(key=key)
+
+
+@router.delete("/phone-key", status_code=status.HTTP_204_NO_CONTENT)
+def remove_phone_key(account: CurrentUser, session: SessionDependency) -> Response:
+    account.phone_key_hash = None
+    account.phone_key_created_at = None
+    session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

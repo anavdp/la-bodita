@@ -103,6 +103,18 @@ describe("TopBar", () => {
     expect(screen.queryByRole("dialog", { name: "Your profile" })).not.toBeInTheDocument();
   });
 
+  it("given the account menu, when Share from iPhone is chosen, then the phone sharing panel opens", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ created_at: null })));
+    renderWithProviders(<TopBar />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Account: Vicky" }));
+    await userEvent.click(screen.getByRole("menuitem", { name: /Share from iPhone/ }));
+
+    expect(screen.getByRole("dialog", { name: "Share from your iPhone" })).toBeInTheDocument();
+    await userEvent.click(await screen.findByRole("button", { name: "Done" }));
+    expect(screen.queryByRole("dialog", { name: "Share from your iPhone" })).not.toBeInTheDocument();
+  });
+
   it("given the account menu is open, when it is pressed again, then it closes", async () => {
     renderWithProviders(<TopBar />);
     const account = screen.getByRole("button", { name: "Account: Vicky" });
