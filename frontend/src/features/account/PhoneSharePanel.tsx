@@ -25,8 +25,7 @@ const steps: { text: TranslationKey; url?: string }[] = [
   { text: "phoneShare.step.shareSheet" },
   { text: "phoneShare.step.items", url: "/api/share/items" },
   { text: "phoneShare.step.chooseItem" },
-  { text: "phoneShare.step.tasks", url: "/api/share/tasks" },
-  { text: "phoneShare.step.chooseTask" },
+  { text: "phoneShare.step.repeat" },
   { text: "phoneShare.step.send", url: "/api/share" },
   { text: "phoneShare.step.notify" },
 ];
