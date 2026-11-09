@@ -139,7 +139,7 @@ def test_given_a_phone_key_when_the_planner_is_used_with_it_then_it_does_not_ope
 # Where does this go?
 
 
-def test_given_items_when_the_phone_asks_where_files_can_go_then_it_gets_labels_grouped_by_category(
+def test_given_items_when_the_phone_asks_where_files_can_go_then_each_shows_its_category_in_brackets(
     phone: TestClient, db_session: Session, wedding: Wedding, vicky: UserAccount
 ):
     flowers = Category(wedding_id=wedding.id, name="Flowers", emoji="💐", color="#e7a")
@@ -158,9 +158,9 @@ def test_given_items_when_the_phone_asks_where_files_can_go_then_it_gets_labels_
     assert response.status_code == 200
     assert response.json() == [
         "No item · just ours",
-        "💐 Floristería Ana",
-        "🏛️ Casa Blanca",
-        "🏛️ Hacienda La Vega",
+        "Floristería Ana (flowers)",
+        "Casa Blanca (venue)",
+        "Hacienda La Vega (venue)",
         "Honeymoon ideas",
     ]
 
@@ -312,7 +312,7 @@ def test_given_a_file_sent_as_text_when_shared_then_it_says_the_shortcut_sends_t
     """A Shortcut repeating over the chosen label instead of the shared files sends text, not a file."""
     key = new_key(phone, db_session, vicky)
 
-    response = phone.post("/api/share", data={"file": "💐 Floristería Ana"}, headers=bearer(key))
+    response = phone.post("/api/share", data={"file": "Floristería Ana (flowers)"}, headers=bearer(key))
 
     assert response.status_code == 422
     assert "Shortcut Input" in response.json()["detail"]

@@ -42,7 +42,7 @@ def unique_labels(labelled: list[tuple[str, object]]) -> dict[str, object]:
 
 
 def item_labels(session: Session, account: UserAccount) -> dict[str, Item | None]:
-    """Every item this person may see, grouped by category like the planner, uncategorised last."""
+    """Every item this person may see as "Pronovias (dress)", grouped by category, uncategorised last."""
     items = session.scalars(
         select(Item)
         .outerjoin(Category, Item.category_id == Category.id)
@@ -51,7 +51,7 @@ def item_labels(session: Session, account: UserAccount) -> dict[str, Item | None
         .order_by(Category.id.is_(None), Category.name, Item.name, Item.id)
     ).all()
     labelled = [
-        (f"{item.category.emoji} {item.name}" if item.category and item.category.emoji else item.name, item)
+        (f"{item.name} ({item.category.name.lower()})" if item.category else item.name, item)
         for item in items
     ]
     return {NO_ITEM: None} | unique_labels(labelled)  # type: ignore[return-value]
