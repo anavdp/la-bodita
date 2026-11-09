@@ -97,15 +97,12 @@ describe("DocumentsPage", () => {
       expect(within(row("Marriage banns form")).getAllByText("Missing")).toHaveLength(2);
     });
 
-    it("given an item waiting on papers, when the tab opens, then an alert says which", async () => {
+    it("given an item waiting on papers, when the tab opens, then no alert card repeats what the table shows", async () => {
       renderWithProviders(<DocumentsPage tab="papers" />, { route: "/documents" });
 
-      const alert = await screen.findByRole("region", { name: "Iglesia San José is waiting on 2 papers" });
-      expect(alert).toHaveTextContent("Confirmation certificate (Vicky), Marriage banns form");
-      expect(within(alert).getByRole("link", { name: "See what's missing" })).toHaveAttribute(
-        "href",
-        `/items?item=${parish.id}`,
-      );
+      await screen.findByRole("table", { name: "Our papers" });
+      expect(screen.queryByRole("region", { name: /is waiting on/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "See what's missing" })).not.toBeInTheDocument();
       const [tabs] = screen.getAllByRole("navigation", { name: "Documents views" });
       expect(within(tabs).getByRole("link", { name: /Papers/ })).toHaveTextContent("2");
     });

@@ -1,5 +1,5 @@
 import { aCategory, aDocument, aPaperRequest, aPerson } from "../../testing/planningFactory";
-import { formatPaperDate, itemsWaiting, paperRows, papersRunningOut, shelves } from "./papers";
+import { formatPaperDate, paperRows, papersRunningOut, shelves } from "./papers";
 
 const today = "2026-10-25";
 const vicky = aPerson({ displayName: "Vicky" });
@@ -62,22 +62,6 @@ describe("the papers table", () => {
 });
 
 describe("the alerts", () => {
-  it("given missing papers on two items, when alerts are built, then each item lists what it waits on", () => {
-    const requests = [
-      aPaperRequest({ itemId: 4, itemName: "Iglesia San José", name: "Confirmation certificate", personId: vicky.id }),
-      aPaperRequest({ itemId: 4, itemName: "Iglesia San José", name: "Baptism certificate", isMissing: false, documentId: 1 }),
-      aPaperRequest({ itemId: 4, itemName: "Iglesia San José", name: "Marriage banns form" }),
-      aPaperRequest({ itemId: 5, itemName: "Consolato", name: "Nulla osta", personId: gerardo.id }),
-    ];
-
-    const waiting = itemsWaiting(requests);
-
-    expect(waiting.map((item) => [item.itemName, item.missing.map((request) => request.name)])).toEqual([
-      ["Iglesia San José", ["Confirmation certificate", "Marriage banns form"]],
-      ["Consolato", ["Nulla osta"]],
-    ]);
-  });
-
   it("given papers with expiry dates, when the ones running out are picked, then only papers due within three months come, soonest first", () => {
     const later = aDocument({ title: "Birth certificate", expiresOn: "2027-01-10" });
     const sooner = aDocument({ title: "Fe de vida", expiresOn: "2026-11-20" });
