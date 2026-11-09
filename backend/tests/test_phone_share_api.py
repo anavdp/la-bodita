@@ -1,7 +1,7 @@
 """Sharing files from the phone's share menu (#43).
 
-An iPhone web app can't sit in the share menu, so an iOS Shortcut does: it asks
-which item (and task) the files go to, then sends them here with a personal
+An iPhone web app can't sit in the share menu, so an iOS Shortcut does: it shows
+the list of items and sends the files here with a personal
 phone key instead of the browser's sign-in cookie.
 """
 
@@ -124,7 +124,6 @@ def test_given_no_valid_phone_key_when_sharing_is_used_then_it_answers_401(
     headers = {"Authorization": header} if header else {}
 
     assert phone.get("/api/share/items", headers=headers).status_code == 401
-    assert phone.post("/api/share/tasks", data={"item": "x"}, headers=headers).status_code == 401
     assert phone.post("/api/share", files={"file": ("a.jpg", JPEG, "image/jpeg")}, headers=headers).status_code == 401
 
 
@@ -140,7 +139,7 @@ def test_given_a_phone_key_when_the_planner_is_used_with_it_then_it_does_not_ope
 # Where does this go?
 
 
-def test_given_items_when_the_phone_asks_where_files_can_go_then_it_gets_labels_grouped_by_category(
+def test_given_items_when_the_phone_asks_where_files_can_go_then_each_shows_its_category_in_brackets(
     phone: TestClient, db_session: Session, wedding: Wedding, vicky: UserAccount
 ):
     flowers = Category(wedding_id=wedding.id, name="Flowers", emoji="💐", color="#e7a")
@@ -159,9 +158,9 @@ def test_given_items_when_the_phone_asks_where_files_can_go_then_it_gets_labels_
     assert response.status_code == 200
     assert response.json() == [
         "No item · just ours",
-        "💐 Floristería Ana",
-        "🏛️ Casa Blanca",
-        "🏛️ Hacienda La Vega",
+        "Floristería Ana (flowers)",
+        "Casa Blanca (venue)",
+        "Hacienda La Vega (venue)",
         "Honeymoon ideas",
     ]
 
@@ -186,30 +185,15 @@ def test_given_someone_elses_private_item_when_the_phone_lists_items_then_it_is_
     assert phone.get("/api/share/items", headers=bearer(key)).json() == ["No item · just ours"]
 
 
-def test_given_an_item_with_tasks_when_the_phone_asks_for_them_then_no_task_comes_first(
+def test_given_an_item_with_tasks_when_the_phone_lists_items_then_only_the_item_shows(
     phone: TestClient, db_session: Session, wedding: Wedding, vicky: UserAccount
 ):
+    """One question only: a file is moved onto a task later, in the planner."""
     (florist,) = add(db_session, Item(wedding_id=wedding.id, name="Floristería Ana"))
-    add(
-        db_session,
-        Requirement(wedding_id=wedding.id, item_id=florist.id, title="Get a quote"),
-        Requirement(wedding_id=wedding.id, item_id=florist.id, title="Book a visit"),
-    )
+    add(db_session, Requirement(wedding_id=wedding.id, item_id=florist.id, title="Get a quote"))
     key = new_key(phone, db_session, vicky)
 
-    response = phone.post("/api/share/tasks", data={"item": "Floristería Ana"}, headers=bearer(key))
-
-    assert response.json() == ["No task", "Book a visit", "Get a quote"]
-
-
-def test_given_no_item_when_the_phone_asks_for_tasks_then_only_no_task_comes_back(
-    phone: TestClient, db_session: Session, vicky: UserAccount
-):
-    key = new_key(phone, db_session, vicky)
-
-    response = phone.post("/api/share/tasks", data={"item": "No item · just ours"}, headers=bearer(key))
-
-    assert response.json() == ["No task"]
+    assert phone.get("/api/share/items", headers=bearer(key)).json() == ["No item · just ours", "Floristería Ana"]
 
 
 # Saving
@@ -224,7 +208,7 @@ def test_given_a_shared_photo_when_it_is_sent_for_an_item_then_it_lands_on_that_
     response = phone.post(
         "/api/share",
         files={"file": ("IMG_2210.jpg", JPEG, "image/jpeg")},
-        data={"item": "Floristería Ana", "task": "No task"},
+        data={"item": "Floristería Ana"},
         headers=bearer(key),
     )
 
@@ -256,24 +240,6 @@ def test_given_several_files_shared_at_once_when_saved_then_all_of_them_land_on_
         ("one", DocumentKind.PHOTO, florist.id),
         ("quote", DocumentKind.PAPER, florist.id),
     ]
-
-
-def test_given_a_task_when_a_file_is_shared_to_it_then_it_sits_on_the_task_and_its_item(
-    phone: TestClient, db_session: Session, wedding: Wedding, vicky: UserAccount
-):
-    (florist,) = add(db_session, Item(wedding_id=wedding.id, name="Floristería Ana"))
-    (quote,) = add(db_session, Requirement(wedding_id=wedding.id, item_id=florist.id, title="Get a quote"))
-    key = new_key(phone, db_session, vicky)
-
-    phone.post(
-        "/api/share",
-        files={"file": ("quote.pdf", PDF, "application/pdf")},
-        data={"item": "Floristería Ana", "task": "Get a quote"},
-        headers=bearer(key),
-    )
-
-    document = db_session.scalars(select(Document)).one()
-    assert (document.item_id, document.requirement_id) == (florist.id, quote.id)
 
 
 def test_given_no_item_when_a_file_is_shared_then_it_is_kept_as_just_ours(
@@ -323,20 +289,30 @@ def test_given_a_file_the_planner_cannot_show_when_shared_then_nothing_is_saved(
     assert bucket.objects == {}
 
 
-@pytest.mark.parametrize(
-    ("form", "detail"),
-    [
-        ({"item": "Gone"}, "Item not found"),
-        ({"item": "Floristería Ana", "task": "Gone"}, "Task not found"),
-    ],
-)
 def test_given_an_unknown_label_when_a_file_is_shared_then_it_is_refused(
-    phone: TestClient, db_session: Session, wedding: Wedding, vicky: UserAccount, form: dict, detail: str
+    phone: TestClient, db_session: Session, wedding: Wedding, vicky: UserAccount
 ):
     add(db_session, Item(wedding_id=wedding.id, name="Floristería Ana"))
     key = new_key(phone, db_session, vicky)
 
-    response = phone.post("/api/share", files={"file": ("a.jpg", JPEG, "image/jpeg")}, data=form, headers=bearer(key))
+    response = phone.post(
+        "/api/share",
+        files={"file": ("a.jpg", JPEG, "image/jpeg")},
+        data={"item": "Gone"},
+        headers=bearer(key),
+    )
 
     assert response.status_code == 422
-    assert response.json()["detail"] == detail
+    assert response.json()["detail"] == "Item not found"
+
+
+def test_given_a_file_sent_as_text_when_shared_then_it_says_the_shortcut_sends_the_wrong_thing(
+    phone: TestClient, db_session: Session, vicky: UserAccount
+):
+    """A Shortcut repeating over the chosen label instead of the shared files sends text, not a file."""
+    key = new_key(phone, db_session, vicky)
+
+    response = phone.post("/api/share", data={"file": "Floristería Ana (flowers)"}, headers=bearer(key))
+
+    assert response.status_code == 422
+    assert "Shortcut Input" in response.json()["detail"]
