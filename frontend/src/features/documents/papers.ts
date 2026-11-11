@@ -82,28 +82,6 @@ export function paperRows(
   });
 }
 
-export interface WaitingItem extends AskingItem {
-  missing: PaperRequest[];
-}
-
-/** Every item still waiting on a paper, with what it waits on. */
-export function itemsWaiting(requests: PaperRequest[]): WaitingItem[] {
-  const waiting = new Map<number, WaitingItem>();
-  requests
-    .filter((request) => request.isMissing)
-    .forEach((request) => {
-      const item = waiting.get(request.itemId) ?? {
-        itemId: request.itemId,
-        itemName: request.itemName,
-        categoryId: request.categoryId,
-        missing: [],
-      };
-      item.missing.push(request);
-      waiting.set(request.itemId, item);
-    });
-  return [...waiting.values()];
-}
-
 /** Papers past or near their expiry date, soonest first. */
 export function papersRunningOut(documents: WeddingDocument[], today: string): WeddingDocument[] {
   const horizon = addDays(today, RUNNING_OUT_DAYS);

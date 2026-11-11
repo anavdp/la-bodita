@@ -9,7 +9,7 @@ import { CategoryIcon } from "../../components/playful/IconPicker";
 import { avatarTones, compactButton, outlinedCard } from "../../components/playful/styles";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import type { FilesPreset } from "./AddFilesForm";
-import { formatPaperDate, itemsWaiting, paperRows, papersRunningOut } from "./papers";
+import { formatPaperDate, paperRows, papersRunningOut } from "./papers";
 import type { PaperCell, PaperRow, PaperState } from "./papers";
 
 interface PapersTabProps {
@@ -156,36 +156,9 @@ export function PapersTab({
   const rows = paperRows(requests, documents, people, today).filter(
     (row) => fold(row.name).includes(needle) || row.askedBy.some((item) => fold(item.itemName).includes(needle)),
   );
-  const waiting = itemsWaiting(requests);
   const runningOut = papersRunningOut(documents, today);
 
   const alerts = [
-    ...waiting.map((item) => {
-      const title = t(item.missing.length === 1 ? "documents.alert.waitingOne" : "documents.alert.waitingMany", {
-        item: item.itemName,
-        count: item.missing.length,
-      });
-      const names = item.missing
-        .map((request) => {
-          const whose = personName(request.personId);
-          return whose === null ? request.name : `${request.name} (${whose})`;
-        })
-        .join(", ");
-      return (
-        <section key={`waiting-${item.itemId}`} aria-label={title} className={alertCard("bg-coral-soft")}>
-          <h3 className="flex items-start gap-2 text-[19px] leading-snug">
-            <span className="material-symbols-outlined" aria-hidden="true">
-              assignment_late
-            </span>
-            {title}
-          </h3>
-          <p className="text-[15px] text-ink/80">{names}</p>
-          <Link to={`/items?item=${item.itemId}`} className={`${compactButton} mt-auto self-start !text-[15px]`}>
-            {t("documents.alert.seeMissing")}
-          </Link>
-        </section>
-      );
-    }),
     ...runningOut.map((document) => {
       const whose = personName(document.personId);
       const title = whose === null ? document.title : `${document.title} · ${whose}`;

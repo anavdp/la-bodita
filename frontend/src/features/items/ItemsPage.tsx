@@ -43,7 +43,7 @@ export function ItemsPage() {
   const { categories, items, tasks, isLoading, loadFailures } = planning;
 
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
-  // `?item=7`: the documents screen links straight to the item waiting on a paper.
+  // `?item=7`: the documents screen links straight to the item a paper belongs to.
   const [searchParams] = useSearchParams();
   const [selectedId, setSelectedId] = useState<number | null>(() => {
     const linked = Number(searchParams.get("item"));
